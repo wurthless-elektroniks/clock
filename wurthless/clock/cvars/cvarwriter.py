@@ -43,7 +43,10 @@ class TokenedCvarWriter(CvarWriter):
             except Exception as e:
                 # suppress - preflights aren't 100% necessary
                 pass
-        self.loadFrom(cvardict, self.path)
+        try:
+            self.loadFrom(cvardict, self.path)
+        except FileNotFoundError as e:
+            self.save(cvardict)
 
     def save(self, cvardict):
         with open(self.path, "w") as f:
