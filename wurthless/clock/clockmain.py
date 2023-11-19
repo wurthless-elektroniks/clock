@@ -44,6 +44,12 @@ registerCvar(u"wurthless.clock.clockmain",
              86400)
 
 registerCvar(u"wurthless.clock.clockmain",
+             u"settings_write_delay",
+             u"Int",
+             u"Interval time in seconds to delay saving settings. Default is 36000 (10 hours). Needed to prevent wearing down the system flash.",
+             36000)
+
+registerCvar(u"wurthless.clock.clockmain",
              u"force_server",
              u"Boolean",
              u"If True, force server mode (needed for testing).",
@@ -142,6 +148,7 @@ def promptTime(tot, inputs, hour, minute):
     retval = [ 0, 0 ]
 
     inp = hour
+
     while True:
         hour_visible = autoformatHourIn12HourTime(tot, inp)
         bcd = unpackBcd(inp, 0)
@@ -440,6 +447,9 @@ def loop(tot):
 
     dst_disable = tot.cvars().get(u"config.clock",u"dst_disable") 
 
+    next_cfg_writeback = None
+    cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
+    
     displaymode = 0
     while True:
         renderDisplay(tot, displaymode)
@@ -461,7 +471,7 @@ def loop(tot):
                     brightness = 8
                 tot.display().setBrightness(brightness) 
                 tot.cvars().set(u"config.display",u"brightness",brightness)
-                tot.cvars().save()
+                next_cfg_writeback = tot.rtc().getUtcTime() + cfg_writeback_delay
                 ticks_up_held = 1
 
         # Pressing DOWN will toggle between displaymodes
@@ -505,6 +515,9 @@ def loop(tot):
                         configMode(tot)
 
                     ticks_set_held = 0
+                    
+                    # if configuration mode entered, kill any pending settings writeback
+                    next_cfg_writeback = None
 
         # Pressing and holding DST for long enough sets/unsets DST.
         # Skip this logic if DST is explicitly disabled in config.
@@ -522,10 +535,16 @@ def loop(tot):
                     dst = tot.cvars().get(u"config.clock",u"dst_active")
                     dst = not dst
                     tot.cvars().set(u"config.clock",u"dst_active",dst)
-                    tot.cvars().save()
-
+                    
+                    next_cfg_writeback = tot.rtc().getUtcTime() + cfg_writeback_delay
                     ticks_dst_held = 0
         
+        if next_cfg_writeback is not None:
+            t = tot.rtc().getUtcTime()
+            if next_cfg_writeback <= t:
+                tot.cvars().save()
+                next_cfg_writeback = None
+
         # sleep for 10 ms
         time.sleep( 10 / 1000 )
 

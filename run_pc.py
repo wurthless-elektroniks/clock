@@ -60,6 +60,9 @@ def cursesMain(stdscr):
 
     tot.cvars().set(u"wurthless.clock.clockmain", u"set_and_dst_no_debounce", True)
 
+    # settings writeback delay would ideally be 0 seconds, but we make it 60 so it's easier to tell that there is a delay.
+    tot.cvars().set(u"wurthless.clock.clockmain", u"settings_write_delay", 60)
+
     tot.setDisplay( CursesDisplay(stdscr) )
     tot.setInputs( CursesInputs(stdscr) )
 
