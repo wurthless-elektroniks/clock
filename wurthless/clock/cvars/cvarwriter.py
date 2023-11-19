@@ -45,7 +45,7 @@ class TokenedCvarWriter(CvarWriter):
                 pass
         try:
             self.loadFrom(cvardict, self.path)
-        except FileNotFoundError as e:
+        except OSError as e:
             self.save(cvardict)
 
     def save(self, cvardict):

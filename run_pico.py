@@ -54,6 +54,10 @@ def runPicoW():
     tot.setNic( MicropythonWifiNic(tot) )
     tot.setTimeSources( [ NtpTimeSource(tot) ] )
 
+    # force server mode if user hasn't configured wifi yet
+    if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
+        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+
     tot.finalize()
     clockMain(tot)
 
