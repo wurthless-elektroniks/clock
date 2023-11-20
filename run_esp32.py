@@ -45,8 +45,8 @@ def runEsp32C3Wroom02():
     if bootpin.value() == 0:
         tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
 
-    cvars.set(u"wurthless.clock.drivers.display.bitbangdisplay", u"strobe_frequency", 1000)
-    cvars.set(u"wurthless.clock.drivers.display.bitbangdisplay", u"strobe_delay", 1000)
+    cvars.set(u"wurthless.clock.drivers.display.bitbangdisplay", u"strobe_frequency", 2000)
+    cvars.set(u"wurthless.clock.drivers.display.bitbangdisplay", u"strobe_delay", 2000)
 
     tot.setDisplay( BitbangDisplay(tot) )
     tot.setInputs( NullInputs() )

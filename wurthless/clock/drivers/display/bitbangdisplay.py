@@ -145,17 +145,13 @@ class BitbangDisplay(Display):
     def _strobe(self,t):
         for digit in range(0,4):
             data = self.digs[digit]
-            self.dig_drives[digit].value(1)
             for segment in range(0,7):
                 bit = (data & 1) 
                 self.seg_drives[segment].value(bit)
                 data >>= 1
-            
+            self.dig_drives[digit].value(1)
             time.sleep(self.strobe_delay)
-            
             self.dig_drives[digit].value(0)
-            for segment in range(0,7):
-                self.seg_drives[segment].value(0)
 
     def setBrightness(self, brightness):
         pass
