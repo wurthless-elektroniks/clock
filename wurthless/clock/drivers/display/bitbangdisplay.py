@@ -88,8 +88,14 @@ registerCvar(u"wurthless.clock.drivers.display.bitbangdisplay",
 registerCvar(u"wurthless.clock.drivers.display.bitbangdisplay",
              u"strobe_frequency",
              u"Int",
-             u"Frequency at which we update the display. Default is 400 Hz",
-             400)
+             u"Frequency at which we update the display",
+             1000)
+
+registerCvar(u"wurthless.clock.drivers.display.bitbangdisplay",
+             u"strobe_delay",
+             u"Int",
+             u"Delay between digit strobes in microseconds",
+             1000)
 
 # Brightness table the same as in rp2040display.py
 DEFAULT_BRIGHTNESS_TABLE = [
@@ -131,7 +137,9 @@ class BitbangDisplay(Display):
         self.digs = [ 0b00000000, 0b00000000, 0b00000000, 0b00000000 ]
         self.setBrightness(8)
 
-        frequency = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"digit_0_pin" )
+        frequency = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"strobe_frequency" )
+        self.strobe_delay = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"strobe_delay" ) / 1000000.0
+
         self.timer = Timer(0, mode=Timer.PERIODIC, freq=frequency, callback=self._strobe)
 
     def _strobe(self,t):
@@ -143,8 +151,7 @@ class BitbangDisplay(Display):
                 self.seg_drives[segment].value(bit)
                 data >>= 1
             
-            # this value is hardcoded for now - will bring out later.
-            time.sleep(5000 / 1000000.0)
+            time.sleep(self.strobe_delay)
             
             self.dig_drives[digit].value(0)
             for segment in range(0,7):
