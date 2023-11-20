@@ -64,9 +64,11 @@ class MicropythonWifiNic(Nic):
                 break
             max_wait -= 1
             print('waiting for connection...')
-            time.sleep(1)
+            time.sleep(5)
 
-        if wlan.status() != 3:
+        # occasionally wlan.status() returns something other than 3 even if the network is connected.
+        # such behavior occurs on ESP32-based boards.
+        if wlan.isconnected() is False and wlan.status() != 3:
             print(u"ERROR: cannot connect to accesspoint!")
             return
         else:
