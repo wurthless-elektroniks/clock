@@ -60,9 +60,11 @@ It's nice to look at.
 
 ### For Wi-Fi-enabled clocks:
 
-**IF YOUR CLOCK HAS WI-FI SUPPORT**, the first thing that should be displayed is the letters "CFG". This means that the clock is starting up in configuration mode. Using a Wi-Fi compatible device, connect to the network labelled TMUCITW. If prompted for a network password, enter "wurthless" (no quotes!).
+**IF YOUR CLOCK HAS WI-FI SUPPORT**, the first thing that should be displayed is the letters "CFG". This means that the clock is starting up in configuration mode. Using a Wi-Fi compatible device, connect to the network labelled TMUCITW (or similar). If prompted for a network password, enter "wurthless" (no quotes!).
 
-Then open your web browser to [http://192.168.4.1]. If successful, you'll see a page like this:
+Once connected to the network, open your web browser to: http://192.168.4.1
+
+If successful, you'll see a page like this:
 
 ![](configpage.png)
 
@@ -74,6 +76,8 @@ Here's what to enter:
 * "dst adjust": Whether to adjust for DST. If set to "off", DST will be turned off. If set to "on", DST will be turned on. **In regions that do not observe Daylight Savings Time, you should set this to "disable dst".**
 
 Press "save settings" to generate the bug report you will be submitting to me when it inevitably crashes. But if it doesn't crash, then congratulations, your clock is now set up. Press RESET on your clock, and it should connect to the Internet, grab the current time, and display it. Hooray!
+
+**If you need to re-enter this panel for any reason, such as to re-configure your Wi-Fi settings, hold SET when powering up the clock (or pressing RESET).**
 
 ### Manual configuration mode:
 
