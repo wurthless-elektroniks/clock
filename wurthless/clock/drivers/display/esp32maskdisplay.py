@@ -82,13 +82,13 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
              u"Int",
              u"Frequency at which we update the display",
-             10000)
+             int(11100))
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_wait_ticks",
              u"Int",
              u"Number of ticks to wait before advancing to next display digit",
-             30)
+             int(11))
 
 
 SM_CLOCK_NEXT_DIGIT  = 0
@@ -149,9 +149,12 @@ class Esp32MaskDisplay(Display):
                self.sm_state += 1
                self.sm_state &= 3
         elif self.sm_state == SM_CLEAR_DISPLAY:
-            mem32[GPIO_OUT_REG] = 0
-            self.sm_waits = self.sm_off_ticks
-            self.sm_state += 1
+            if self.sm_off_ticks == 0:
+                self.sm_state = 0
+            else:
+                mem32[GPIO_OUT_REG] = 0
+                self.sm_waits = self.sm_off_ticks
+                self.sm_state += 1
         else:
             mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr]
             self.sm_ptr += 1

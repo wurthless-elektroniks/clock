@@ -7,6 +7,11 @@
 import sys
 import time
 
+try:
+    from utime import sleep_ms
+except:
+    sleep_ms = lambda a : time.sleep(a / 1000)
+
 from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.webserver.webserver import serverMain
@@ -303,7 +308,6 @@ def renderDisplay(tot, mode):
 
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
     dst_active = tot.cvars().get(u"config.clock",u"dst_active")
-    
     use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr")
 
     utctime += utc_offset
@@ -546,7 +550,7 @@ def loop(tot):
                 next_cfg_writeback = None
 
         # sleep for 10 ms
-        time.sleep( 10 / 1000 )
+        sleep_ms( 10 )
 
 def clockMain(tot):
     # enter webserver config mode when SET is held on reset
