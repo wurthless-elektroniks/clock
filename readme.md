@@ -10,7 +10,7 @@ This is a rewrite of the [original TMUCITW software](https://github.com/wurthles
 
 * For local testing on PC: python3 run_pc.py
 * For deployment on RP2040-based hardware: copy relevant ini in defaults/ to secrets, rename factory.ini, and have your RP2040 board call the appropriate function in run_pico.py
-* Might be ported to ESP32 at some point, it's a bit cheaper than the Pico W
+* Early support for ESP32 present, check run_esp32.py. Note that since all this is bitbanged you won't be able to get a stable display.
 
 # Technical support, manual, etc.
 
