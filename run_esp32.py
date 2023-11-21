@@ -7,7 +7,7 @@ from wurthless.clock.clockmain import clockMain
 
 from wurthless.clock.common.ntp import NtpTimeSource
 
-from wurthless.clock.drivers.display.ioseqdisplay import IoseqDisplay
+from wurthless.clock.drivers.display.esp32maskdisplay import Esp32MaskDisplay
 from wurthless.clock.mock.nullinputs import NullInputs
 from wurthless.clock.drivers.rtc.micropythonrtc import MicropythonRTC
 from wurthless.clock.drivers.nic.micropythonwifinic import MicropythonWifiNic
@@ -45,7 +45,7 @@ def runEsp32C3Wroom02():
     if bootpin.value() == 0:
         tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
 
-    tot.setDisplay( IoseqDisplay(tot) )
+    tot.setDisplay( Esp32MaskDisplay(tot) )
     tot.setInputs( NullInputs() )
     tot.setRtc( MicropythonRTC() )
 

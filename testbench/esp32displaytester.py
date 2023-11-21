@@ -3,7 +3,7 @@ from wurthless.clock.clockmain import clockMain
 
 from wurthless.clock.common.ntp import NtpTimeSource
 
-from wurthless.clock.drivers.display.ioseqdisplay import IoseqDisplay
+from wurthless.clock.drivers.display.esp32maskdisplay import Esp32MaskDisplay
 from wurthless.clock.mock.nullinputs import NullInputs
 from wurthless.clock.drivers.rtc.micropythonrtc import MicropythonRTC
 from wurthless.clock.drivers.nic.micropythonwifinic import MicropythonWifiNic
@@ -20,5 +20,4 @@ def boot_display():
     tot.setCvars( cvars )
 
     print(u"init/return display...")
-    return IoseqDisplay(tot)
-
+    return Esp32MaskDisplay(tot)
