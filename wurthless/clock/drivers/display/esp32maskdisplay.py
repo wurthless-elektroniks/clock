@@ -82,7 +82,13 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
              u"Int",
              u"Frequency at which we update the display",
-             250000)
+             10000)
+
+registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
+             u"strobe_wait_ticks",
+             u"Int",
+             u"Number of ticks to wait before advancing to next display digit",
+             10)
 
 class Esp32MaskDisplay(Display):
     def __init__(self, tot):
@@ -120,15 +126,27 @@ class Esp32MaskDisplay(Display):
         self.andmask = ~andmask
 
         frequency = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency" )
+        self.strobe_wait_ticks = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_wait_ticks" )
+
+        self.sm_ptr = 0
+        self.sm_waits = 0
 
         self.timer = Timer(0, mode=Timer.PERIODIC, freq=frequency, callback=self._strobe)
 
     def _strobe(self,t):
         isr = disable_irq()
+        if self.sm_waits > 0:
+            self.sm_waits -= 1
+        else:
+            self.sm_ptr += 1
+            self.sm_ptr &= 3
+            self.sm_waits = self.strobe_wait_ticks
+        
         outreg = mem32[GPIO_OUT_REG]
-        base = outreg & self.andmask
-        for digit in range(0,4):
-            mem32[GPIO_OUT_REG] = base | self.digs[digit]
+#        base = outreg & self.andmask
+        mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr]
+        for i in range(0,10):
+            pass
         mem32[GPIO_OUT_REG] = outreg
         enable_irq(isr)
 
