@@ -109,64 +109,6 @@ DEFAULT_BRIGHTNESS_TABLE = [
     [ 2000, int(65535 * (10/10)) ]
 ]
 
-class BitbangDisplayIoseq(Display):
-    def __init__(self, tot):
-        self.digs = 0
-        
-        self._buildIoSeq(tot)
-
-        self.ioseq.exec()
-
-    def _buildIoSeq(self, tot):
-        cvars = tot.cvars()
-
-        seg_a_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"seg_a_pin" )
-        seg_b_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"seg_b_pin" )
-        seg_c_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"seg_c_pin" )
-        seg_d_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"seg_d_pin" )
-        seg_e_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"seg_e_pin" )
-        seg_f_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"seg_f_pin" )
-        seg_g_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"seg_g_pin" )
-
-        dig_0_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"digit_0_pin" )
-        dig_1_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"digit_1_pin" )
-        dig_2_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"digit_2_pin" )
-        dig_3_pin = cvars.get(u"wurthless.clock.drivers.display.bitbangdisplay", u"digit_3_pin" )
-       
-        seg_pins = [ seg_a_pin, seg_b_pin, seg_c_pin, seg_d_pin, seg_e_pin, seg_f_pin, seg_g_pin ]
-        dig_pins = [ dig_0_pin, dig_1_pin, dig_2_pin, dig_3_pin ]
-
-        self.ioseq = IoSequencer()
-
-        # this display driver assumes the direction of these pins will never change.
-        # if you need to mux inputs, look elsewhere!
-        for i in seg_pins + dig_pins:
-            self.ioseq.assignPin(i)
-            self.ioseq.setPinMode(i, Pin.OUT)
-
-        for digit in range(0,4):
-            for segment in range(0,7):
-                self.ioseq.assembleOutShiftRegister(seg_pins[segment])
-                self.ioseq.assemblePinValue(dig_pins[digit], 1)
-                self.ioseq.assembleWAA()
-                self.ioseq.assemblePinValue(dig_pins[digit], 0)
-                self.ioseq.assemblePinValue(seg_pins[segment], 0)
-                self.ioseq.assembleWAB()
-            self.ioseq.assembleBurnShiftRegister()
-
-
-    def setBrightness(self, brightness):
-        brightness_period = (brightness / 8)
-        self.ioseq.setA(int( 10 * brightness_period))
-        self.ioseq.setB(int( 10 * (1-brightness_period)))
-
-    def setDigitsBinary(self, a, b, c, d):
-        a = int(a & 255)
-        b = int(b & 255)
-        c = int(c & 255)
-        d = int(d & 255)
-        self.ioseq.setShiftRegisterValue( ( d << 24 | c << 16 | b << 8 | a ) )
-
 class BitbangDisplay(Display):
     def __init__(self, tot):
         cvars = tot.cvars()

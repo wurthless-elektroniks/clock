@@ -2,7 +2,7 @@
 # Generic I/O sequencer for systems that do not have a builtin statemachine.
 #
 
-from machine import Pin,Timer
+from machine import Pin,Timer,disable_irq,enable_irq
 
 OPCODE_WAIT = 1  # WAIT x  - wait number of states
 OPCODE_WAA  = 2  # WAA - load wait counter with A
@@ -41,9 +41,10 @@ class IoSequencer(object):
     '''
     Start the program, if it isn't started already.
     '''
-    def exec(self):
+    def exec(self,frequency):
+        self.timer.deinit()
         self.reset()
-        self.timer.init(freq=10000,callback=self._tick)
+        self.timer.init(freq=frequency,callback=self._tick)
 
     '''
     Stop executing the program
@@ -65,43 +66,54 @@ class IoSequencer(object):
         self.shift_register_current = self.shift_register_reload
         self.program_counter = 0
 
+    # ------ HERE BE OPCODES ------ 
+
+    def _execOpcodePm(self,op):
+        op[1].init(mode=op[2])
+    
+    def _execOpcodePul(self,op):
+        op[1].init(mode=Pin.IN, pull=Pin.PULL_UP)
+    
+    def _execOpcodePv(self,op):
+        op[1].value(op[2])
+
+    def _execOpcodeWait(self,op):
+        self.wait_states = op[1]
+
+    def _execOpcodeWAA(self,op):
+        self.wait_states = self.a
+
+    def _execOpcodeWAB(self,op):
+        self.wait_states = self.b
+
+    def _execOpcodeBSR(self,op):
+        self.shift_register_current >>= 1
+
+    def _execOpcodeISR(self,op):
+        self.shift_register_current >>= 1
+        self.shift_register_current |= (op[1].value() << 31)
+
+    def _execOpcodeOSR(self,op):
+        op[1].value( self.shift_register_current & 1 )
+        self.shift_register_current >>= 1
+
+    # ------ END OPCODE LIST ------ 
+
     def _tick(self, t):
+        isr = disable_irq()
+
         if self.wait_states > 0:
             self.wait_states -= 1
-            return
-
-        # if past the end of the program, spend this tick resetting the statemachine
-        if self.program_counter >= len(self.program):
+        elif self.program_counter >= len(self.program):
+            # if past the end of the program, spend this tick resetting the statemachine
             self.reset()
-            return
- 
-        # BEWARE! Timing is VERY tight in here when the state machine is running!
-        # Keep your code as simple and fast as possible so the tick can stop executing!
-        op = self.program[self.program_counter]
-        if op[0] == OPCODE_PM:
-            self.pins[op[1]].init(mode=op[2])
-        elif op[0] == OPCODE_PUL:
-            self.pins[op[1]].init(mode=Pin.IN, pull=Pin.PULL_UP)
-        elif op[0] == OPCODE_PV:
-            self.pins[op[1]].value(op[2])
-        elif op[0] == OPCODE_WAIT:
-            self.wait_states = op[1]
-        elif op[0] == OPCODE_WAA:
-            self.wait_states = self.a
-        elif op[0] == OPCODE_WAB:
-            self.wait_states = self.b
-        elif op[0] == OPCODE_BSR:
-            self.shift_register_current >>= 1
-        elif op[0] == OPCODE_ISR:
-            self.shift_register_current >>= 1
-            self.shift_register_current |= (self.pins[op[1]].value() << 31)
-        elif op[0] == OPCODE_OSR:
-            self.pins[op[1]].value( self.shift_register_current & 1 )
-            self.shift_register_current >>= 1
         else:
-            # don't have enough time for complaining about illegal opcodes, so do nothing
-            pass
-        self.program_counter += 1
+            # BEWARE! Timing is VERY tight in here when the state machine is running!
+            # Keep your code as simple and fast as possible so the tick can stop executing!
+            op = self.program[self.program_counter]
+            op[0](op)
+            self.program_counter += 1
+        enable_irq(isr)
 
     '''
     Assign pin to sequencer. Software simply adds it to a dict pointing pin -> Pin(pin).
@@ -130,47 +142,47 @@ class IoSequencer(object):
     Advance shift register, discarding whatever bit is there.
     '''
     def assembleBurnShiftRegister(self):
-        self.program.append( [ OPCODE_BSR ] )
+        self.program.append( [ self._execOpcodeBSR ] )
 
     '''
     Output LSB on shift register to given pin and advance shift register.
     '''
     def assembleOutShiftRegister(self, pin):
-        self.program.append( [ OPCODE_OSR, pin ] )
+        self.program.append( [ self._execOpcodeOSR, self.pins[pin] ] )
 
     '''
     Read from the given input, placing its value as MSB on shift register.
     '''
     def assembleInShiftRegister(self, pin):
-        self.program.append( [ OPCODE_ISR, pin ] )
+        self.program.append( [ self._execOpcodeISR, self.pins[pin] ] )
 
     '''
     Assemble wait state. State machine waits for the given amount of ticks before advancing.
     '''
     def assembleWait(self, wait):
-        self.program.append( [ OPCODE_WAIT, wait ] )
+        self.program.append( [ self._execOpcodeWait, wait ] )
 
     def assembleWAA(self):
-        self.program.append( [ OPCODE_WAA ] )
+        self.program.append( [ self._execOpcodeWAA ] )
 
     def assembleWAB(self):
-        self.program.append( [ OPCODE_WAB ] )
+        self.program.append( [ self._execOpcodeWAB  ] )
 
     '''
     Explicitly set the given pin to the given value.
     '''
     def assemblePinValue(self, pin, value):
-        self.program.append( [ OPCODE_PV, pin, value ] )
+        self.program.append( [ self._execOpcodePv, self.pins[pin], value ] )
 
     '''
     Change pin to the current direction.
     '''
     def assemblePinMode(self, pin, direction):
-        self.program.append( [ OPCODE_PM, pin, direction ] )
+        self.program.append( [ self._execOpcodePm, self.pins[pin], direction ] )
 
     '''
     Change pin to an input with internal pullup enabled.
     '''
     def assemblePinPullup(self, pin):
-        self.program.append( [ OPCODE_PUL, pin ] )
+        self.program.append( [ self._execOpcodePul, self.pins[pin] ] )
 
