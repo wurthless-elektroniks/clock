@@ -2,6 +2,7 @@
 # Display driver that accesses the ESP32 GPIOs directly.
 #
 
+import sys
 import time
 from micropython import const
 from machine import Pin,Timer,mem32,disable_irq,enable_irq
@@ -10,7 +11,13 @@ from wurthless.clock.api.display import Display
 
 # i'm serious. we are accessing the hardware directly. it's too slow otherwise.
 # DANGER! this I/O register changes depending on what ESP32 we are using.
-GPIO_OUT_REG = const(0x60004004)
+if sys.platform == u'esp32':
+    GPIO_OUT_REG = 0x3FF44004
+elif sys.platform == u'esp32c3':
+    GPIO_OUT_REG = 0x60004004
+else:
+    print(u"DANGER: platform not recognized (%s). defaulting to default esp32 gpio register. you're entering very dangerous territory if you start execution."%(sys.platform))
+    GPIO_OUT_REG = 0x3FF44004
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_a_pin",

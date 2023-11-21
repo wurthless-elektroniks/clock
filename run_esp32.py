@@ -62,3 +62,50 @@ def runEsp32C3Wroom02():
 
     tot.finalize()
     clockMain(tot)
+
+def runEsp32Wroom32E():
+    tot = ToT()
+
+    cvars = Cvars()
+    writer = TokenedCvarWriter()
+
+    # "factory" is the factory defaults
+    writer.addPreflight(u"secrets/factory.ini")
+    
+    # "guid" is device-specific stuff (serial number, device name, etc.)
+    writer.addPreflight(u"secrets/guid.ini")
+
+    cvars.setWriter(writer)
+
+    cvars.load()
+    tot.setCvars( cvars )
+
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_a_pin", 15 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_b_pin", 2)
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_c_pin", 0 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_d_pin", 4 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_e_pin", 16 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_f_pin", 17 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_g_pin", 5 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_0_pin", 18 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_1_pin", 19 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_2_pin", 21 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_3_pin", 22 )
+
+    tot.setDisplay( Esp32MaskDisplay(tot) )
+    tot.setInputs( NullInputs() )
+    tot.setRtc( MicropythonRTC() )
+
+    # display INIT
+    tot.display().setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
+
+    # install NIC and NTP timesource
+    tot.setNic( MicropythonWifiNic(tot) )
+    tot.setTimeSources( [ NtpTimeSource(tot) ] )
+
+    # force server mode if user hasn't configured wifi yet
+    if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
+        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+
+    tot.finalize()
+    clockMain(tot)
