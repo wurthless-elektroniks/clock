@@ -22,25 +22,25 @@ This section only applies to those who have a würthless elektroniks-branded TMU
 
 ### The original prototype
 
-!()[proto.jpg]
+![](proto.jpg)
 
 It's nice to look at.
 
 ### Version 1
 
-!()[v1.jpg]
+![](v1.jpg)
 
-**Version 1** is something I don't support anymore. It ran on ATMega328-based hardware with a MAX7219 driving the display and a DS1307 for RTC. As you can tell, that's extremely expensive and was a motivator for remaking the clock on much cheaper hardware. Much of the documentation below should apply to how it behaves. In case you give a shit, only three of these exist in the wild, although there could possibly be more if someone dumb enough to do so builds more of them using (the publicly available Gerbers and sourcecode)[https://github.com/wurthless-elektroniks/clock_v1].
+**Version 1** is something I don't support anymore. It ran on ATMega328-based hardware with a MAX7219 driving the display and a DS1307 for RTC. As you can tell, that's extremely expensive and was a motivator for remaking the clock on much cheaper hardware. Much of the documentation below should apply to how it behaves. In case you give a shit, only three of these exist in the wild, although there could possibly be more if someone dumb enough to do so builds more of them using [the publicly available Gerbers and sourcecode](https://github.com/wurthless-elektroniks/clock_v1).
 
 ### Version 2
 
-!()[v2.jpg]
+![](v2.jpg)
 
 **Version 2** (*double the uselessness, double the destruction*) is the first RP2040-based version, now using the standard stylish black solder mask. This board will typically come with bodges applied; while it's ugly, it's necessary for the clock to function at all. Originally, DST and the master PWM transistor would be controlled entirely in software, but this was decided against because it would add code complexity and would not be safe or reliable (that master output control transistor has gone up in smoke on me several times during testing.)
 
 ### Version 3
 
-!()[v3.jpg]
+![](v3.jpg)
 
 **Version 3** (*for those about to clock... we salute you*) fixes the issues with v2, changes to a mini-USB port for power and has a bigger expansion port. It also has space for a TLV-1117-33 voltage regulator, but it is not populated as the Pico's built-in 3v3 voltage regulator works nicely enough.
 
@@ -64,7 +64,7 @@ It's nice to look at.
 
 Then open your web browser to [http://192.168.4.1]. If successful, you'll see a page like this:
 
-!()[configpage.png]
+![](configpage.png)
 
 Here's what to enter:
 
