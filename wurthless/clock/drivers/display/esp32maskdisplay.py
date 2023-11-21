@@ -88,7 +88,13 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_wait_ticks",
              u"Int",
              u"Number of ticks to wait before advancing to next display digit",
-             10)
+             30)
+
+
+SM_CLOCK_NEXT_DIGIT  = 0
+SM_WAIT_IN_ON_STATE  = 1
+SM_CLEAR_DISPLAY     = 2
+SM_WAIT_IN_OFF_STATE = 3
 
 class Esp32MaskDisplay(Display):
     def __init__(self, tot):
@@ -115,7 +121,6 @@ class Esp32MaskDisplay(Display):
             Pin(p,Pin.OUT).value(0)
 
         self.digs = [ 0b00000000, 0b00000000, 0b00000000, 0b00000000 ]
-        self.setBrightness(8)
 
         # compute andmask
         andmask = 0
@@ -128,30 +133,37 @@ class Esp32MaskDisplay(Display):
         frequency = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency" )
         self.strobe_wait_ticks = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_wait_ticks" )
 
+        self.sm_state = 0
         self.sm_ptr = 0
         self.sm_waits = 0
+        self.setBrightness(8)
 
         self.timer = Timer(0, mode=Timer.PERIODIC, freq=frequency, callback=self._strobe)
 
     def _strobe(self,t):
         isr = disable_irq()
-        if self.sm_waits > 0:
-            self.sm_waits -= 1
+        if self.sm_state == SM_WAIT_IN_ON_STATE or self.sm_state == SM_WAIT_IN_OFF_STATE:    
+            if self.sm_waits > 0:
+                self.sm_waits -= 1
+            else:
+               self.sm_state += 1
+               self.sm_state &= 3
+        elif self.sm_state == SM_CLEAR_DISPLAY:
+            mem32[GPIO_OUT_REG] = 0
+            self.sm_waits = self.sm_off_ticks
+            self.sm_state += 1
         else:
+            mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr]
             self.sm_ptr += 1
             self.sm_ptr &= 3
-            self.sm_waits = self.strobe_wait_ticks
-        
-        outreg = mem32[GPIO_OUT_REG]
-#        base = outreg & self.andmask
-        mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr]
-        for i in range(0,10):
-            pass
-        mem32[GPIO_OUT_REG] = outreg
+            self.sm_waits = self.sm_on_ticks
+            self.sm_state += 1
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        pass
+        period = (brightness / 8)
+        self.sm_on_ticks  = int(self.strobe_wait_ticks * period)
+        self.sm_off_ticks = int(self.strobe_wait_ticks * (1-period))
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
