@@ -1,5 +1,7 @@
 # The Most Useless Clock in the World
 
+**[End-user documentation over here!](https://github.com/wurthless-elektroniks/clock/tree/main/docs)**
+
 ![TMUCITW running under curses](docs/testbench.png)
 
 Python-based seven-segment digital clock. It is called "The Most Useless Clock in the World" because it is janky, overpriced, and tells the time and nothing else. But it is very stylish and can easily be seen across a room.
