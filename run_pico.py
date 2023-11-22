@@ -9,6 +9,7 @@ from wurthless.clock.common.ntp import NtpTimeSource
 
 from wurthless.clock.drivers.input.gpioinputs import GpioInputs
 from wurthless.clock.drivers.display.rp2040display import Rp2040Display
+from wurthless.clock.drivers.display.invertedbitdisplay import InvertedBitDisplay 
 from wurthless.clock.drivers.nic.micropythonwifinic import MicropythonWifiNic
 from wurthless.clock.drivers.rtc.micropythonrtc import MicropythonRTC
 
@@ -19,7 +20,7 @@ from wurthless.clock.cvars.cvarwriter import TokenedCvarWriter
 import config
 
 # Pico/Pico W share common hardware configuration for the LED matrix, switches, etc.
-def picoCommonInit(tot):
+def picoCommonInit(tot,invert_bits):
     cvars = Cvars()
     writer = TokenedCvarWriter()
 
@@ -34,7 +35,10 @@ def picoCommonInit(tot):
     cvars.load()
     tot.setCvars( cvars )
 
-    tot.setDisplay( Rp2040Display(tot) )
+    display = Rp2040Display(tot)
+    if invert_bits is True:
+        display = InvertedBitDisplay(display)
+    tot.setDisplay(display)
     tot.setInputs( GpioInputs(tot) )
     tot.setRtc( MicropythonRTC() )
 
@@ -43,9 +47,9 @@ def picoCommonInit(tot):
 # runPicoW(): init base RPi Pico W hardware; Wifi enabled, NTP timesource
 #
 #############################################################################
-def runPicoW():
+def runPicoW(invert_bits=False):
     tot = ToT()
-    picoCommonInit(tot)
+    picoCommonInit(tot,invert_bits)
 
     # display INIT
     tot.display().setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
@@ -67,9 +71,9 @@ def runPicoW():
 #
 ############################################################################
 # #
-def runPico():
+def runPico(invert_bits=False):
     tot = ToT()
-    picoCommonInit(tot)
+    picoCommonInit(tot,invert_bits)
 
     tot.finalize()
     clockMain(tot)
