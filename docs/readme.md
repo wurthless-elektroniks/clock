@@ -46,7 +46,9 @@ It's nice to look at.
 
 ### Version 4
 
-**Version 4** (*rock out with your USB-C clock out*) I haven't determined the fate of yet.
+![](v4.jpeg)
+
+**Version 4** (*rock out with your USB-C clock out*) is a major revision to the board to make it smaller (and cheaper). The expansion port has been removed, and the pushbuttons are now surface mount. But, obviously, the biggest change is the switch to USB-C power, which was done because absolutely uses mini-USB for power applications. It's either that, or force the end users to use the awful, horrible, no-good piece of crap power interface that is Micro USB.
 
 ### Version 5
 
