@@ -4,21 +4,11 @@ Congratulations! You were dumb or unlucky enough to buy, acquire, or otherwise u
 
 **If you're an end-user, this documentation is for you.** If you're just someone who wants to use this code as part of their own project (*who would?*), then it will still be useful in a way. However, most of the technical docs, if any, will live in the sourcecode.
 
-## Why the hell would you do something like this?
-
-Building a clock, or some such basic-yet-useful device, is a typical beginners' electronics project which I would highly recommend to anyone looking to start out in the hobby. It teaches the following:
-
-* Electronics
-* Soldering, particularly for surface mount components
-* Circuit design
-* Embedded systems software development
-* Cost-reduction techniques
-
-So yeah, this is a dumb hobby project that I keep going back to because it's interesting.
-
 ## Hardware revisions
 
 This section only applies to those who have a würthless elektroniks-branded TMUCITW. If you're just checking out the code for your own use, you can at least appreciate the pretty pictures.
+
+**Note that I'm not just putting these pictures here to jerk myself off!** They're here for an important reason: so you know which hardware revision you ended up with, and known issues with that revision in case you have trouble.
 
 ### The original prototype
 
@@ -32,31 +22,33 @@ It's nice to look at.
 
 **Version 1** is something I don't support anymore. It ran on ATMega328-based hardware with a MAX7219 driving the display and a DS1307 for RTC. As you can tell, that's extremely expensive and was a motivator for remaking the clock on much cheaper hardware. Much of the documentation below should apply to how it behaves. In case you give a shit, only three of these exist in the wild, although there could possibly be more if someone dumb enough to do so builds more of them using [the publicly available Gerbers and sourcecode](https://github.com/wurthless-elektroniks/clock_v1).
 
+**This version is known to have numerous issues**, mostly due to the use of the MAX7219 and DS1307 chips and the separate board design. The clock will freeze and glitch out if you touch it the wrong way. The DS1307 also needs a pulldown resistor in order to function at all when a battery is not connected. In non-technical parlance this means the coin cell you put in the battery holder will die in a few months when it should last years. When the battery dies, the clock will no longer reliably keep track of time until the battery is replaced.
+
 ### Version 2
 
 ![](v2.jpeg)
 
-**Version 2** (*double the uselessness, double the destruction*) is the first RP2040-based version, now using the standard stylish black solder mask. This board will typically come with bodges applied; while it's ugly, it's necessary for the clock to function at all. Originally, DST and the master PWM transistor would be controlled entirely in software, but this was decided against because it would add code complexity and would not be safe or reliable (that master output control transistor has gone up in smoke on me several times during testing.)
+**Version 2** (*double the uselessness, double the destruction*) is the first RP2040-based version, now using the standard stylish black solder mask. **This board will typically come with bodges applied; while it's ugly, it's necessary for the clock to function at all.** Originally, DST and the master PWM transistor would be controlled entirely in software, but this was decided against because it would add code complexity and would not be safe or reliable (that master output control transistor has gone up in smoke on me several times during testing). The DST button, if present, will be glued onto the board next to the SET button. It is not pictured in this photo for whatever reason (i.e., I was lazy).
 
 ### Version 3
 
 ![](v3.jpeg)
 
-**Version 3** (*for those about to clock... we salute you*) fixes the issues with v2, changes to a mini-USB port for power and has a bigger expansion port. It also has space for a TLV-1117-33 voltage regulator, but it is not populated as the Pico's built-in 3v3 voltage regulator works nicely enough.
+**Version 3** (*for those about to clock... we salute you*) fixes the issues with v2, changes to a mini-USB port for power and has a bigger expansion port. It also has space for a TLV-1117-33 voltage regulator, but it is not populated as the Pico's built-in 3v3 voltage regulator works nicely enough. **There are no known issues with this board (yet).**
 
 ### Version 4
 
 ![](v4.jpeg)
 
-**Version 4** (*rock out with your USB-C clock out*) is a major revision to the board to make it smaller (and cheaper). The expansion port has been removed, and the pushbuttons are now surface mount. But, obviously, the biggest change is the switch to USB-C power, which was done because absolutely uses mini-USB for power applications. It's either that, or force the end users to use the awful, horrible, no-good piece of crap power interface that is Micro USB.
+**Version 4** (*rock out with your USB-C clock out*) is a major revision to the board to make it smaller (and cheaper). The expansion port has been removed, and the pushbuttons are now surface mount. But, obviously, the biggest change is the switch to USB-C power, which was done because absolutely uses mini-USB for power applications. It's either that, or force the end users to use the awful, horrible, no-good piece of crap power interface that is Micro USB. **There are no known issues with this board (yet).**
 
 ### Version 5
 
-**Version 5** (working title: *my clock is bigger than yours!*) I also haven't determined the fate of yet.
+**Version 5** (*my clock is bigger than yours!*) will be the final version to run on the Raspberry Pi Pico W. Following this, development will move to cheaper hardware, most likely the ESP32 series.
 
 ### TMUCITW Junior
 
-**TMUCITW Junior** is also yet to be decided on. It will almost certainly run on cheaper ESP32-based hardware and only support 12-hour time.
+**TMUCITW Junior** is yet to be decided on. It will almost certainly run on cheaper ESP32-based hardware and only support 12-hour time.
 
 ## Initial Setup
 
