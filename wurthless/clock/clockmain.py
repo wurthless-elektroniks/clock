@@ -455,9 +455,18 @@ def loop(tot):
     cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
     
     displaymode = 0
+    should_rerender_display = False
+    last_second = int(time.time())
     while True:
-        renderDisplay(tot, displaymode)
-        
+        if should_rerender_display == True:
+            renderDisplay(tot, displaymode)
+            should_rerender_display = False
+        else:
+            t = int(time.time())
+            if t != last_second:
+                should_rerender_display = True
+                last_second = t
+                
         tot.inputs().strobe()
         up_state = tot.inputs().up()
         down_state = tot.inputs().down()
@@ -490,6 +499,7 @@ def loop(tot):
                     # toggle displaymode
                     displaymode += 1
                     displaymode &= 3
+                    should_rerender_display = True
                     ticks_since_datedisplay_pushed = 1
                     ticks_down_held += 1
             
@@ -497,6 +507,7 @@ def loop(tot):
                 ticks_since_datedisplay_pushed += 1
                 if ticks_since_datedisplay_pushed == 200:
                     displaymode = 0
+                    should_rerender_display = True
                     ticks_since_datedisplay_pushed = 0
 
         # Pressing and holding SET for long enough will go to configuration mode

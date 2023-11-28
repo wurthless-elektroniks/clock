@@ -92,7 +92,7 @@ def runEsp32Wroom32E():
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_2_pin", 21 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_3_pin", 22 )
 
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency", 4000 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency", 4*60 )
 
     tot.setDisplay( Esp32MaskDisplay(tot) )
     tot.setInputs( NullInputs() )
