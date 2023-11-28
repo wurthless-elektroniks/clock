@@ -89,13 +89,13 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
              u"Int",
              u"Frequency at which we update the display",
-             int(11100))
+             int(200))
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_wait_ticks",
              u"Int",
              u"Number of ticks to wait before advancing to next display digit",
-             int(11))
+             int(8))
 
 
 SM_CLOCK_NEXT_DIGIT  = 0
@@ -145,35 +145,18 @@ class Esp32MaskDisplay(Display):
         self.sm_waits = 0
         self.setBrightness(8)
 
-        self.timer = Timer(0, mode=Timer.PERIODIC, freq=frequency, callback=self._strobe)
+        self.timer = Timer(3, mode=Timer.PERIODIC, freq = frequency, callback=self._strobe)
 
     def _strobe(self,t):
         isr = disable_irq()
-        if self.sm_state == SM_WAIT_IN_ON_STATE or self.sm_state == SM_WAIT_IN_OFF_STATE:    
-            if self.sm_waits > 0:
-                self.sm_waits -= 1
-            else:
-               self.sm_state += 1
-               self.sm_state &= 3
-        elif self.sm_state == SM_CLEAR_DISPLAY:
-            if self.sm_off_ticks == 0:
-                self.sm_state = 0
-            else:
-                mem32[GPIO_OUT_REG] = 0
-                self.sm_waits = self.sm_off_ticks
-                self.sm_state += 1
-        else:
-            mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr]
-            self.sm_ptr += 1
-            self.sm_ptr &= 3
-            self.sm_waits = self.sm_on_ticks
-            self.sm_state += 1
+        mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr]
+        self.sm_ptr += 1
+        self.sm_ptr &= 3
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        period = (brightness / 8)
-        self.sm_on_ticks  = int(self.strobe_wait_ticks * period)
-        self.sm_off_ticks = int(self.strobe_wait_ticks * (1-period))
+        # to implement later as PWM control
+        pass
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
