@@ -10,13 +10,15 @@ This section only applies to those who have a würthless elektroniks-branded TMU
 
 **Note that I'm not just putting these pictures here to jerk myself off!** They're here for an important reason: so you know which hardware revision you ended up with, and known issues with that revision in case you have trouble.
 
-### The original prototype
+### The ATMega Generation
+
+#### The original prototype
 
 ![](proto.jpeg)
 
 It's nice to look at.
 
-### Version 1
+#### Version 1
 
 ![](v1.jpeg)
 
@@ -24,29 +26,39 @@ It's nice to look at.
 
 **This version is known to have numerous issues**, mostly due to the use of the MAX7219 and DS1307 chips and the separate board design. The clock will freeze and glitch out if you touch it the wrong way. The DS1307 also needs a pulldown resistor in order to function at all when a battery is not connected. In non-technical parlance this means the coin cell you put in the battery holder will die in a few months when it should last years. When the battery dies, the clock will no longer reliably keep track of time until the battery is replaced.
 
-### Version 2
+### The Raspberry Pi Pico W Generation
+
+**WARNING!** Versions 2, 3 and 4 are all subject to an issue where it is possible to backfeed power to another device. Version 5 has a diode in place to mitigate this issue. Do **NOT** plug any USB cable into the Micro USB port! It's there for debugging purposes only. 
+
+#### Version 2
 
 ![](v2.jpeg)
 
 **Version 2** (*double the uselessness, double the destruction*) is the first RP2040-based version, now using the standard stylish black solder mask. **This board will typically come with bodges applied; while it's ugly, it's necessary for the clock to function at all.** Originally, DST and the master PWM transistor would be controlled entirely in software, but this was decided against because it would add code complexity and would not be safe or reliable (that master output control transistor has gone up in smoke on me several times during testing). The DST button, if present, will be glued onto the board next to the SET button. It is not pictured in this photo for whatever reason (i.e., I was lazy).
 
-### Version 3
+#### Version 3
 
 ![](v3.jpeg)
 
 **Version 3** (*for those about to clock... we salute you*) fixes the issues with v2, changes to a mini-USB port for power and has a bigger expansion port. It also has space for a TLV-1117-33 voltage regulator, but it is not populated as the Pico's built-in 3v3 voltage regulator works nicely enough. **There are no known issues with this board (yet).**
 
-### Version 4
+#### Version 4
 
 ![](v4.jpeg)
 
 **Version 4** (*rock out with your USB-C clock out*) is a major revision to the board to make it smaller (and cheaper). The expansion port has been removed, and the pushbuttons are now surface mount. But, obviously, the biggest change is the switch to USB-C power, which was done because absolutely uses mini-USB for power applications. It's either that, or force the end users to use the awful, horrible, no-good piece of crap power interface that is Micro USB. **There are no known issues with this board (yet).**
 
-### Version 5
+#### Version 5
 
 **Version 5** (*my clock is bigger than yours!*) will be the final version to run on the Raspberry Pi Pico W. Following this, development will move to cheaper hardware, most likely the ESP32 series.
 
-### TMUCITW Junior
+### The Future
+
+#### Version 6
+
+**Version 6** (*boom boom boom, i want you in my WROOM*) will be the first version to run on ESP32-based hardware. Exact details TBD.
+
+#### TMUCITW Junior
 
 **TMUCITW Junior** is yet to be decided on. It will almost certainly run on cheaper ESP32-based hardware and only support 12-hour time.
 
