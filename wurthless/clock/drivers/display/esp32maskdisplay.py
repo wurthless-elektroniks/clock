@@ -128,6 +128,7 @@ class Esp32MaskDisplay(Display):
             Pin(p,Pin.OUT).value(0)
 
         self.digs = [ 0b00000000, 0b00000000, 0b00000000, 0b00000000 ]
+        self.last_digs = self.digs
 
         # compute andmask
         andmask = 0
@@ -176,4 +177,7 @@ class Esp32MaskDisplay(Display):
                     v |= (1 << self.seg_pins[segment])
                 bits >>= 1
             munged[digit] = v
-        self.digs = munged
+
+        if self.last_digs != munged:
+            self.digs = munged
+            self.last_digs = self.digs
