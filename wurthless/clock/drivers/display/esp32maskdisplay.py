@@ -78,25 +78,25 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_0_pin",
              u"Int",
              u"LED digit 0 drive pin",
-             6)
+             5)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_1_pin",
              u"Int",
              u"LED digit 1 drive pin",
-             7)
+             6)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_2_pin",
              u"Int",
              u"LED digit 2 drive pin",
-             8)
+             7)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_3_pin",
              u"Int",
              u"LED digit 3 drive pin",
-             9)
+             8)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
