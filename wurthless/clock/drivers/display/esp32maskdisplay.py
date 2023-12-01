@@ -11,10 +11,23 @@ from wurthless.clock.api.display import Display
 
 # i'm serious. we are accessing the hardware directly. it's too slow otherwise.
 # DANGER! this I/O register changes depending on what ESP32 we are using.
-if sys.platform == u'esp32':
-    GPIO_OUT_REG = 0x3FF44004
-elif sys.platform == u'esp32c3':
+
+# for esp32c3, have to check implementation, platform will be esp32 and that's too ambiguous
+if sys.implementation._machine.find("ESP32C3") >= 0:
     GPIO_OUT_REG = 0x60004004
+
+    # micropython sucks and will not let us grab pins 18 or 19 as I/Os
+    # although, hilariously, it allows us to try grabbing pins 11-17.
+    print(u"******* ESP32-C3 detected. hacking around micropython limitations *******")
+    print(u"killing USB-JTAG. if i don't see you on the other side, adios!")
+
+    # disable USB PHY
+    mem32[0x60043018] = 0x00000000
+
+    # set pins 18/19 as outputs
+    mem32[0x60004024] |= (1 << 18) | (1 << 19)
+elif sys.platform == u'esp32':
+    GPIO_OUT_REG = 0x3FF44004
 else:
     print(u"DANGER: platform not recognized (%s). defaulting to default esp32 gpio register. you're entering very dangerous territory if you start execution."%(sys.platform))
     GPIO_OUT_REG = 0x3FF44004
@@ -23,13 +36,13 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_a_pin",
              u"Int",
              u"LED segment A drive pin",
-             9)
+             19)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_b_pin",
              u"Int",
              u"LED segment B drive pin",
-             8)
+             18)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_c_pin",
@@ -65,31 +78,31 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_0_pin",
              u"Int",
              u"LED digit 0 drive pin",
-             4)
+             6)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_1_pin",
              u"Int",
              u"LED digit 1 drive pin",
-             5)
+             7)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_2_pin",
              u"Int",
              u"LED digit 2 drive pin",
-             6)
+             8)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_3_pin",
              u"Int",
              u"LED digit 3 drive pin",
-             7)
+             9)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
              u"Int",
              u"Frequency at which we update the display",
-             int(200))
+             int(4*60*4))
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_wait_ticks",
@@ -125,7 +138,11 @@ class Esp32MaskDisplay(Display):
 
         # force system to mark all pins as outputs
         for p in self.seg_pins+self.dig_pins:
-            Pin(p,Pin.OUT).value(0)
+            if sys.implementation._machine.find("ESP32C3") >= 0 and p in [18,19]:
+                # we've already tried grabbing those, don't do it again or we'll get exceptions
+                pass
+            else:
+                Pin(p,Pin.OUT).value(0)
 
         self.digs = [ 0b00000000, 0b00000000, 0b00000000, 0b00000000 ]
         self.last_digs = self.digs
@@ -146,7 +163,7 @@ class Esp32MaskDisplay(Display):
         self.sm_waits = 0
         self.setBrightness(8)
 
-        self.timer = Timer(3, mode=Timer.PERIODIC, freq = frequency, callback=self._strobe)
+        self.timer = Timer(0, mode=Timer.PERIODIC, freq = frequency, callback=self._strobe)
 
     def _strobe(self,t):
         isr = disable_irq()
