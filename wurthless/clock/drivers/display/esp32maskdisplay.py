@@ -24,8 +24,21 @@ if sys.implementation._machine.find("ESP32C3") >= 0:
     # disable USB PHY
     mem32[0x60043018] = 0x00000000
 
+    print(u"grabbing pins 18/19 and setting them up as outputs")
+
     # set pins 18/19 as outputs
     mem32[0x60004024] |= (1 << 18) | (1 << 19)
+
+    # configure pins 18/19 on I/O mux to match how the others are configured.
+    # unfortunately, it seems pins 18/19 are limited in how much current they
+    # can deliver so those segments might be dimmer than the others.
+    # more testing to be done later.
+    #
+    #                     fedcba9876543210
+    mem32[0x6000904C] = 0b0000111101101011
+    mem32[0x60009050] = 0b0000111101101011
+
+    print(u"esp32c3 platform configured. have a nice day!")
 elif sys.platform == u'esp32':
     GPIO_OUT_REG = 0x3FF44004
 else:
