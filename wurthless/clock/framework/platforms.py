@@ -13,24 +13,32 @@ class PlatformBuilder(object):
             # import settings from parent builder
             pass
 
-    def name(self, name):
-        self.name = name
-        return self
-    
     def displayDriver(self, cls):
         self.displayDriver = cls
+        return self
+    
+    def decoratingDisplayDriver(self, decoratorCls):
         return self
 
     def inputDriver(self, cls):
         self.inputDriver = cls
         return self
 
+    def decoratingInputDriver(self, decoratorCls):
+        return self
+
     def rtcDriver(self, cls):
         self.rtcDriver = cls
+        return self
+    
+    def decoratingRtcDriver(self, decoratorCls):
         return self
 
     def nicDriver(self, cls):
         self.nicDriver = cls
+        return self
+
+    def decoratingNicDriver(self, decoratorCls):
         return self
 
     def timesources(self, ts):
@@ -38,7 +46,7 @@ class PlatformBuilder(object):
         return self
 
     def cvarOverride(self, registrant, name, value):
-        pass
+        return self
 
     '''
     Call to finish setup of the builder and to register it for later use.
@@ -51,8 +59,8 @@ platforms[u"root"] = PlatformBuilder() \
                         .inputDriver(None) \
                         .rtcDriver(None) \
                         .nicDriver(None) \
-                        .timesources([])
-
+                        .timesources([]) \
+                        .done()
 
 
 def platformBuilder(identifier, name, parent=None):
