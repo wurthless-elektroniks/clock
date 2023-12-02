@@ -42,6 +42,7 @@ def picoCommonInit(tot,invert_bits):
     tot.setInputs( GpioInputs(tot) )
     tot.setRtc( MicropythonRTC() )
 
+
 #############################################################################
 #
 # runPicoW(): init base RPi Pico W hardware; Wifi enabled, NTP timesource
@@ -78,3 +79,9 @@ def runPico(invert_bits=False):
     tot.finalize()
     clockMain(tot)
 
+def burninPico(invert_bits=False):
+    tot = ToT()
+    picoCommonInit(tot,invert_bits)
+
+    # turn all bits on display on and exit
+    tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
