@@ -10,7 +10,7 @@ Unbranded RPi Pico W-based clock for your clockey enjoyment. Production version 
 * R2/R3: 5.1k pullup resistors to enable USB-C power, 0603 footprint
 * Q1, Q2, Q3, Q4, Q5, Q7: Dual NPN transistors, E1/B1/C2 pinout, SOT-363 footprint
 * Q6: NPN transistor, BEC pinout, SOT-23 footprint
-* RN1, RN2: 470 ohm segment isolating/current limiting resistor network, 1206 footprint
+* RN1, RN2: 470 ohm segment isolating/current limiting resistor network, 1206 footprint, convex, **approx. 1/16" (0.061-0.063") wide**
 * D113: 1206 input protection diode so idiots do not backfeed micro USB power to a USB-C host
 * C1: 100 uF courtesy cap, 1206 footprint
 * SW1, SW2, SW3, SW4, SW5: 6x6mm tactile switches
