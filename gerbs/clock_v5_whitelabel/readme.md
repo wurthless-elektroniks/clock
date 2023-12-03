@@ -6,11 +6,11 @@ Unbranded RPi Pico W-based clock for your clockey enjoyment. Production version 
 
 * U1: Raspberry Pi Pico W, will also accomodate the Pico and Pico H
 * U2: BCR420UW6 constant current device, SOT-26 footprint
-* R1: Sense resistor for BCR420UW6 (value varies); 1210 footprint
+* R1: Sense resistor for BCR420UW6 (value varies); 1210 footprint. If full current is needed, this should be a 0 ohm resistor.
 * R2/R3: 5.1k pullup resistors to enable USB-C power, 0603 footprint
 * Q1, Q2, Q3, Q4, Q5, Q7: Dual NPN transistors, E1/B1/C2 pinout, SOT-363 footprint
 * Q6: NPN transistor, BEC pinout, SOT-23 footprint
-* RN1, RN2: 220 ohm segment isolating/current limiting resistors, 4x1206 footprint
+* RN1, RN2: 470 ohm segment isolating/current limiting resistor network, 1206 footprint
 * D113: 1206 input protection diode so idiots do not backfeed micro USB power to a USB-C host
 * C1: 100 uF courtesy cap, 1206 footprint
 * SW1, SW2, SW3, SW4, SW5: 6x6mm tactile switches
@@ -30,7 +30,9 @@ Really boring power input circuit. Resistors enable USB-C power, diode prevents 
 
 Nothing special over here. Pushbuttons get one I/O each, all are digital. Remnants of the expansion bus are shown in this diagram, but they are not present on the board itself.
 
-GPIOs 16-22 drive the LED matrix on the switcher circuit. Digit returns (DIG_0-DIG_3) are switched through GPIOs 12-15. GPIO10 provides PWM for the display because it was far easier to implement in software. The BCR420UW6 can just as easily be replaced with a normal NPN transistor, but it will not drive the segments with consistent current, so you'll have one digit that is lighter than the others. I picked the BCR420UW6 at random, we'll see how it holds up.
+GPIOs 16-22 drive the LED matrix on the switcher circuit. Digit returns (DIG_0-DIG_3) are switched through GPIOs 12-15. GPIO10 provides PWM for the display because it was far easier to implement in software. 
+
+The master output control is a BCR420UW6 LED driver. It replaced the single NPN resistor in earlier designs in an attempt to keep all segments lit at the same intensity, but in testing it's introduced several quirks of its own, including very flickery displays at certain PWM/resistance combinations. If R1 is not populated, the chip will default to its internal current limiting resistance of approximately 100 ohms. However, if R1 is populated, then the emitter of the chip's internal NPN transistor will be routed through the resistor. It's possible to safely short this terminal to ground because the resistors letting current into the LED matrix will limit the current through the circuit anyway.
 
 ### Switcher circuit
 
