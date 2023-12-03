@@ -4,6 +4,7 @@
 
 from wurthless.clock.api.tot import ToT
 from wurthless.clock.clockmain import clockMain
+from wurthless.clock.burnin import burnin
 
 from wurthless.clock.common.ntp import NtpTimeSource
 
@@ -83,5 +84,4 @@ def burninPico(invert_bits=False):
     tot = ToT()
     picoCommonInit(tot,invert_bits)
 
-    # turn all bits on display on and exit
-    tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
+    burnin(tot)
