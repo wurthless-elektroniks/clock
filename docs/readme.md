@@ -40,7 +40,7 @@ It's nice to look at.
 
 ![](v3.jpeg)
 
-**Version 3** (*for those about to clock... we salute you*) fixes the issues with v2, changes to a mini-USB port for power and has a bigger expansion port. It also has space for a TLV-1117-33 voltage regulator, but it is not populated as the Pico's built-in 3v3 voltage regulator works nicely enough. **There are no known issues with this board (yet).**
+**Version 3** (*for those about to clock... we salute you*) fixes the issues with v2, changes to a mini-USB port for power and has a bigger expansion port. It also has space for a TLV-1117-33 voltage regulator, but it is not populated as the Pico's built-in 3v3 voltage regulator works nicely enough. [Grab the Gerbers here.](/gerbs/clock_v3/)
 
 #### Version 4
 
@@ -50,7 +50,9 @@ It's nice to look at.
 
 #### Version 5
 
-**Version 5** (*my clock is bigger than yours!*) will be the final version to run on the Raspberry Pi Pico W. Following this, development will move to cheaper hardware, most likely the ESP32 series.
+![](v5.jpeg)
+
+**Version 5** (*my clock is bigger than yours!*) is the final version to run on the Raspberry Pi Pico W. The LED matrix driver circuit is redone; the matrix is now driven by 5 volts and a BCR420UW6 is used for the master PWM output control. The clock is now able to be used with blue and purple LEDs, which wasn't possible on the older designs (although probably possible with the MAX7219). Thanks to more efficient space management on the board (and the spaghetti wire routing to go with it), the board size has also been slimmed down a bit more, at the cost of my sanity, because now there are tiny, impossible-to-solder dual NPN transistors switching the matrix. [Grab the Gerbers here.](/gerbs/clock_v5_whitelabel/)
 
 ### The Future
 
