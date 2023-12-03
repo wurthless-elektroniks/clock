@@ -567,6 +567,8 @@ def loop(tot):
         snooze()
 
 def clockMain(tot):
+    tot.inputs().strobe()
+
     # if DOWN held on reset, go to burnin / demo mode
     if tot.inputs().down():
         burnin(tot)
@@ -574,7 +576,6 @@ def clockMain(tot):
     # enter webserver config mode when SET is held on reset
     force_server = tot.cvars().get(u"wurthless.clock.clockmain", u"force_server")
 
-    tot.inputs().strobe()
     if tot.inputs().set() or force_server:
         # display "cfg"
         tot.display().setBrightness(8)
