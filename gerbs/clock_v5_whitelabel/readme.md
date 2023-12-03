@@ -30,7 +30,9 @@ Really boring power input circuit. Resistors enable USB-C power, diode prevents 
 
 Nothing special over here. Pushbuttons get one I/O each, all are digital. Remnants of the expansion bus are shown in this diagram, but they are not present on the board itself.
 
-GPIOs 16-22 drive the LED matrix on the switcher circuit. Digit returns (DIG_0-DIG_3) are switched through GPIOs 12-15. GPIO10 provides PWM for the display because it was far easier to implement in software. The BCR420UW6 can just as easily be replaced with a normal NPN transistor, but it will not drive the segments with consistent current, so you'll have one digit that is lighter than the others. I picked the BCR420UW6 at random, we'll see how it holds up.
+GPIOs 16-22 drive the LED matrix on the switcher circuit. Digit returns (DIG_0-DIG_3) are switched through GPIOs 12-15. GPIO10 provides PWM for the display because it was far easier to implement in software. 
+
+The master output control is a BCR420UW6 LED driver. It replaced the single NPN resistor in earlier designs in an attempt to keep all segments lit at the same intensity, but in testing it's introduced several quirks of its own, including very flickery displays at certain PWM/resistance combinations. If R1 is not populated, the chip will default to its internal current limiting resistance of approximately 100 ohms. However, if R1 is populated, then the emitter of the chip's internal NPN transistor will be routed through the resistor. It's possible to safely short this terminal to ground because the resistors letting current into the LED matrix will limit the current through the circuit anyway.
 
 ### Switcher circuit
 
