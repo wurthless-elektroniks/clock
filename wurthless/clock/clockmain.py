@@ -12,11 +12,15 @@ try:
 except:
     sleep_ms = lambda a : time.sleep(a / 1000)
 
+from wurthless.clock.burnin import burnin
 from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.webserver.webserver import serverMain
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
+
+TICK_TIME_MS = 10
+snooze = lambda : sleep_ms(TICK_TIME_MS)
 
 ################################################################################################################
 #
@@ -115,7 +119,7 @@ def promptYear(tot, inputs, year):
             return year_inp
         else:
             flash_state = not flash_state
-            time.sleep(100 / 1000)
+            snooze()
 
 def promptMonthOrDay(tot, inputs, valin, maxval):
     flash_state = False
@@ -144,7 +148,7 @@ def promptMonthOrDay(tot, inputs, valin, maxval):
             return inp
         else:
             flash_state = not flash_state
-            time.sleep(100 / 1000)
+            snooze()
 
 def promptTime(tot, inputs, hour, minute):
     use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr") is True
@@ -178,7 +182,7 @@ def promptTime(tot, inputs, hour, minute):
             break
         else:
             flash_state = not flash_state
-            time.sleep(100 / 1000)
+            snooze()
 
     flash_state = False
     inp = minute
@@ -206,7 +210,7 @@ def promptTime(tot, inputs, hour, minute):
             return retval
         else:
             flash_state = not flash_state
-            time.sleep(100 / 1000)
+            snooze()
 
 def promptDst(tot,inputs,dst):
     flash_state = False
@@ -230,7 +234,7 @@ def promptDst(tot,inputs,dst):
             return inp
         else:
             flash_state = not flash_state
-        time.sleep(0.5)
+        snooze()
 
 
 def configMode(tot):
@@ -560,10 +564,13 @@ def loop(tot):
                 tot.cvars().save()
                 next_cfg_writeback = None
 
-        # sleep for 10 ms
-        sleep_ms( 10 )
+        snooze()
 
 def clockMain(tot):
+    # if DOWN held on reset, go to burnin / demo mode
+    if tot.inputs().down():
+        burnin(tot)
+    
     # enter webserver config mode when SET is held on reset
     force_server = tot.cvars().get(u"wurthless.clock.clockmain", u"force_server")
 
