@@ -12,7 +12,7 @@ try:
 except:
     sleep_ms = lambda a : time.sleep(a / 1000)
 
-from wurthless.clock.burnin import burnin
+from wurthless.clock.burnin import burnin,inputTest
 from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.webserver.webserver import serverMain
@@ -568,6 +568,9 @@ def loop(tot):
 
 def clockMain(tot):
     tot.inputs().strobe()
+
+    if tot.inputs().dst():
+        inputTest(tot)
 
     # if DOWN held on reset, go to burnin / demo mode
     if tot.inputs().down():

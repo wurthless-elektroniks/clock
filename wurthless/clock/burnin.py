@@ -4,6 +4,30 @@
 
 import time
 
+def inputTest(tot):
+    tot.display().setBrightness(8)
+    while True:
+        tot.inputs().strobe()
+
+        up = tot.inputs().up()
+        down = tot.inputs().down()
+        set = tot.inputs().set()
+        dst = tot.inputs().dst()
+
+        # TODO: account for clocks that only populate segs b/c on digit 0
+        button_on  = 0b00000100 
+        button_off = 0b01011100
+
+        tot.display().setDigitsBinary(button_on if up else button_off,
+                                      button_on if down else button_off,
+                                      button_on if set else button_off,
+                                      button_on if dst else button_off)
+
+        time.sleep(0.1)
+
+
+
+
 def burnin(tot):
     while True:
         tot.display().setBrightness(8)
