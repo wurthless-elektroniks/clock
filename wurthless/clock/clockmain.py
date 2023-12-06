@@ -214,22 +214,28 @@ def promptTime(tot, inputs, hour, minute):
 
 def promptDst(tot,inputs,dst):
     flash_state = False
+    display_delay_ticks = 0
     inp = dst
     while True:
-        if flash_state is False:
-            # "dST"
-            tot.display().setDigitsBinary(0b00000000, 0b01011110, 0b01101101, 0b01111000)
-        else: 
-            # either "oFF" or "on"
-            if inp is True:
-                tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01010100, 0b00000000)
-            else:
-                tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01110001, 0b01110001)
+        if display_delay_ticks == 0:
+            display_delay_ticks = 20
+            if flash_state is False:
+                # "dST"
+                tot.display().setDigitsBinary(0b00000000, 0b01011110, 0b01101101, 0b01111000)
+            else: 
+                # either "oFF" or "on"
+                if inp is True:
+                    tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01010100, 0b00000000)
+                else:
+                    tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01110001, 0b01110001)
+        else:
+            display_delay_ticks -= 1
 
         inputs.strobe()
         if inputs.up() or inputs.down():
             inp = not inp
             flash_state = False
+            display_delay_ticks = 0
         elif inputs.set():
             return inp
         else:
@@ -360,8 +366,16 @@ def renderDisplay(tot, mode):
 # Return False otherwise.
 #
 def syncTime(tot, suppressError = False):
-    # display "SYNC"
-    tot.display().setDigitsBinary(0b01101101, 0b01101110, 0b00110111, 0b00111001)
+
+    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr")
+    
+    if use_12hr is True:
+       # display "I 02"
+       # TODO: come up with something better...
+       tot.display().setDigitsBinary(0b01101101, 0, 0b00111111, 0b01011011)
+    else:
+        # display "SYNC"
+       tot.display().setDigitsBinary(0b01101101, 0b01101110, 0b00110111, 0b00111001)
 
     # enumerate over all time sources until something answers
     t = 0
@@ -377,7 +391,7 @@ def syncTime(tot, suppressError = False):
         return False
     else:
         # otherwise, display "Err"
-        tot.display().setDigitsBinary(0b01111001, 0b01010000, 0b01010000, 0)
+        tot.display().setDigitsBinary(0, 0b01111001, 0b01010000, 0b01010000)
 
         # wait for user to press button
         while True:
