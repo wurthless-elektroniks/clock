@@ -10,7 +10,7 @@ Unbranded RPi Pico W-based clock for your clockey enjoyment. Production version 
 * R2/R3: 5.1k pullup resistors to enable USB-C power, 0603 footprint
 * Q1, Q2, Q3, Q4, Q5, Q7: Dual NPN transistors, E1/B1/C2 pinout, SOT-363 footprint
 * Q6: NPN transistor, BEC pinout, SOT-23 footprint
-* RN1, RN2: 470 ohm segment isolating/current limiting resistor network, 1206 footprint
+* RN1, RN2: 470 ohm segment isolating/current limiting resistor network. **ERRATA: Thanks to a KiCad obsolete part SNAFU, these will need to be bodged with 0805 or similar resistors.** KiCad claims that this footprint matches a 1206 resistor network, but it doesn't. It is closer to the now obsolete 2012 resistor network form factor (approx. 5mm wide by 3mm long). TMUCITW hardware version 6 will correct this error. 220 ohm resistor networks are still routinely stocked, so populate R1 as appropriate.
 * D113: 1206 input protection diode so idiots do not backfeed micro USB power to a USB-C host
 * C1: 100 uF courtesy cap, 1206 footprint
 * SW1, SW2, SW3, SW4, SW5: 6x6mm tactile switches

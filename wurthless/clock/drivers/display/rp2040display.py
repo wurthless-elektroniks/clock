@@ -83,10 +83,17 @@ class Rp2040Display(Display):
         digit_drive_base_pin   = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"digit_drive_base_pin")
         brightness_pwm_pin     = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"brightness_pwm_pin")
 
+        # attempt to grab I/Os here by setting them all as outputs
+        # it is better to have them setup in a known state than to assume the statemachine will do everything for us
+        for i in range(segment_drive_base_pin, segment_drive_base_pin+7):
+            Pin(i, Pin.OUT)
+        for i in range(digit_drive_base_pin,   digit_drive_base_pin+4):
+            Pin(i, Pin.OUT)
+        
         # init brightness table here...
 
         self.sm = rp2.StateMachine(0, sevseg, freq=2000, out_base=Pin(segment_drive_base_pin), sideset_base=Pin(digit_drive_base_pin))
-        self.brightness_pwm = PWM(Pin(brightness_pwm_pin))
+        self.brightness_pwm = PWM(Pin(brightness_pwm_pin, Pin.OUT))
         
         # bring up display but in blank state.
         self.setBrightness(8)
