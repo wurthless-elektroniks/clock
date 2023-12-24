@@ -12,7 +12,7 @@
 from wurthless.clock.api.display import Display
 from wurthless.clock.cvars.cvars import registerCvar
 
-from machine import Pin, PWM
+from machine import Pin, PWM, mem32
 import rp2
 from rp2 import PIO
 
@@ -40,6 +40,14 @@ registerCvar(u"wurthless.clock.drivers.display.rp2040display",
              u"Int",
              u"PWM pin for controlling brightness. Default is GPIO 10.",
              10)
+
+registerCvar(u"wurthless.clock.drivers.display.rp2040display",
+             u"low_power_drives",
+             u"Boolean",
+             u"If true, reduces current drive power on the segment and digit control GPIOs. Default is True.",
+             True)
+
+
 
 # brightness table as frequency/duty cycle.
 # you might need to change these if there is no resistor in-line with the master output transistor's base,
@@ -85,15 +93,22 @@ class Rp2040Display(Display):
 
         # attempt to grab I/Os here by setting them all as outputs
         # it is better to have them setup in a known state than to assume the statemachine will do everything for us
+        low_power_drives     = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"low_power_drives")   
         for i in range(segment_drive_base_pin, segment_drive_base_pin+7):
             Pin(i, Pin.OUT)
+            if low_power_drives is True:
+                mem32[0x4001c004 + (i*4)] = (mem32[0x4001c004 + (i*4)] & 0b11001111)
         for i in range(digit_drive_base_pin,   digit_drive_base_pin+4):
             Pin(i, Pin.OUT)
-        
+            if low_power_drives is True:
+                mem32[0x4001c004 + (i*4)] = (mem32[0x4001c004 + (i*4)] & 0b11001111)
+                
         # init brightness table here...
 
         self.sm = rp2.StateMachine(0, sevseg, freq=2000, out_base=Pin(segment_drive_base_pin), sideset_base=Pin(digit_drive_base_pin))
         self.brightness_pwm = PWM(Pin(brightness_pwm_pin, Pin.OUT))
+
+
         
         # bring up display but in blank state.
         self.setBrightness(8)
