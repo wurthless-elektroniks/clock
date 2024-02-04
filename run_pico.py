@@ -23,6 +23,7 @@ import config
 from machine import Pin,UART
 from wurthless.clock.drivers.nmea.nmeadevice import NmeaDevice
 from wurthless.clock.drivers.nmea.nmeatimesource import NmeaTimeSource
+from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 
 # Pico/Pico W share common hardware configuration for the LED matrix, switches, etc.
 def picoCommonInit(tot,invert_bits):
@@ -81,10 +82,11 @@ def runPicoGnss(invert_bits=False):
 
     nmea = NmeaDevice(UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(0), rx=Pin(1), timeout=300))
 
-    print(u"Wait on NMEA")
+    # display number of GNSS satellites in view until the NMEA device signals it's ready
     while nmea.isUp() is False:
-        pass
-
+        digs = sevensegNumbersToDigits(None, 5, nmea.getSatellitesVisible() / 10, nmea.getSatellitesVisible() % 10)
+        tot.display().setDigitsBinary(digs[0],digs[1],digs[2],digs[3])
+    
     tot.setTimeSources( [ NmeaTimeSource(nmea) ] )
     
     tot.finalize()
