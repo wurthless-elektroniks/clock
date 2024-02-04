@@ -20,6 +20,10 @@ from wurthless.clock.cvars.cvarwriter import TokenedCvarWriter
 # must-init cvars must be defined, so don't remove this
 import config
 
+from machine import Pin,UART
+from wurthless.clock.drivers.nmea.nmeadevice import NmeaDevice
+from wurthless.clock.drivers.nmea.nmeatimesource import NmeaTimeSource
+
 # Pico/Pico W share common hardware configuration for the LED matrix, switches, etc.
 def picoCommonInit(tot,invert_bits):
     cvars = Cvars()
@@ -64,6 +68,25 @@ def runPicoW(invert_bits=False):
     if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
         tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
 
+    tot.finalize()
+    clockMain(tot)
+
+
+def runPicoGnss(invert_bits=False):
+    tot = ToT()
+    picoCommonInit(tot,invert_bits)
+
+    # display INIT
+    tot.display().setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
+
+    nmea = NmeaDevice(UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(0), rx=Pin(1), timeout=300))
+
+    print(u"Wait on NMEA")
+    while nmea.isUp() is False:
+        pass
+
+    tot.setTimeSources( [ NmeaTimeSource(nmea) ] )
+    
     tot.finalize()
     clockMain(tot)
 
