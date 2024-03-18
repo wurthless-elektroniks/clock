@@ -82,7 +82,7 @@ def runEsp32Wroom32E():
 
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_a_pin", 15 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_b_pin", 2)
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_c_pin", 0 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_c_pin", 12 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_d_pin", 4 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_e_pin", 16 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_f_pin", 17 )
