@@ -13,11 +13,13 @@ except:
     sleep_ms = lambda a : time.sleep(a / 1000)
 
 from wurthless.clock.burnin import burnin,inputTest
-from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp
+from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp,autoformatHourIn12HourTime
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.webserver.webserver import serverMain
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
+from wurthless.clock.common.prompt import promptYear, promptMonthOrDay, promptTime, promptDst
+from wurthless.clock.common.bcd import unpackBcd
 
 TICK_TIME_MS = 10
 snooze = lambda : sleep_ms(TICK_TIME_MS)
@@ -64,185 +66,6 @@ registerCvar(u"wurthless.clock.clockmain",
              u"If True, force server mode (needed for testing).",
              False)
 
-
-# util function commonly used to render the current hour
-# return array [hour, is_pm]. if running in 24 hour mode, simply return [ hour, False ].
-def autoformatHourIn12HourTime(tot, hour):
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr") is True
-    if use_12hr:
-        is_pm = False
-        if hour > 12:
-            hour -= 12
-            is_pm = True
-        elif hour == 0:
-            hour = 12
-        return [ hour, is_pm ]
-    else:
-        return [ hour, False ]
-
-
-################################################################################################################
-#
-# Config mode
-#
-################################################################################################################
-
-def promptYear(tot, inputs, year):
-    # 12 hour clocks do not have enough digits to display the full year
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr") is True
-
-    # if value is already out of range, clamp it
-    if year < 2022:
-        year = 2022
-    elif year > 2099:
-        year = 2099
-
-    year_inp = year
-    flash_state = False
-    while True:
-        bcd = unpackBcd(year_inp / 100, year_inp % 100)
-        digs = sevensegNumbersToDigits( None if use_12hr is True else bcd[0], None if use_12hr is True else bcd[1], bcd[2], bcd[3] )
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-        tot.display().setBrightness( 8 if flash_state else 2 )
-
-        inputs.strobe()
-
-        if inputs.up():
-            year_inp += 1
-            year_inp = 2022 if year_inp > 2099 else year_inp
-            flash_state = False
-        elif inputs.down():
-            year_inp -= 1
-            year_inp = 2099 if year_inp < 2022 else year_inp
-            flash_state = False
-        elif inputs.set():
-            return year_inp
-        else:
-            flash_state = not flash_state
-            snooze()
-
-def promptMonthOrDay(tot, inputs, valin, maxval):
-    flash_state = False
-    inp = valin
-
-    # if value is already out of range, clamp it
-    if valin > maxval:
-        valin = maxval
-
-    while True:
-        bcd = unpackBcd(0, inp)
-        digs = sevensegNumbersToDigits( None, None, bcd[2], bcd[3]  )
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-        tot.display().setBrightness( 8 if flash_state else 2 )
-
-        inputs.strobe()
-        if inputs.up():
-            inp += 1
-            inp = 1 if inp > maxval else inp
-            flash_state = False
-        elif inputs.down():
-            inp -= 1
-            inp = maxval if inp == 0 else inp
-            flash_state = False
-        elif inputs.set():
-            return inp
-        else:
-            flash_state = not flash_state
-            snooze()
-
-def promptTime(tot, inputs, hour, minute):
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr") is True
-    flash_state = False
-
-    retval = [ 0, 0 ]
-
-    inp = hour
-
-    while True:
-        hour_visible = autoformatHourIn12HourTime(tot, inp)
-        bcd = unpackBcd(inp, 0)
-        digs = sevensegNumbersToDigits( bcd[0], bcd[1], None, None )
-
-        # set segment A to indicate pm in 12-hour mode
-        if use_12hr and hour_visible[1] is True:
-            digs[0] |= 1
-
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-        tot.display().setBrightness( 8 if flash_state else 2 )
-
-        inputs.strobe()
-        if inputs.up():
-            inp = 0 if inp == 23 else inp + 1
-            flash_state = False
-        elif inputs.down():
-            inp = 23 if inp == 0 else inp - 1
-            flash_state = False
-        elif inputs.set():
-            retval[0] = inp
-            break
-        else:
-            flash_state = not flash_state
-            snooze()
-
-    flash_state = False
-    inp = minute
-    while True:
-        hour_visible = autoformatHourIn12HourTime(tot, retval[0])
-        bcd = unpackBcd(retval[0], inp)
-        digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-
-        # set segment A to indicate pm in 12-hour mode
-        if use_12hr and hour_visible[1] is True:
-            digs[0] |= 1
-
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-        tot.display().setBrightness( 8 if flash_state else 2 )
-
-        inputs.strobe()
-        if inputs.up():
-            inp = 0 if inp == 59 else inp + 1
-            flash_state = False
-        elif inputs.down():
-            inp = 59 if inp == 0 else inp - 1
-            flash_state = False
-        elif inputs.set():
-            retval[1] = inp
-            return retval
-        else:
-            flash_state = not flash_state
-            snooze()
-
-def promptDst(tot,inputs,dst):
-    flash_state = False
-    display_delay_ticks = 0
-    inp = dst
-    while True:
-        if display_delay_ticks == 0:
-            display_delay_ticks = 20
-            if flash_state is False:
-                # "dST"
-                tot.display().setDigitsBinary(0b00000000, 0b01011110, 0b01101101, 0b01111000)
-            else: 
-                # either "oFF" or "on"
-                if inp is True:
-                    tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01010100, 0b00000000)
-                else:
-                    tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01110001, 0b01110001)
-        else:
-            display_delay_ticks -= 1
-
-        inputs.strobe()
-        if inputs.up() or inputs.down():
-            inp = not inp
-            flash_state = False
-            display_delay_ticks = 0
-        elif inputs.set():
-            return inp
-        else:
-            flash_state = not flash_state
-        snooze()
-
-
 def configMode(tot):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
 
@@ -252,7 +75,6 @@ def configMode(tot):
     # wrap inputs (simplifies keeping track of pushbutton states between prompts)
     inputs = DebouncedInputs(tot.inputs())
     inputs.strobe()
-
 
     # if RTC already configured, grab current time
     if tot.rtc().isUp():
@@ -302,14 +124,6 @@ def configMode(tot):
     # restore brightness before returning to caller, as there's no guarantee the caller will do that for us
     tot.display().setBrightness(tot.cvars().get(u"config.display",u"brightness"))
 
-def unpackBcd(a,b):
-    buf = [ 0,0,0,0 ]
-    buf[1] = int(a % 10)
-    buf[0] = int((a - buf[1]) / 10)
-    buf[3] = int(b % 10)
-    buf[2] = int((b - buf[3]) / 10)
-    return buf
-
 #
 # Draw/update the display
 #
@@ -357,7 +171,6 @@ def renderDisplay(tot, mode):
         bcd = unpackBcd(0, day)
         digs = sevensegNumbersToDigits( None, None, bcd[2], bcd[3] )
         tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-    
     
 #
 # syncTime()
