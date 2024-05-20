@@ -5,7 +5,7 @@
 import sys
 import time
 from micropython import const
-from machine import Pin,Timer,mem32,disable_irq,enable_irq
+from machine import Pin,Timer,mem32,disable_irq,enable_irq,PWM
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.api.display import Display
 
@@ -174,9 +174,11 @@ class Esp32MaskDisplay(Display):
         self.sm_state = 0
         self.sm_ptr = 0
         self.sm_waits = 0
-        self.setBrightness(8)
 
         self.timer = Timer(0, mode=Timer.PERIODIC, freq = frequency, callback=self._strobe)
+
+        self.brightness_pwm = PWM(Pin(25))
+        self.setBrightness(8)
 
     def _strobe(self,t):
         isr = disable_irq()
@@ -186,8 +188,7 @@ class Esp32MaskDisplay(Display):
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        # to implement later as PWM control
-        pass
+        self.brightness_pwm.init(freq = 2000, duty = int(1000*((brightness / 8))+23))
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
