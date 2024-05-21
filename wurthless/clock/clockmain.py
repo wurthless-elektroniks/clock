@@ -211,7 +211,7 @@ def syncTime(tot, suppressError = False):
     if t != 0:
         tot.rtc().setUtcTime(t)
         return True
-    elif tot.rtc().isUp() is False and suppressError is True:
+    elif tot.rtc().isUp() is True and suppressError is True:
         # skip "Err" message if RTC is already configured
         return False
     else:
