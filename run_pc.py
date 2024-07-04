@@ -49,6 +49,17 @@ def cursesMain(stdscr):
     # input driver requires it
     stdscr.nodelay(True)
 
+    if curses.can_change_color():
+        curses.use_default_colors()
+        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_BLACK)  
+        curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_RED)  
+        curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_YELLOW)  
+        curses.init_pair(4, curses.COLOR_BLACK, curses.COLOR_BLUE)  
+        curses.init_pair(5, curses.COLOR_BLACK, curses.COLOR_MAGENTA)  
+        curses.init_pair(6, curses.COLOR_BLACK, curses.COLOR_CYAN)  
+        curses.init_pair(7, curses.COLOR_BLACK, curses.COLOR_WHITE)  
+        curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN) 
+        
     # platform initialization
     tot = ToT()
 
@@ -103,5 +114,5 @@ def main():
         return
 
     curses.wrapper(cursesMain)
-
+    
 main()
