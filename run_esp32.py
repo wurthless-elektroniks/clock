@@ -11,6 +11,7 @@ from wurthless.clock.drivers.display.esp32maskdisplay import Esp32MaskDisplay
 from wurthless.clock.mock.nullinputs import NullInputs
 from wurthless.clock.drivers.rtc.micropythonrtc import MicropythonRTC
 from wurthless.clock.drivers.nic.micropythonwifinic import MicropythonWifiNic
+from wurthless.clock.drivers.display.invertedbitdisplay import InvertedBitDisplay 
 
 from wurthless.clock.cvars.cvars import Cvars
 from wurthless.clock.cvars.cvarwriter import TokenedCvarWriter
@@ -63,7 +64,7 @@ def runEsp32C3Wroom02():
     tot.finalize()
     clockMain(tot)
 
-def runEsp32Wroom32E():
+def runEsp32Wroom32E(invert_bits=False):
     tot = ToT()
 
     cvars = Cvars()
@@ -80,21 +81,30 @@ def runEsp32Wroom32E():
     cvars.load()
     tot.setCvars( cvars )
 
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_a_pin", 15 )
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_b_pin", 2)
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_c_pin", 12 )
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_d_pin", 4 )
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_e_pin", 16 )
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_f_pin", 17 )
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_g_pin", 5 )
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_0_pin", 18 )
+    # pin assignments on v7
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_a_pin", 4 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_b_pin", 16)
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_c_pin", 5 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_d_pin", 17 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_e_pin", 18 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_f_pin", 13 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_g_pin", 27 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_0_pin", 23 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_1_pin", 19 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_2_pin", 21 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_3_pin", 22 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"brightness_pwm_pin", 34 )
 
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency", 4*60*4 )
 
-    tot.setDisplay( Esp32MaskDisplay(tot) )
+    # not enough CPU time in config mode to run the display
+    cvars.set("wurthless.clock.webserver", "disable_display_when_serving", True)
+    cvars.set("wurthless.clock.webserver", "server_active_pin", 26)
+    display = Esp32MaskDisplay(tot)
+    if invert_bits is True:
+        display = InvertedBitDisplay(display)
+
+    tot.setDisplay( display )
     tot.setInputs( NullInputs() )
     tot.setRtc( MicropythonRTC() )
 

@@ -14,3 +14,5 @@ class InvertedBitDisplay(Display):
     def setDigitsBinary(self, a, b, c, d):
         self.parent.setDigitsBinary(~a, ~b, ~c, ~d)
 
+    def shutdown(self):
+        self.parent.shutdown()

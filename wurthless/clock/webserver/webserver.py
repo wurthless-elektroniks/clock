@@ -8,8 +8,20 @@
 #
 
 from microdot import Microdot
+from wurthless.clock.cvars.cvars import registerCvar
+
+
+global running_under_upy
+try:
+    from machine import Pin 
+    running_under_upy = True
+except:
+    running_under_upy = False
 
 server = Microdot()
+
+registerCvar(u"wurthless.clock.webserver", u"disable_display_when_serving", u"Boolean", u"If True, shutdown display driver while running server. Default is False.", False)
+registerCvar(u"wurthless.clock.webserver", u"server_active_pin", u"Int", u"I/O pin that will be pulled high when server mode is active. Default is -1 (disable).", -1)
 
 # unfortunately, we have to store the ToT as a global...
 global g_tot
@@ -127,8 +139,8 @@ def generateDstSelection():
     <label for="dst_disable">disable dst</label>
     """%(dst_off_item,dst_on_item,dst_disable_item)
 
-@server.route('/')
-def index(request):
+@server.get('/')
+async def index(request):
     return u"""
     <html>
     <head>
@@ -142,19 +154,19 @@ def index(request):
     <table>
     <tr>
     <td>wifi accesspoint</td>
-    <td>"""+generateWifiAccessPoint()+"""</td>
+    <td>%s</td>
     </tr>
     <tr>
     <td>wifi password</td>
-    <td>"""+generateWifiPassword()+"""</td>
+    <td>%s</td>
     </tr>
     <tr>
     <td>timezone</td>
-    <td>"""+generateUtcOffsetList()+"""</td>
+    <td>%s</td>
     </tr>
     <tr>
     <td>dst adjust</td>
-    <td>"""+generateDstSelection()+"""</td>
+    <td>%s</td>
     </tr>
     </table>
     <p><b>please note:</b> your wifi network must be accessible over the 2.4 GHz band. unfortunately, i can't provide a dropdown of available wifi networks because of technical limitations.</p>
@@ -162,10 +174,10 @@ def index(request):
     </form>
     </body>
     </html>
-    """, 200, {'Content-Type': 'text/html'}
+    """ % (generateWifiAccessPoint(),generateWifiPassword(),generateUtcOffsetList(),generateDstSelection()), 200, {'Content-Type': 'text/html'}
 
-@server.route('/sub', methods=['POST'])
-def sub(request):
+@server.post('/sub')
+async def sub(request):
     ap_name = request.form.get('ap_name')
     ap_password = request.form.get('ap_password')
     dst = request.form.get('dst')
@@ -200,7 +212,7 @@ def sub(request):
         <ul>
         <li>the SSID must be between 2 and 32 characters long</li>
         <li>it can't start or end with whitespace</li>
-        <li>it can't contain the characters: ?, ", $, [, \, ], and +</li>
+        <li>it can't contain the characters: ?, ", $, [, \\, ], and +</li>
         <li>it can't start with the characters: !, # and ;</li>
         <li>it has to be ASCII characters only (whatever the hell that means, i don't know, i'm not a technically apt person)</li>
         </ul>
@@ -236,4 +248,14 @@ def serverMain(tot):
     tot.nic().initAsServer()
     global g_tot
     g_tot = tot
+
+    # on ESP32 (probably other boards) where the display is driven through software
+    # there will not be enough CPU time to update the display and handle server logic
+    if tot.cvars().get("wurthless.clock.webserver", "disable_display_when_serving") is True:
+        print(u"shutting down display NOW")
+        tot.display().shutdown()
+    status_pin = tot.cvars().get("wurthless.clock.webserver", "server_active_pin")
+    if status_pin != -1 and running_under_upy is True:
+        Pin(status_pin,Pin.OUT).value(1)
+
     server.run(port=80)

@@ -12,3 +12,9 @@ class Display:
     '''
     def setDigitsBinary(self, a, b, c, d):
         pass
+
+    '''
+    Permanently shuts down the display driver. A reboot is necessary to restart it.
+    '''
+    def shutdown(self):
+        pass

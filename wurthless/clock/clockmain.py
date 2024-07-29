@@ -43,6 +43,13 @@ registerCvar(u"wurthless.clock.clockmain",
              False)
 
 registerCvar(u"wurthless.clock.clockmain",
+             u"digit_0_truncated",
+             u"Boolean",
+             u"If True, digit 0 only has segments B and C populated, with segmetn A indicating p.m. Default is False.",
+             False)
+
+# TODO: digit_0_truncated replaces this so that fully populated clocks can run 12 hour time if necessary.
+registerCvar(u"wurthless.clock.clockmain",
              u"use_12hr",
              u"Boolean",
              u"If True, this is a 12-hour clock (only 2 segments on digit 0, with segment A indicating p.m.). Default is False (all segments on digit 0 populated).",

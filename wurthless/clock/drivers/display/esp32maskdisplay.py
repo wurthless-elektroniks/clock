@@ -112,17 +112,16 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              8)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
+             u"brightness_pwm_pin",
+             u"Int",
+             u"LED brightness PWM pin",
+             25)
+
+registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
              u"Int",
              u"Frequency at which we update the display",
              int(4*60*4))
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"strobe_wait_ticks",
-             u"Int",
-             u"Number of ticks to wait before advancing to next display digit",
-             int(8))
-
 
 SM_CLOCK_NEXT_DIGIT  = 0
 SM_WAIT_IN_ON_STATE  = 1
@@ -168,27 +167,27 @@ class Esp32MaskDisplay(Display):
                 andmask |= (1 << self.seg_pins[segment])
         self.andmask = ~andmask
 
-        frequency = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency" )
-        self.strobe_wait_ticks = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_wait_ticks" )
-
+        frequency = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency")
         self.sm_state = 0
         self.sm_ptr = 0
-        self.sm_waits = 0
-
+        
         self.timer = Timer(0, mode=Timer.PERIODIC, freq = frequency, callback=self._strobe)
 
-        self.brightness_pwm = PWM(Pin(25))
-        self.setBrightness(8)
+        pwm_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"brightness_pwm_pin")
+        
+        #self.brightness_pwm = PWM(Pin(pwm_pin))
+        #self.setBrightness(8)
+#        Pin(pwm_pin,Pin.OUT).value(1)
 
     def _strobe(self,t):
         isr = disable_irq()
-        mem32[GPIO_OUT_REG] = (mem32[GPIO_OUT_REG] & self.andmask) | self.digs[self.sm_ptr]
+        mem32[GPIO_OUT_REG] = (mem32[GPIO_OUT_REG] & self.andmask) | self.digs[self.sm_ptr & 3]
         self.sm_ptr += 1
-        self.sm_ptr &= 3
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        self.brightness_pwm.init(freq = 2000, duty = int(1000*((brightness / 8))+23))
+        pass
+        #self.brightness_pwm.init(freq = 2000, duty = int(1000*((brightness / 8))+23))
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
@@ -212,3 +211,9 @@ class Esp32MaskDisplay(Display):
         if self.last_digs != munged:
             self.digs = munged
             self.last_digs = self.digs
+
+    def shutdown(self):
+        self.timer.deinit()
+        
+        # disable all digit drives so the display goes blank
+        mem32[GPIO_OUT_REG] = (mem32[GPIO_OUT_REG] & self.andmask)

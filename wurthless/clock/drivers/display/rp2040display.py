@@ -72,17 +72,19 @@ DEFAULT_BRIGHTNESS_TABLE = [
 #
 ################################################################################################################
 
+# Copypasted code, but now that I know how it works, here are comments.
+# Segments are on the output pins, digit drives are on the sideset pins.
 @rp2.asm_pio(out_init=[PIO.OUT_LOW]*7, sideset_init=[PIO.OUT_LOW]*4)
 def sevseg():
     wrap_target()
     label("0")
-    pull(noblock)           .side(0)      # 0
-    mov(x, osr)             .side(0)      # 1
-    out(pins, 8)            .side(1)      # 2
-    out(pins, 8)            .side(2)      # 3
-    out(pins, 8)            .side(4)      # 4
-    out(pins, 8)            .side(8)      # 5
-    jmp("0")                .side(0)      # 6
+    pull(noblock)           .side(0)      # get whatever the CPU wants us to display
+    mov(x, osr)             .side(0)      # push to output shift register (all values 8 bits, msb unused)
+    out(pins, 8)            .side(1)      # display digit 3 (display is rendered in reverse)
+    out(pins, 8)            .side(2)      # display digit 2
+    out(pins, 8)            .side(4)      # display digit 1
+    out(pins, 8)            .side(8)      # display digit 0
+    jmp("0")                .side(0)      # blank display and repeat
     wrap()
 
 class Rp2040Display(Display):
