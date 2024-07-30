@@ -12,6 +12,7 @@ from wurthless.clock.mock.nullinputs import NullInputs
 from wurthless.clock.drivers.rtc.micropythonrtc import MicropythonRTC
 from wurthless.clock.drivers.nic.micropythonwifinic import MicropythonWifiNic
 from wurthless.clock.drivers.display.invertedbitdisplay import InvertedBitDisplay 
+from wurthless.clock.drivers.display.cacheddisplay import CachedDisplay 
 
 from wurthless.clock.cvars.cvars import Cvars
 from wurthless.clock.cvars.cvarwriter import TokenedCvarWriter
@@ -95,7 +96,7 @@ def runEsp32Wroom32E(invert_bits=False):
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_3_pin", 22 )
     cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"brightness_pwm_pin", 34 )
 
-    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency", 4*60*4 )
+    cvars.set(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency", 2000 )
 
     # not enough CPU time in config mode to run the display
     cvars.set("wurthless.clock.webserver", "disable_display_when_serving", True)
@@ -104,7 +105,7 @@ def runEsp32Wroom32E(invert_bits=False):
     if invert_bits is True:
         display = InvertedBitDisplay(display)
 
-    tot.setDisplay( display )
+    tot.setDisplay( CachedDisplay(display) )
     tot.setInputs( NullInputs() )
     tot.setRtc( MicropythonRTC() )
 

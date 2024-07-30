@@ -17,7 +17,7 @@ class Rtc:
     def getUtcTime(self):
         return 0
 
-    def setUtcTime(self):
+    def setUtcTime(self, timestamp):
         pass
 
     '''

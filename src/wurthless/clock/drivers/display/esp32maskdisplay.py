@@ -209,7 +209,10 @@ class Esp32MaskDisplay(Display):
             munged[digit] = v
 
         if self.last_digs != munged:
+            isr = disable_irq()
             self.digs = munged
+            enable_irq(isr)
+            
             self.last_digs = self.digs
 
     def shutdown(self):

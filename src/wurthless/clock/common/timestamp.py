@@ -7,6 +7,20 @@
 
 import time
 
+def getTimestampForNextMinute(timestamp):
+    firsttuple = timestampToTimeTuple(timestamp)
+
+    ts = timestamp
+    # this is very slow, but is used to catch leap seconds
+    # (of course, that assumes our runtime knows about those)
+    while True:
+        ts += 1
+        nexttuple = timestampToTimeTuple(ts)
+        if firsttuple[4] != nexttuple[4]:
+            break    
+    return ts
+
+
 def timestampToTimeTuple(timestamp):
     return time.gmtime(timestamp)
 

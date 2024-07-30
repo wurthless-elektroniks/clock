@@ -13,7 +13,7 @@ except:
     sleep_ms = lambda a : time.sleep(a / 1000)
 
 from wurthless.clock.burnin import burnin,inputTest
-from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp,autoformatHourIn12HourTime
+from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp,autoformatHourIn12HourTime,getTimestampForNextMinute
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.webserver.webserver import serverMain
 from wurthless.clock.cvars.cvars import registerCvar
@@ -21,7 +21,7 @@ from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
 from wurthless.clock.common.prompt import promptYear, promptMonthOrDay, promptTime, promptDst
 from wurthless.clock.common.bcd import unpackBcd
 
-TICK_TIME_MS = 10
+TICK_TIME_MS = 17
 snooze = lambda : sleep_ms(TICK_TIME_MS)
 
 ################################################################################################################
@@ -305,28 +305,28 @@ def loop(tot):
     cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
     
     displaymode = 0
-    should_rerender_display = False
+    should_rerender_display = True
     last_second = int(time.time())
+    next_minute_ts = getTimestampForNextMinute(last_second)
     last_synced = int(time.time())
     autosync_period       = tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_period")
     autosync_retry_period = tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_retry_period")
     autosync_errors = 0
     
+    timesource_present = tot.timesources() is not None and tot.timesources() != []
+    inputs = tot.inputs()
+
     while True:
         if should_rerender_display == True:
             renderDisplay(tot, displaymode)
             should_rerender_display = False
-        elif tot.timesources() is not None and tot.timesources() != [] and ((last_second - last_synced) >= autosync_period):
-
-            should_rerender_display = True
         else:
             t = int(time.time())
             if t != last_second:
-                should_rerender_display = True
                 last_second = t
 
                 # when autosyncing time, retry on error, but only a certain amount of times
-                if tot.timesources() is not None and tot.timesources() != [] and autosync_errors <= 5 and ((last_second - last_synced) >= autosync_period):
+                if timesource_present is True and autosync_errors <= 5 and ((last_second - last_synced) >= autosync_period):
                     if syncTime(tot, suppressError=True) is False:
                         autosync_period += autosync_retry_period
                         autosync_errors += 1
@@ -334,12 +334,17 @@ def loop(tot):
                         last_synced = last_second
                         autosync_period = tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_period")
                         autosync_errors = 0
+                    should_rerender_display = True
+                elif last_second >= next_minute_ts:
+                    # avoid re-rendering display every second
+                    should_rerender_display = True
+                    next_minute_ts = getTimestampForNextMinute(last_second)
 
-        tot.inputs().strobe()
-        up_state = tot.inputs().up()
-        down_state = tot.inputs().down()
-        set_state = tot.inputs().set()
-        dst_state = tot.inputs().dst()
+        inputs.strobe()
+        up_state = inputs.up()
+        down_state = inputs.down()
+        set_state = inputs.set()
+        dst_state = inputs.dst()
         
 
         # Pressing UP changes brightness in descending order.
