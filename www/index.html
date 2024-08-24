@@ -1,0 +1,50 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>the most useless clock in the world - config mode</title>
+    <link rel="stylesheet" href="cfg.css">
+
+    <script type="text/javascript" src="cfg.js">
+    </script>
+</head>
+<body>
+    <form action="javascript:submitForm();" method="post">
+    <noscript>
+        <p style="color: red; font-weight: bolder;">THIS FORM NEEDS JAVASCRIPT TO RUN. ENABLE SCRIPTS OR ELSE.</p>
+    </noscript>
+    <div id="form" class="formframe" style="visibility: hidden">
+        <h1>TMUCITW config mode</h1>
+
+        <div class="field">
+            <h2>accesspoint name</h2>
+            <input type="text" id="ap_name" name="ap_name" value="" required minlength="2" maxlength="32" />
+            <p id="twoferwarning">(WARNING: 2.4 GHz accesspoints ONLY!)</p>
+        </div>
+        <div class="field">
+            <h2>password</h1>
+            <input type="password" id="ap_password" name="ap_password" required minlength="8" maxlength="63" value="" />
+        </div>
+        <div class="field">
+            <h2>timezone</h2>
+            <select name="utcoffset" id="utcoffset">
+                <!-- populated by js -->
+            </select>
+        </div>
+        <div class="field">
+            <h2>dst adjust</h1>
+            <a href="#" onclick="selectDstOff();"><div class="butane" id="dst_off"><p>off</p></div></a>
+            <a href="#" onclick="selectDstOn();"><div class="butaneselectad" id="dst_on"><p>on</p></div></a>
+            <a href="#" onclick="selectDstDisabled();"><div class="butane" id="dst_disable"><p>disable DST</p><p><sub>(if you're in a region that doesn't use DST)</sub></p></div></a>
+        </div>
+        <div class="field">
+            <button type="submit" id="submit">save settings</button>
+        </div>
+    </div>
+    </form>
+    <div id="success" class="success" style="display: none">
+        <h1>hooray, settings saved</h1>
+        <p>press RESET/REBOOT on the clock to test things out. to run configuration mode again, hold SET when powering up.</p>
+    </div>
+</body>
+</html>

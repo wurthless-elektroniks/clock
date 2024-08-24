@@ -1,0 +1,85 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+}
+
+.success {
+    container-type: inline-size;
+    container-name: formframe;
+    width: 75vw;
+    margin: auto;
+    height: 100vh;
+    justify-self: center;
+}
+
+.formframe {
+    container-type: inline-size;
+    container-name: formframe;
+    width: 75vw;
+    margin: auto;
+    height: 100vh;
+}
+
+.field {
+    justify-self: center;
+    width: 100%;
+}
+ 
+.butane {
+    justify-self: center;
+    border-color: white;
+    border-width: 5px;
+    border-top: 5px white solid;
+    border-bottom: 5px white solid;
+    border-left: 5px white solid;
+    border-right: 5px white solid;
+    background-color: gray;
+
+    width: 100%;
+
+    text-align: center;
+}
+
+.butaneselectad {
+    justify-self: center;
+    border-color: gray;
+    border-width: 5px;
+    border-top: 5px gray solid;
+    border-bottom: 5px gray solid;
+    border-left: 5px gray solid;
+    border-right: 5px gray solid;
+    background-color: white;
+
+    width: 100%;
+
+    text-align: center;
+}
+
+input {
+    justify-self: center;
+    width: 100%;
+    font-size: 1em;
+}
+
+select {
+    justify-self: center;
+    width: 100%;
+    font-size: 1em;
+}
+
+button {
+    justify-self: center;
+    width: 100%;
+    font-size: 1em;
+}
+
+h1 {
+    justify-self: center;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap; 
+    font-size: 1rem;
+}
