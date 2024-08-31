@@ -18,8 +18,10 @@ from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.webserver.webserver import serverMain
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
+from wurthless.clock.drivers.input.delayedinputs import DelayedInputs
 from wurthless.clock.common.prompt import promptYear, promptMonthOrDay, promptTime, promptDst
 from wurthless.clock.common.bcd import unpackBcd
+from wurthless.clock.scheduler.scheduler import Scheduler, EVENT_FIRES_EVERY_MINUTE, EVENT_FIRES_IMMEDIATELY, EventFiresAfter
 
 TICK_TIME_MS = 17
 snooze = lambda : sleep_ms(TICK_TIME_MS)
@@ -147,6 +149,7 @@ def configMode(tot):
 # Draw/update the display
 #
 def renderDisplay(tot, mode):
+    # get UTC time straight from the RTC (VERY SLOW)
     utctime = tot.rtc().getUtcTime()
 
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
@@ -284,13 +287,6 @@ def init(tot):
 ################################################################################################################
 
 def loop(tot):
-    # state-based variables
-    ticks_up_held = 0
-    ticks_down_held = 0
-    ticks_set_held = 0
-    ticks_dst_held = 0
-    ticks_since_datedisplay_pushed = 0
-
     brightness = tot.cvars().get(u"config.display",u"brightness")
     if not (1 <= brightness and brightness <= 8):
         brightness = 8
@@ -301,44 +297,72 @@ def loop(tot):
 
     dst_disable = tot.cvars().get(u"config.clock",u"dst_disable") 
 
-    next_cfg_writeback = None
     cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
     
     displaymode = 0
-    should_rerender_display = True
-    last_second = int(time.time())
-    next_minute_ts = getTimestampForNextMinute(last_second)
-    last_synced = int(time.time())
-    autosync_period       = tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_period")
-    autosync_retry_period = tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_retry_period")
-    autosync_errors = 0
-    
     timesource_present = tot.timesources() is not None and tot.timesources() != []
+    
     inputs = tot.inputs()
 
-    while True:
-        if should_rerender_display == True:
-            renderDisplay(tot, displaymode)
-            should_rerender_display = False
-        else:
-            t = int(time.time())
-            if t != last_second:
-                last_second = t
+    delayedinputs = DelayedInputs(inputs)
+    delayedinputs.up_delay(0)     
+    delayedinputs.down_delay(0)
+    delayedinputs.set_delay(255 if set_and_dst_no_debounce is False else 0)
+    delayedinputs.dst_delay(255 if set_and_dst_no_debounce is False else 0)
+    
+    inputs = DebouncedInputs(delayedinputs)
 
-                # when autosyncing time, retry on error, but only a certain amount of times
-                if timesource_present is True and autosync_errors <= 5 and ((last_second - last_synced) >= autosync_period):
-                    if syncTime(tot, suppressError=True) is False:
-                        autosync_period += autosync_retry_period
-                        autosync_errors += 1
-                    else:
-                        last_synced = last_second
-                        autosync_period = tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_period")
-                        autosync_errors = 0
-                    should_rerender_display = True
-                elif last_second >= next_minute_ts:
-                    # avoid re-rendering display every second
-                    should_rerender_display = True
-                    next_minute_ts = getTimestampForNextMinute(last_second)
+    scheduler = Scheduler()
+
+    scheduler.createEvent("writebackCfg",
+                          EventFiresAfter(cfg_writeback_delay),
+                          lambda: tot.cvars().save())
+
+    scheduler.createEvent("rerenderDisplay",
+                          EVENT_FIRES_EVERY_MINUTE,
+                          lambda: renderDisplay(tot, displaymode),
+                          repeat=True)
+                          
+    def autosyncAttempt():
+        syncTime(tot, suppressError=True)
+        scheduler.fireEvent("rerenderDisplay")
+
+    scheduler.createEvent("autosync",
+                            EventFiresAfter(tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_period")),
+                            lambda: autosyncAttempt(),
+                            repeat=True)
+
+    def autoreturnToDisplayMode0():
+        displaymode = 0
+        scheduler.fireEvent("rerenderDisplay")
+
+    scheduler.createEvent("autoreturnToDisplayMode0",
+                          EventFiresAfter(3),
+                          lambda: autoreturnToDisplayMode0())
+
+    # function will be called several times
+    def resetState():
+        cfg_save_pending = scheduler.isEventScheduled("writebackCfg")
+        displaymode_change_pending = scheduler.isEventScheduled("autoreturnToDisplayMode0")
+
+        scheduler.cancelAllEvents()
+        inputs.reset()
+
+        if cfg_save_pending:
+            scheduler.scheduleEvent("writebackCfg")
+
+        if timesource_present:
+            scheduler.scheduleEvent("autosync")
+
+        if displaymode_change_pending:
+            scheduler.fireEvent("autoreturnToDisplayMode0")
+        else:
+            scheduler.fireEvent("rerenderDisplay")
+
+    resetState()
+
+    while True:
+        scheduler.tick()
 
         inputs.strobe()
         up_state = inputs.up()
@@ -346,98 +370,42 @@ def loop(tot):
         set_state = inputs.set()
         dst_state = inputs.dst()
         
-
         # Pressing UP changes brightness in descending order.
         # If brightness is at minimum, reset to highest brightness.
-        if not up_state and ticks_up_held != 0:
-            ticks_up_held = 0
-        elif up_state:
-            if ticks_up_held == 0:
-                brightness -= 1
-                if not (1 <= brightness and brightness <= 8):
-                    brightness = 8
+        if up_state:
+            brightness -= 1
+            if not (1 <= brightness and brightness <= 8):
+                brightness = 8
                 tot.display().setBrightness(brightness) 
-                tot.cvars().set(u"config.display",u"brightness",brightness)
-                next_cfg_writeback = tot.rtc().getUtcTime() + cfg_writeback_delay
-                ticks_up_held = 1
+            scheduler.scheduleEvent("writebackCfg")
 
         # Pressing DOWN will toggle between displaymodes
         # in this order: year, month, day, time
         # If the displaymode goes off of time for a while, switch back to time.
         # DOWN does nothing if calendar mode disabled.
-        if disable_calendar is False:
-            if not down_state and ticks_down_held > 0:
-                ticks_down_held = 0
-            elif down_state:
-                if ticks_down_held == 0:
-                    # toggle displaymode
-                    displaymode += 1
-                    displaymode &= 3
-                    should_rerender_display = True
-                    ticks_since_datedisplay_pushed = 1
-                    ticks_down_held += 1
-            
-            if ticks_since_datedisplay_pushed != 0:
-                ticks_since_datedisplay_pushed += 1
-                if ticks_since_datedisplay_pushed == 200:
-                    displaymode = 0
-                    should_rerender_display = True
-                    ticks_since_datedisplay_pushed = 0
+        if disable_calendar is False and down_state is True:
+            displaymode += 1
+            displaymode &= 3
+            scheduler.fireEvent("rerenderDisplay")
+            scheduler.scheduleEvent("autoreturnToDisplayMode0")
 
         # Pressing and holding SET for long enough will go to configuration mode
-        # if we are allowed to configure the RTC at all
-        if tot.rtc().readOnly() is False:
-            if not set_state and ticks_set_held > 2:
-                ticks_set_held = 0
-            elif set_state:
-                if ticks_set_held == 0:
-                    pass
+        # if we are allowed to configure the RTC at all.
+        # If any timesources are present, attempt synchronization before running config mode.
+        if tot.rtc().readOnly() is False and set_state is True:
+            if (timesource_present is False or syncTime(tot, suppressError=False) is False):
+                configMode(tot)
 
-                ticks_set_held += 1
-
-                if ticks_set_held == 255 or set_and_dst_no_debounce is True:
-                    # attempt synchronization to timesource
-                    if tot.timesources() is not None and tot.timesources() != []:
-                        if syncTime(tot, suppressError=False) is False:
-                            configMode(tot)
-                        else:
-                            last_synced = last_second
-                            # successful resync means re-enable autosync (if necessary)
-                            autosync_period = tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_period")
-                            autosync_errors = 0
-                    else:
-                        configMode(tot)
-
-                    ticks_set_held = 0
-                    
-                    # if configuration mode entered, kill any pending settings writeback
-                    next_cfg_writeback = None
-
-        # Pressing and holding DST for long enough sets/unsets DST.
-        # Skip this logic if DST is explicitly disabled in config.
-        if dst_disable is False:
-            if not dst_state and ticks_dst_held > 2:
-                ticks_dst_held = 0
-            elif dst_state:
-                if ticks_dst_held == 0:
-                    # debugging leftover
-                    pass
-
-                ticks_dst_held += 1
-                if ticks_dst_held == 255 or set_and_dst_no_debounce is True:
-                    # set / unset DST flag and save cvars
-                    dst = tot.cvars().get(u"config.clock",u"dst_active")
-                    dst = not dst
-                    tot.cvars().set(u"config.clock",u"dst_active",dst)
-                    
-                    next_cfg_writeback = tot.rtc().getUtcTime() + cfg_writeback_delay
-                    ticks_dst_held = 0
-        
-        if next_cfg_writeback is not None:
-            t = tot.rtc().getUtcTime()
-            if next_cfg_writeback <= t:
-                tot.cvars().save()
-                next_cfg_writeback = None
+            # previously scheduled events are assigned to times that are no longer valid,
+            # and debounce logic needs to be reset anyway
+            resetState()
+            continue
+            
+        if dst_disable is False and dst_state is True:
+            dst = tot.cvars().get(u"config.clock",u"dst_active")
+            dst = not dst
+            tot.cvars().set(u"config.clock",u"dst_active",dst)
+            scheduler.scheduleEvent("writebackCfg")
 
         snooze()
 
