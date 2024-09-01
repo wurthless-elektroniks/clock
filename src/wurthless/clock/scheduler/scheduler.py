@@ -39,29 +39,35 @@ class Scheduler(object):
         self._event_queue = []
 
         self._last_time = int(time.time())
+        self._scheduler_executing = False
 
     def tick(self):
         ts = int(time.time())
         if self._last_time == ts:
             return
-        
         self._last_time = ts
+        self._runScheduler()
 
-        if len(self._event_queue) == 0:
+    def _runScheduler(self):
+        if self._scheduler_executing:
             return
+        
+        self._scheduler_executing = True
+        try:
+            while len(self._event_queue) != 0:
+                # peek first event in queue
+                if self._last_time < self._event_queue[0]._fire_at:
+                    return
 
-        while True:
-            # peek first event in queue
-            if self._last_time < self._event_queue[0]._fire_at:
-                return
+                event = self._event_queue.pop(0)
+                
+                # careful: the event is free to modify the queue via APIs below
+                event._callback()
 
-            event = self._event_queue.pop(0)
-            
-            # careful: the event is free to modify the queue via APIs below
-            event._callback()
-
-            if event._repeat:
-                self._enqueueEvent(event)
+                if event._repeat:
+                    self._enqueueEvent(event)
+        finally:
+            self._scheduler_executing = False
 
     def createEvent(self, name, when, callback, repeat=False):
         '''
@@ -116,7 +122,7 @@ class Scheduler(object):
         '''
         idx = self._findEvent(name)
         if idx != -1:
-            self._event_queue.remove(idx)
+            self._event_queue.pop(idx)
 
     def _findEvent(self, name):
         # lazy search by index
@@ -132,18 +138,20 @@ class Scheduler(object):
         '''
         Put the given event at the front of the queue and mark it to execute immediately.
         If the event is recurring, it will be rescheduled.
+        If this is called outside of the normal scheduler loop, it will force the scheduler to run immediately.
         '''
         if name not in self._event_dict:
             raise RuntimeError("event not registered: %s" % (name))
 
         idx = self._findEvent(name)
         if idx != -1:
-            event = self._event_queue.remove(idx)
+            event = self._event_queue.pop(idx)
         else:
             event = self._event_dict[name]
         
         event._fire_at = 0
         self._event_queue.insert(0, event) 
+        self._runScheduler()
 
     def scheduleEvent(self, name):
         '''
@@ -154,6 +162,6 @@ class Scheduler(object):
 
         idx = self._findEvent(name)
         if idx != -1:
-            self._event_queue.remove(idx)
+            self._event_queue.pop(idx)
 
         self._enqueueEvent(self._event_dict[name])

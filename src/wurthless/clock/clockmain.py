@@ -298,19 +298,20 @@ def loop(tot):
     dst_disable = tot.cvars().get(u"config.clock",u"dst_disable") 
 
     cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
-    
+
+    global displaymode
     displaymode = 0
     timesource_present = tot.timesources() is not None and tot.timesources() != []
     
     inputs = tot.inputs()
 
-    delayedinputs = DelayedInputs(inputs)
-    delayedinputs.up_delay(0)     
-    delayedinputs.down_delay(0)
-    delayedinputs.set_delay(255 if set_and_dst_no_debounce is False else 0)
-    delayedinputs.dst_delay(255 if set_and_dst_no_debounce is False else 0)
-    
-    inputs = DebouncedInputs(delayedinputs)
+    if set_and_dst_no_debounce is False:    
+        delayedinputs = DelayedInputs(inputs)
+        delayedinputs.up_delay(0)     
+        delayedinputs.down_delay(0)
+        delayedinputs.set_delay(255)
+        delayedinputs.dst_delay(255)        
+        inputs = DebouncedInputs(delayedinputs)
 
     scheduler = Scheduler()
 
@@ -333,7 +334,10 @@ def loop(tot):
                             repeat=True)
 
     def autoreturnToDisplayMode0():
+        # awful hack, but otherwise this code doesn't work
+        global displaymode
         displaymode = 0
+        
         scheduler.fireEvent("rerenderDisplay")
 
     scheduler.createEvent("autoreturnToDisplayMode0",
@@ -406,6 +410,7 @@ def loop(tot):
             dst = not dst
             tot.cvars().set(u"config.clock",u"dst_active",dst)
             scheduler.scheduleEvent("writebackCfg")
+            scheduler.fireEvent("rerenderDisplay")
 
         snooze()
 
