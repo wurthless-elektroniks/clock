@@ -337,7 +337,7 @@ def loop(tot):
         # awful hack, but otherwise this code doesn't work
         global displaymode
         displaymode = 0
-        
+
         scheduler.fireEvent("rerenderDisplay")
 
     scheduler.createEvent("autoreturnToDisplayMode0",
@@ -380,7 +380,7 @@ def loop(tot):
             brightness -= 1
             if not (1 <= brightness and brightness <= 8):
                 brightness = 8
-                tot.display().setBrightness(brightness) 
+            tot.display().setBrightness(brightness) 
             scheduler.scheduleEvent("writebackCfg")
 
         # Pressing DOWN will toggle between displaymodes
