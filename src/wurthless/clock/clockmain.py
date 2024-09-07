@@ -58,34 +58,22 @@ registerCvar(u"wurthless.clock.clockmain",
              False)
 
 registerCvar(u"wurthless.clock.clockmain",
-             u"sync_frequency",
+             u"autosync_frequency",
              u"Int",
-             u"Interval time in seconds between clock synchronization. Default is 86400 (24 hours). Used only if timesources are present.",
-             86400)
+             u"Interval time in seconds between clock synchronization. Default is 14400 (every 4 hours). Used only if timesources are present.",
+             7200)
 
 registerCvar(u"wurthless.clock.clockmain",
              u"settings_write_delay",
              u"Int",
-             u"Interval time in seconds to delay saving settings. Default is 36000 (10 hours). Needed to prevent wearing down the system flash.",
-             36000)
+             u"Interval time in seconds to delay saving settings. Default is 1800 (30 minutes). Needed to prevent wearing down the system flash.",
+             1800)
 
 registerCvar(u"wurthless.clock.clockmain",
              u"force_server",
              u"Boolean",
              u"If True, force server mode (needed for testing).",
              False)
-
-registerCvar(u"wurthless.clock.clockmain",
-             u"autosync_period",
-             u"Int",
-             u"If a timesource is present, attempt synchronization every X seconds.",
-             3600 * 4)
-
-registerCvar(u"wurthless.clock.clockmain",
-             u"autosync_retry_period",
-             u"Int",
-             u"If time synchronization failed, retry after X seconds.",
-             3600)
 
 def configMode(tot):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
@@ -330,7 +318,7 @@ def loop(tot):
         scheduler.fireEvent("rerenderDisplay")
 
     scheduler.createEvent("autosync",
-                            EventFiresAfter(tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_period")),
+                            EventFiresAfter(tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_frequency")),
                             lambda: autosyncAttempt(),
                             repeat=True)
 
