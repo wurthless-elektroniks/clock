@@ -89,6 +89,13 @@ class Cvars(object):
     def set(self, registrant, name, value):
         self._find(registrant, name).setValue(value)
 
+    def configure(self, registrant, kvmappings):
+        '''
+        Given dict of name->value, bulk set cvars for the given registrant.
+        '''
+        for name,value in kvmappings.items():
+            self.set(registrant,name,value)
+
     def load(self):
         if self.writer is not None:
             self.writer.load(self.cvars)

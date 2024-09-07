@@ -295,6 +295,7 @@ def loop(tot):
     set_and_dst_no_debounce = tot.cvars().get(u"wurthless.clock.clockmain", u"set_and_dst_no_debounce")
     disable_calendar = tot.cvars().get(u"wurthless.clock.clockmain", u"disable_calendar")
 
+    rtc_read_only = tot.rtc().readOnly() 
     dst_disable = tot.cvars().get(u"config.clock",u"dst_disable") 
 
     cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
@@ -391,12 +392,15 @@ def loop(tot):
             displaymode += 1
             displaymode &= 3
             scheduler.fireEvent("rerenderDisplay")
-            scheduler.scheduleEvent("autoreturnToDisplayMode0")
+            if displaymode != 0:
+                scheduler.scheduleEvent("autoreturnToDisplayMode0")
+            else:
+                scheduler.cancelEvent("autoreturnToDisplayMode0")
 
         # Pressing and holding SET for long enough will go to configuration mode
         # if we are allowed to configure the RTC at all.
         # If any timesources are present, attempt synchronization before running config mode.
-        if tot.rtc().readOnly() is False and set_state is True:
+        if rtc_read_only is False and set_state is True:
             if (timesource_present is False or syncTime(tot, suppressError=False) is False):
                 configMode(tot)
 

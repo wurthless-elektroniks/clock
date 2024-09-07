@@ -100,11 +100,6 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"Frequency at which we update the display",
              int(4*60*4))
 
-SM_CLOCK_NEXT_DIGIT  = 0
-SM_WAIT_IN_ON_STATE  = 1
-SM_CLEAR_DISPLAY     = 2
-SM_WAIT_IN_OFF_STATE = 3
-
 class Esp32MaskDisplay(Display):
     def __init__(self, tot):
         cvars = tot.cvars()
@@ -196,4 +191,6 @@ class Esp32MaskDisplay(Display):
         self.timer.deinit()
         
         # disable all digit drives so the display goes blank
+        isr = disable_irq()
         mem32[GPIO_OUT_REG] = (mem32[GPIO_OUT_REG] & self.andmask)
+        enable_irq(isr)
