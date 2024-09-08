@@ -1,5 +1,8 @@
 
-def unpackBcd(a,b):
+def unpackBcd(a: int, b: int) -> list[int]:
+    '''
+    Unpack two ints into a BCD array.
+    '''
     buf = [ 0,0,0,0 ]
     buf[1] = int(a % 10)
     buf[0] = int((a - buf[1]) / 10)

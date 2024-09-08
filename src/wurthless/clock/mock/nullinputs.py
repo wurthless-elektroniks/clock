@@ -1,9 +1,9 @@
-#
-# Null input driver. Everything returns false.
-#
 from wurthless.clock.api.inputs import Inputs
 
 class NullInputs(Inputs):
+    '''
+     Null input driver. Everything returns false.
+    '''
     def __init__(self):
         pass
 

@@ -69,7 +69,7 @@ class Scheduler(object):
         finally:
             self._scheduler_executing = False
 
-    def createEvent(self, name, when, callback, repeat=False):
+    def createEvent(self, name: str, when: int, callback: function, repeat:bool=False):
         '''
         Registers a new event but does not start it.
         Call restartEvent() to start it.
@@ -88,7 +88,7 @@ class Scheduler(object):
 
         self._event_dict[name] = event
 
-    def _enqueueEvent(self, event):
+    def _enqueueEvent(self, event: Event):
         # calc next fire
         ts = event._when._calcNextFire(int(time.time()))
         event._fire_at = ts

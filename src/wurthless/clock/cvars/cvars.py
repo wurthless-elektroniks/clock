@@ -1,17 +1,3 @@
-#
-# Config variables registry
-#
-# cvars are represented in json as follows (an example):
-#
-# registrant:  String. Indicates file that registered this cvar. 
-#              If cvar not yet registered, attempts to force import that file.
-#              If that fails, or if the cvar never gets registered, throw exception.
-# name:        String. Name of the cvar.
-# datatype:    String. Python datatype. Must be primitive: Int, Double, String, etc.
-# description: String. Describes what the cvar is.
-# default:     Value matching datatype. If set, cvar defaults to this. If not, cvar defaults to None. 
-#
-
 known_cvars = {}
 
 #
@@ -55,13 +41,26 @@ class CvarDefinition(object):
         return Cvar(self.registrant, self.name, self.datatype, self.description, self.default)
 
 # registerCvar(): Registers cvar.
-def registerCvar(registrant, name, datatype, description, default):
+def registerCvar(registrant: str, name: str, datatype: str, description: str, default: Any):
+    '''
+    Register a cvar.
+    - registrant: name of the module to which this cvar belongs
+    - name: name of the cvar itself. This is unique to that module.
+    - datatype: String indicating datatype, which must be a primitive: Int, Double, String, etc.
+    - description: Documentation about what that cvar is.
+    - default: Default value for this cvar.
+
+    Cvars are registered internally as "registrant:name".
+    '''
     defn = CvarDefinition(registrant, name, datatype, description, default)
     key = registrant + u':' + name
     known_cvars[ registrant + u':' + name ] = defn
     print(u"registered cvar: %s" % (key))
 
 class Cvars(object):
+    '''
+    Config variables registry.
+    '''
     def __init__(self):
         # this will point "registrant:name" -> cvar
         self.cvars = {}
@@ -72,7 +71,7 @@ class Cvars(object):
 
         self.writer = None
 
-    def _find(self, registrant, name):
+    def _find(self, registrant: str, name: str):
         key = registrant + u":" + name
         if key in self.cvars:
             return self.cvars[key]
@@ -82,14 +81,20 @@ class Cvars(object):
     def setWriter(self, writer):
         self.writer = writer
 
-    def get(self, registrant, name):
+    def get(self, registrant: str, name: str) -> Any:
+        '''
+        Get value of the given cvar. If cvar not found, panic.
+        '''
         key = registrant + u":" + name
         return self._find(registrant, name).getValue()
     
-    def set(self, registrant, name, value):
+    def set(self, registrant: str, name: str, value: Any):
+        '''
+        Set value of the given cvar. If cvar not found, panic.
+        '''
         self._find(registrant, name).setValue(value)
 
-    def configure(self, registrant, kvmappings):
+    def configure(self, registrant: str, kvmappings: dict[str,Any]):
         '''
         Given dict of name->value, bulk set cvars for the given registrant.
         '''

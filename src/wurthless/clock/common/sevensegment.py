@@ -15,7 +15,12 @@ NUMBERS_TO_DIGITS = [
      0b01101111  # 9
 ]
 
-def sevensegNumbersToDigits(segA, segB, segC, segD):
+def sevensegNumbersToDigits(segA: (int | None), segB: (int | None), segC: (int | None), segD: (int | None)) -> list[int]:
+    '''
+    Decode four integers to bitmasks for use with the seven-segment display.
+    Each segment value must be between 0 and 9. If out of range, or None, the digit will
+    not be populated/displayed (all bits 0).
+    '''
     buf = [ 0, 0, 0, 0 ]
     if type(segA) == int and 0 <= segA and segA <= 9:
         buf[0] = NUMBERS_TO_DIGITS[segA]

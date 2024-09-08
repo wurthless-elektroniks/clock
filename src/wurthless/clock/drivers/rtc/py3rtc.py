@@ -1,13 +1,12 @@
-#
-# Standard Python3 time wrapped as an Rtc instance.
-# Not possible to change this clock at all.
-#
-
 import time
 from wurthless.clock.common.timestamp import timeTupleToTimestamp
 from wurthless.clock.api.rtc import Rtc
 
 class Python3Rtc(Rtc):
+    '''
+    Standard Python3 time wrapped as an Rtc instance.
+    Not possible to change this clock at all.
+    '''
     def __init__(self):
         pass
 

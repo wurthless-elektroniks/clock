@@ -1,20 +1,23 @@
-#
-# Seven-segment display control
-# 
-
-
-class Display:
-    def setBrightness(self, brightness):
+class Display(object):
+    '''
+    Interface to a seven-segment display device.
+    '''
+        
+    def setBrightness(self, brightness: int):
+        '''
+        Set brightness to a value between 1 and 8. If the device doesn't support brightness, this does nothing.
+        '''
         pass
 
-    '''
-    Set digits on seven-segment display manually using binary bitmasks (LSB = segment A).
-    '''
-    def setDigitsBinary(self, a, b, c, d):
+
+    def setDigitsBinary(self, a: int, b: int, c: int, d: int):
+        '''
+        Set digits on seven-segment display manually using binary bitmasks (LSB = segment A).
+        '''
         pass
 
-    '''
-    Permanently shuts down the display driver. A reboot is necessary to restart it.
-    '''
     def shutdown(self):
+        '''
+        Permanently shuts down the display driver. A reboot is necessary to restart it.
+        '''
         pass

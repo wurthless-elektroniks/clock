@@ -1,28 +1,31 @@
-#
-# Interface on to RTC.
-#
-# This only handles the storage and retrieval of current time settings.
-# DST / timezone control are to be done elsewhere.
-#
-class Rtc:
+class Rtc(object):
     '''
-    Returns true if the RTC was successfully set.
-    
-    This will return False if:
-    - on battery backed RTCs, the RTC is not in an initialized state (first powerup, or battery had died)
+    Interface to a RTC device. Only handles storage/retrieval of UTC time,
+    timezone/DST control are to be handled in software.
     '''
-    def isUp(self):
+
+    def isUp(self) -> bool:
+        '''
+        Returns true if the RTC was successfully set and is currently running.
+        If False, the RTC hasn't been initialized yet, or has stopped running (e.g., battery-backed RTC's battery has died).
+        '''
         return False
 
-    def getUtcTime(self):
+    def getUtcTime(self) -> int:
+        '''
+        Return current UTC time relative to the system's epoch. If 0, the RTC is not initialized.
+        '''
         return 0
 
-    def setUtcTime(self, timestamp):
+    def setUtcTime(self, timestamp: int):
+        '''
+        Set UTC time. If the RTC is read only, undefined behavior results.
+        '''
         pass
 
-    '''
-    Return True if it's not possible to change the time.
-    '''
-    def readOnly(self):
+    def readOnly(self) -> bool:
+        '''
+        Return True if it's not possible to change the time.
+        '''
         return False
 

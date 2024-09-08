@@ -1,8 +1,3 @@
-#
-# Software (i.e., very unreliable) RTC.
-# To be used only during testing. Use Python3Rtc or MicropythonRTC.
-#
-
 from threading import Thread, Lock
 from time import sleep
 from wurthless.clock.api.rtc import Rtc
@@ -11,6 +6,10 @@ def _thunk(rtc):
     rtc._thread()
 
 class SoftRtc(Rtc):
+    '''
+    Software (i.e., very unreliable) RTC.
+    To be used only during testing. Use Python3Rtc or MicropythonRTC.
+    '''
     def __init__(self):
         self.time = 0
         self.threadinstance = None

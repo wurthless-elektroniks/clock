@@ -12,6 +12,9 @@ from wurthless.clock.common.timestamp import timeTupleToTimestamp
 import _thread
 
 class NmeaDevice(object):
+    '''
+    Generic NMEA device driver.
+    '''
     def __init__(self, uart):
         self.uart = uart
         self.mappers = self._getMappers()

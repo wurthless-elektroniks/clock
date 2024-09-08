@@ -1,11 +1,10 @@
-#
-# RTC decorator where we have a "front-end" RTC (typically whatever is on-chip) and a "back-end" RTC (which is battery backed).
-#
-#
-
 from wurthless.clock.api.rtc import Rtc
 
 class CascadedRtc(Rtc):
+    '''
+    RTC decorator where we have a "front-end" RTC (typically whatever is on-chip)
+    and a "back-end" RTC (which is battery backed).
+    '''
     def __init__(self, frontendRtc, backendRtc):
         self.frontendRtc = frontendRtc
         self.backendRtc = backendRtc

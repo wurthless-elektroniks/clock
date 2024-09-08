@@ -1,30 +1,31 @@
-#
-# NIC control.
-#
 
-class Nic:
+class Nic(object):
     '''
-    Initialize the NIC as client.
-    Returns after init happens regardless of outcome.
+    Interface to a network device.
     '''
+    
     def initAsClient(self):
+        '''
+        Initialize the NIC as client.
+        Returns after init happens regardless of outcome.
+        '''
         pass
 
-    '''
-    Initialize the NIC as server.
-    '''
     def initAsServer(self):
+        '''
+        Initialize the NIC as server.
+        '''
         pass
 
-    '''
-    Return true if interface up.
-    '''
-    def isUp(self):
+    def isUp(self) -> bool:
+        '''
+        Return true if interface up.
+        '''
         return False
 
-    '''
-    Shuts down the NIC.
-    '''
     def shutdown(self):
+        '''
+        Shuts down the NIC.
+        '''
         pass
 

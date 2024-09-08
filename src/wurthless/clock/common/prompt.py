@@ -37,7 +37,7 @@ class DisplayFlasher:
         self.even_odd = True  # even = fullbrite, odd = lowbrite
         self.display.setBrightness(8)
 
-def clamp(val, minval, maxval):
+def clamp(val: int, minval: int, maxval: int) -> int:
     inp = val
     if inp < minval:
         inp = maxval
@@ -45,7 +45,7 @@ def clamp(val, minval, maxval):
         inp = minval
     return inp
 
-def promptFourDigit(tot, inputs, valin, minval=0, maxval=9999):
+def promptFourDigit(tot, inputs, valin: int, minval: int=0, maxval: int=9999):
     inp = clamp(valin, minval, maxval)
     display = tot.display()
     flasher = DisplayFlasher(display)

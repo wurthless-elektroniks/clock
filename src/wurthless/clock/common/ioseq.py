@@ -1,6 +1,8 @@
 #
 # Generic I/O sequencer for systems that do not have a builtin statemachine.
 #
+# DEPRECATED/UNUSED, TO BE REMOVED.
+#
 
 from machine import Pin,Timer,disable_irq,enable_irq
 
