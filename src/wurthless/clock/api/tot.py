@@ -2,6 +2,8 @@ from wurthless.clock.api.nic import Nic
 from wurthless.clock.api.rtc import Rtc
 from wurthless.clock.api.timesource import TimeSource
 from wurthless.clock.api.inputs import Inputs
+from wurthless.clock.api.display import Display
+from wurthless.clock.cvars.cvars import Cvars
 
 class ToT(object):
     '''
@@ -45,13 +47,13 @@ class ToT(object):
         self._rtc = rtc
 
 
-    def display(self):
+    def display(self) -> Display:
         '''
         Return display control. see wurthless.clock.api.display
         '''
         return self._display
 
-    def setDisplay(self, display):
+    def setDisplay(self, display: Display):
         self.assertNotFinalized()
         self._display = display
 
@@ -77,10 +79,10 @@ class ToT(object):
         self.assertNotFinalized()
         self._inputs = inputs
     
-    def cvars(self):
+    def cvars(self) -> Cvars:
         return self._cvars
     
-    def setCvars(self, cvars):
+    def setCvars(self, cvars: Cvars):
         self.assertNotFinalized()
         self._cvars = cvars
 

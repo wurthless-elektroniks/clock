@@ -42,6 +42,9 @@ class Scheduler(object):
         self._scheduler_executing = False
 
     def tick(self):
+        '''
+        Run the scheduler main loop.
+        '''
         ts = int(time.time())
         if self._last_time == ts:
             return
@@ -116,7 +119,7 @@ class Scheduler(object):
         '''
         self._event_queue = []
 
-    def cancelEvent(self, name):
+    def cancelEvent(self, name: str):
         '''
         Deschedules an event but does not unregister it.
         '''
@@ -124,17 +127,20 @@ class Scheduler(object):
         if idx != -1:
             self._event_queue.pop(idx)
 
-    def _findEvent(self, name):
+    def _findEvent(self, name: str):
         # lazy search by index
         for i in range(0, len(self._event_queue)):
             if self._event_queue[i]._name == name:
                 return i
         return -1
 
-    def isEventScheduled(self, name):
+    def isEventScheduled(self, name: str) -> bool:
+        '''
+        Return True if the given event is currently scheduled.
+        '''
         return self._findEvent(name) != -1
 
-    def fireEvent(self, name):
+    def fireEvent(self, name: str):
         '''
         Put the given event at the front of the queue and mark it to execute immediately.
         If the event is recurring, it will be rescheduled.
@@ -153,9 +159,9 @@ class Scheduler(object):
         self._event_queue.insert(0, event) 
         self._runScheduler()
 
-    def scheduleEvent(self, name):
+    def scheduleEvent(self, name: str):
         '''
-        (Re)schedules an event to fire
+        (Re)schedules an event to fire.
         '''
         if name not in self._event_dict:
             raise RuntimeError("event not registered: %s" % (name))

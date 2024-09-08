@@ -2,9 +2,11 @@
 # better burn-in script (at last)
 #
 
-import time
 
-def inputTest(tot):
+import time
+from wurthless.clock.api.tot import ToT
+
+def inputTest(tot: ToT):
     tot.display().setBrightness(8)
     while True:
         tot.inputs().strobe()
@@ -28,7 +30,7 @@ def inputTest(tot):
 
 
 
-def burnin(tot):
+def burnin(tot: ToT):
     while True:
         tot.display().setBrightness(8)
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)

@@ -12,6 +12,7 @@ try:
 except:
     sleep_ms = lambda a : time.sleep(a / 1000)
 
+from wurthless.clock.api.tot import ToT
 from wurthless.clock.burnin import burnin,inputTest
 from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp,autoformatHourIn12HourTime,getTimestampForNextMinute
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
@@ -22,6 +23,7 @@ from wurthless.clock.drivers.input.delayedinputs import DelayedInputs
 from wurthless.clock.common.prompt import promptYear, promptMonthOrDay, promptTime, promptDst
 from wurthless.clock.common.bcd import unpackBcd
 from wurthless.clock.scheduler.scheduler import Scheduler, EVENT_FIRES_EVERY_MINUTE, EVENT_FIRES_IMMEDIATELY, EventFiresAfter
+
 
 TICK_TIME_MS = 17
 snooze = lambda : sleep_ms(TICK_TIME_MS)
@@ -75,7 +77,7 @@ registerCvar(u"wurthless.clock.clockmain",
              u"If True, force server mode (needed for testing).",
              False)
 
-def configMode(tot):
+def configMode(tot: ToT):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
 
     # brightness always 8 coming into this loop
@@ -136,7 +138,7 @@ def configMode(tot):
 #
 # Draw/update the display
 #
-def renderDisplay(tot, mode):
+def renderDisplay(tot: ToT, mode: int):
     # get UTC time straight from the RTC (VERY SLOW)
     utctime = tot.rtc().getUtcTime()
 
@@ -181,15 +183,12 @@ def renderDisplay(tot, mode):
         bcd = unpackBcd(0, day)
         digs = sevensegNumbersToDigits( None, None, bcd[2], bcd[3] )
         tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-    
-#
-# syncTime()
-#
-# Return True if the clock was successfully able to synchronize to a timezone.
-# Return False otherwise.
-#
-def syncTime(tot, suppressError = False):
 
+def syncTime(tot: ToT, suppressError:bool=False) -> bool:
+    '''
+    Return True if the clock was successfully able to synchronize to a timezone.
+    Return False otherwise.
+    '''
     use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr")
     
     if use_12hr is True:
@@ -239,7 +238,7 @@ def syncTime(tot, suppressError = False):
 #
 ################################################################################################################
 
-def init(tot):
+def init(tot: ToT):
     # At the very least, we need the display installed,
     # else panic and exit immediately
     if tot.display() is None:
@@ -274,7 +273,7 @@ def init(tot):
 #
 ################################################################################################################
 
-def loop(tot):
+def loop(tot: ToT):
     brightness = tot.cvars().get(u"config.display",u"brightness")
     if not (1 <= brightness and brightness <= 8):
         brightness = 8
@@ -294,7 +293,7 @@ def loop(tot):
     
     inputs = tot.inputs()
 
-    if set_and_dst_no_debounce is False:    
+    if set_and_dst_no_debounce is False:
         delayedinputs = DelayedInputs(inputs)
         delayedinputs.up_delay(0)     
         delayedinputs.down_delay(0)
@@ -406,7 +405,7 @@ def loop(tot):
 
         snooze()
 
-def clockMain(tot):
+def clockMain(tot: ToT):
     tot.inputs().strobe()
 
     if tot.inputs().dst():
@@ -425,7 +424,6 @@ def clockMain(tot):
         tot.display().setDigitsBinary(0, 0b00111001, 0b01110001, 0b01111101)
 
         serverMain(tot)
-
 
     # the ghost of Arduino past refuses to go away
     init(tot)
