@@ -60,7 +60,7 @@ registerCvar(u"wurthless.clock.clockmain",
 registerCvar(u"wurthless.clock.clockmain",
              u"autosync_frequency",
              u"Int",
-             u"Interval time in seconds between clock synchronization. Default is 14400 (every 4 hours). Used only if timesources are present.",
+             u"Interval time in seconds between clock synchronization. Default is 7200 (every 2 hours). Used only if timesources are present.",
              7200)
 
 registerCvar(u"wurthless.clock.clockmain",

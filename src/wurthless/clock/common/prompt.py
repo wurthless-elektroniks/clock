@@ -50,17 +50,22 @@ def promptFourDigit(tot, inputs, valin, minval=0, maxval=9999):
     display = tot.display()
     flasher = DisplayFlasher(display)
     
-    while True:
+    def _rerender():
         bcd = unpackBcd(inp / 100, inp % 100)
         digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
         display.setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+
+    _rerender()
+    while True:
         inputs.strobe()
         if inputs.up():
             inp = clamp(inp + 1, minval, maxval)
             flasher.reset()
+            _rerender()
         elif inputs.down():
             inp = clamp(inp - 1, minval, maxval)
             flasher.reset()
+            _rerender()
         elif inputs.set():
             return inp
         else:
@@ -72,17 +77,22 @@ def promptTwoDigit(tot, inputs, valin, minval=0, maxval=99):
     display = tot.display()
     flasher = DisplayFlasher(display)
 
-    while True:
+    def _rerender():
         bcd = unpackBcd(0, inp)
         digs = sevensegNumbersToDigits( None, None, bcd[2], bcd[3]  )
         display.setDigitsBinary( 0, 0, digs[2], digs[3] )
+
+    _rerender()
+    while True:
         inputs.strobe()
         if inputs.up():
             inp = clamp(inp + 1, minval, maxval)
             flasher.reset()
+            _rerender()
         elif inputs.down():
             inp = clamp(inp - 1, minval, maxval)
             flasher.reset()
+            _rerender()
         elif inputs.set():
             return inp
         else:
@@ -111,7 +121,7 @@ def promptTime(tot, inputs, hour, minute):
 
     inp = hour
 
-    while True:
+    def _rerenderHour():
         hour_visible = autoformatHourIn12HourTime(tot, inp)
         bcd = unpackBcd(inp, 0)
         digs = sevensegNumbersToDigits( bcd[0], bcd[1], None, None )
@@ -120,15 +130,20 @@ def promptTime(tot, inputs, hour, minute):
         if use_12hr and hour_visible[1] is True:
             digs[0] |= 1
 
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-
+        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )    
+    
+    _rerenderHour()
+    
+    while True:
         inputs.strobe()
         if inputs.up():
             inp = clamp(inp + 1, minval=0, maxval=23)
             flasher.reset()
+            _rerenderHour()
         elif inputs.down():
             inp = clamp(inp - 1, minval=0, maxval=23)
             flasher.reset()
+            _rerenderHour()
         elif inputs.set():
             retval[0] = inp
             break
@@ -138,25 +153,29 @@ def promptTime(tot, inputs, hour, minute):
 
     flasher.reset()
 
-    inp = minute
-    while True:
+    def _rerenderMinute():
         hour_visible = autoformatHourIn12HourTime(tot, retval[0])
         bcd = unpackBcd(retval[0], inp)
         digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-
+        
         # set segment A to indicate pm in 12-hour mode
         if use_12hr and hour_visible[1] is True:
             digs[0] |= 1
 
         tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
 
+    inp = minute
+    _rerenderMinute()
+    while True:
         inputs.strobe()
         if inputs.up():
             inp = clamp(inp + 1, minval=0, maxval=59)
             flasher.reset()
+            _rerenderMinute()
         elif inputs.down():
             inp = clamp(inp - 1, minval=0, maxval=59)
             flasher.reset()
+            _rerenderMinute()
         elif inputs.set():
             retval[1] = inp
             return retval
