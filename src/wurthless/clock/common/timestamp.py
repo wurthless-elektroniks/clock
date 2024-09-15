@@ -36,14 +36,5 @@ def timeTupleToTimestamp(tuple):
 # return array [hour, is_pm]. if running in 24 hour mode, simply return [ hour, False ].
 # didn't know where to put this, it will live in here for now...
 def autoformatHourIn12HourTime(tot, hour):
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr") is True
-    if use_12hr:
-        is_pm = False
-        if hour > 12:
-            hour -= 12
-            is_pm = True
-        elif hour == 0:
-            hour = 12
-        return [ hour, is_pm ]
-    else:
-        return [ hour, False ]
+    # TODO: 12-hour time will return someday, but not here
+    return [ hour, False ]

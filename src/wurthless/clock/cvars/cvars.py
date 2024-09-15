@@ -1,3 +1,5 @@
+from wurthless.clock.cvars.cvarwriter import CvarWriter
+
 known_cvars = {}
 
 #
@@ -71,14 +73,14 @@ class Cvars(object):
 
         self.writer = None
 
-    def _find(self, registrant: str, name: str):
+    def _find(self, registrant: str, name: str) -> Cvar:
         key = registrant + u":" + name
         if key in self.cvars:
             return self.cvars[key]
 
         raise RuntimeError(u"cvar not registered/recognized: %s\n\nentire cvar table is: %s" %(key, self.cvars))
 
-    def setWriter(self, writer):
+    def setWriter(self, writer: CvarWriter):
         self.writer = writer
 
     def get(self, registrant: str, name: str) -> Any:

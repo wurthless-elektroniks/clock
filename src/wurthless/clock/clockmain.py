@@ -52,13 +52,6 @@ registerCvar(u"wurthless.clock.clockmain",
              u"If True, digit 0 only has segments B and C populated, with segmetn A indicating p.m. Default is False.",
              False)
 
-# TODO: digit_0_truncated replaces this so that fully populated clocks can run 12 hour time if necessary.
-registerCvar(u"wurthless.clock.clockmain",
-             u"use_12hr",
-             u"Boolean",
-             u"If True, this is a 12-hour clock (only 2 segments on digit 0, with segment A indicating p.m.). Default is False (all segments on digit 0 populated).",
-             False)
-
 registerCvar(u"wurthless.clock.clockmain",
              u"autosync_frequency",
              u"Int",
@@ -144,7 +137,6 @@ def renderDisplay(tot: ToT, mode: int):
 
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
     dst_active = tot.cvars().get(u"config.clock",u"dst_active")
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr")
 
     utctime += utc_offset
     if dst_active is True:
@@ -154,24 +146,16 @@ def renderDisplay(tot: ToT, mode: int):
     if mode == 0:
         hour    = tuple[3]
         minute  = tuple[4]
-        if use_12hr is True:
-            h = autoformatHourIn12HourTime(tot, hour)
-            bcd = unpackBcd(h[0], minute)
-            digs = sevensegNumbersToDigits( None if h[0] < 10 else bcd[0], bcd[1], bcd[2], bcd[3] )
-            if h[1] is True:
-                bcd[0] |= 1 # in 12-hour mode, segment A on digit 0 is used to indicate AM/PM
-            tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
-        else:
-            bcd = unpackBcd(hour, minute)
-            digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-            tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+        bcd = unpackBcd(hour, minute)
+        digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
+        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
     elif mode == 1:
         year = tuple[0]
         bcd = unpackBcd(year / 100, year % 100)
         # 12-hour assumes that many of the segments on digit 0 will not be populated,
         # so in 12-hour mode, only display the last two digits of the year.
         # these things won't be working in 100 years time, because we'll all be dead by then
-        digs = sevensegNumbersToDigits( None if use_12hr is True else bcd[0], None if use_12hr is True else bcd[1], bcd[2], bcd[3] )
+        digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
         tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
     elif mode == 2:
         month = tuple[1]
@@ -189,15 +173,8 @@ def syncTime(tot: ToT, suppressError:bool=False) -> bool:
     Return True if the clock was successfully able to synchronize to a timezone.
     Return False otherwise.
     '''
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr")
-    
-    if use_12hr is True:
-       # display "I 02"
-       # TODO: come up with something better...
-       tot.display().setDigitsBinary(0b01101101, 0, 0b00111111, 0b01011011)
-    else:
-        # display "SYNC"
-       tot.display().setDigitsBinary(0b01101101, 0b01101110, 0b00110111, 0b00111001)
+    # display "SYNC"
+    tot.display().setDigitsBinary(0b01101101, 0b01101110, 0b00110111, 0b00111001)
 
     # enumerate over all time sources until something answers
     t = 0

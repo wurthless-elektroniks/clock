@@ -100,11 +100,7 @@ def promptTwoDigit(tot, inputs, valin, minval=0, maxval=99):
             snooze()
 
 def promptYear(tot, inputs, year):
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr") is True
-    if use_12hr:
-        return 2000 + promptTwoDigit(tot, inputs, year - 2000, minval=22, maxval=99)
-    else:
-        return promptFourDigit(tot, inputs, year, minval=2022, maxval=2099)
+    return promptFourDigit(tot, inputs, year, minval=2022, maxval=2099)
 
 def promptMonthOrDay(tot, inputs, valin, maxval):
     return promptTwoDigit(tot, inputs, valin, minval=1, maxval=maxval)
@@ -115,8 +111,6 @@ def promptTime(tot, inputs, hour, minute):
     display = tot.display()
     flasher = DisplayFlasher(display)
 
-    use_12hr = tot.cvars().get(u"wurthless.clock.clockmain",u"use_12hr") is True
-
     retval = [ 0, 0 ]
 
     inp = hour
@@ -125,10 +119,6 @@ def promptTime(tot, inputs, hour, minute):
         hour_visible = autoformatHourIn12HourTime(tot, inp)
         bcd = unpackBcd(inp, 0)
         digs = sevensegNumbersToDigits( bcd[0], bcd[1], None, None )
-
-        # set segment A to indicate pm in 12-hour mode
-        if use_12hr and hour_visible[1] is True:
-            digs[0] |= 1
 
         tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )    
     
@@ -157,10 +147,6 @@ def promptTime(tot, inputs, hour, minute):
         hour_visible = autoformatHourIn12HourTime(tot, retval[0])
         bcd = unpackBcd(retval[0], inp)
         digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-        
-        # set segment A to indicate pm in 12-hour mode
-        if use_12hr and hour_visible[1] is True:
-            digs[0] |= 1
 
         tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
 

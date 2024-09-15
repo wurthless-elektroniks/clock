@@ -12,14 +12,12 @@ from wurthless.clock.drivers.display.esp32maskdisplay import Esp32MaskDisplay
 from wurthless.clock.drivers.input.gpioinputs import GpioInputs
 from wurthless.clock.drivers.rtc.micropythonrtc import MicropythonRTC
 from wurthless.clock.drivers.nic.micropythonwifinic import MicropythonWifiNic
-from wurthless.clock.drivers.display.invertedbitdisplay import InvertedBitDisplay 
-from wurthless.clock.drivers.display.cacheddisplay import CachedDisplay 
+from wurthless.clock.drivers.display.invertedbitdisplay import InvertedBitDisplay
 
 from wurthless.clock.cvars.cvars import Cvars
 from wurthless.clock.cvars.cvarwriter import TokenedCvarWriter
 
 import config
-
 
 def runEsp32Wroom32E(invert_bits=False):
     tot = ToT()
