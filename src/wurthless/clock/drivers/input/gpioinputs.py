@@ -34,6 +34,7 @@ class GpioInputs(Inputs):
         self.down_pressed = self.down_pin.value() == 0
         self.set_pressed  = self.set_pin.value() == 0
         self.dst_pressed  = self.dst_pin.value() == 0
+        return self.up_pressed or self.down_pressed or self.set_pressed or self.dst_pressed
 
     def up(self):
         return self.up_pressed

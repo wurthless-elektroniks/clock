@@ -32,6 +32,7 @@ class DelayedInputButton(object):
             self._ticks = 0
 
         self._last = state
+        return state
 
     def output(self):
         return self._output
@@ -57,10 +58,12 @@ class DelayedInputs(Inputs):
 
     def strobe(self):
         self.inputs.strobe()
-        self._up.strobe()
-        self._down.strobe()
-        self._set.strobe()
-        self._dst.strobe()
+        pressed = False
+        pressed |= self._up.strobe()
+        pressed |= self._down.strobe()
+        pressed |= self._set.strobe()
+        pressed |= self._dst.strobe()
+        return pressed
         
     def up_delay(self, ticks):
         self._up.delay(ticks)

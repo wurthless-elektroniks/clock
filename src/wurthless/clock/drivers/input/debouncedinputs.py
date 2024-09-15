@@ -18,6 +18,7 @@ class DebouncedInputButton(object):
     def strobe(self):
         self._last = self._output
         self._output = self._getter()
+        return self._output
     
     def output(self):
         return self._last is False and self._output is True
@@ -40,11 +41,13 @@ class DebouncedInputs(Inputs):
 
     def strobe(self):
         self.inputs.strobe()
-        self._up.strobe()
-        self._down.strobe()
-        self._set.strobe()
-        self._dst.strobe()
-    
+        pressed = False
+        pressed |= self._up.strobe()
+        pressed |= self._down.strobe()
+        pressed |= self._set.strobe()
+        pressed |= self._dst.strobe()
+        return pressed
+
     def up(self):
         return self._up.output()
     

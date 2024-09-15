@@ -48,6 +48,9 @@ class CursesInputs(Inputs):
                 self.strobe_inputs[i] = self.inputs[i]
                 self.inputs[i] = False
 
+        # this is running on PC, CPU time is not that critical.
+        return self.up() or self.down() or self.set() or self.dst()
+
     def up(self):
         return self.strobe_inputs[UP_BUTTON] is True
     

@@ -1,4 +1,7 @@
-
+BUTTON_UP_PRESSED   = (1 << 0)
+BUTTON_DOWN_PRESSED = (1 << 1)
+BUTTON_SET_PRESSED  = (1 << 2)
+BUTTON_DST_PRESSED  = (1 << 3)
 
 class Inputs(object):
     '''
@@ -12,12 +15,14 @@ class Inputs(object):
         '''
         pass
 
-    def strobe(self):
+    def strobe(self) -> bool:
         '''
         Read inputs. Button states are only updated when this function is called. At all other times,
         they return the results of the last strobe.
+
+        Returns True if a button is pressed.
         '''
-        pass
+        return False
 
     def up(self) -> bool:
         '''

@@ -57,8 +57,10 @@ def promptFourDigit(tot, inputs, valin: int, minval: int=0, maxval: int=9999):
 
     _rerender()
     while True:
-        inputs.strobe()
-        if inputs.up():
+        if inputs.strobe() is False:
+            flasher.tick()
+            snooze()
+        elif inputs.up():
             inp = clamp(inp + 1, minval, maxval)
             flasher.reset()
             _rerender()
@@ -69,8 +71,7 @@ def promptFourDigit(tot, inputs, valin: int, minval: int=0, maxval: int=9999):
         elif inputs.set():
             return inp
         else:
-            flasher.tick()
-            snooze()
+            pass
 
 def promptTwoDigit(tot, inputs, valin, minval=0, maxval=99):
     inp = clamp(valin, minval, maxval)
@@ -84,8 +85,10 @@ def promptTwoDigit(tot, inputs, valin, minval=0, maxval=99):
 
     _rerender()
     while True:
-        inputs.strobe()
-        if inputs.up():
+        if inputs.strobe() is False:
+            flasher.tick()
+            snooze()
+        elif inputs.up():
             inp = clamp(inp + 1, minval, maxval)
             flasher.reset()
             _rerender()
@@ -96,8 +99,7 @@ def promptTwoDigit(tot, inputs, valin, minval=0, maxval=99):
         elif inputs.set():
             return inp
         else:
-            flasher.tick()
-            snooze()
+            pass
 
 def promptYear(tot, inputs, year):
     return promptFourDigit(tot, inputs, year, minval=2022, maxval=2099)
@@ -125,7 +127,9 @@ def promptTime(tot, inputs, hour, minute):
     _rerenderHour()
     
     while True:
-        inputs.strobe()
+        if inputs.strobe() is False:
+            flasher.tick()
+            snooze()
         if inputs.up():
             inp = clamp(inp + 1, minval=0, maxval=23)
             flasher.reset()
@@ -138,8 +142,7 @@ def promptTime(tot, inputs, hour, minute):
             retval[0] = inp
             break
         else:
-            flasher.tick()
-            snooze()
+            pass
 
     flasher.reset()
 
@@ -153,7 +156,9 @@ def promptTime(tot, inputs, hour, minute):
     inp = minute
     _rerenderMinute()
     while True:
-        inputs.strobe()
+        if inputs.strobe() is False:
+            flasher.tick()
+            snooze()
         if inputs.up():
             inp = clamp(inp + 1, minval=0, maxval=59)
             flasher.reset()
@@ -166,8 +171,7 @@ def promptTime(tot, inputs, hour, minute):
             retval[1] = inp
             return retval
         else:
-            flasher.tick()
-            snooze()
+            pass
 
 def promptDst(tot,inputs,dst):
     flash_state = False
@@ -188,13 +192,14 @@ def promptDst(tot,inputs,dst):
         else:
             display_delay_ticks -= 1
 
-        inputs.strobe()
-        if inputs.up() or inputs.down():
+        if inputs.strobe() is False:
+            flash_state = not flash_state
+        elif inputs.up() or inputs.down():
             inp = not inp
             flash_state = False
             display_delay_ticks = 0
         elif inputs.set():
             return inp
         else:
-            flash_state = not flash_state
+            pass
         snooze()

@@ -333,52 +333,52 @@ def loop(tot: ToT):
     while True:
         scheduler.tick()
 
-        inputs.strobe()
-        up_state = inputs.up()
-        down_state = inputs.down()
-        set_state = inputs.set()
-        dst_state = inputs.dst()
-        
-        # Pressing UP changes brightness in descending order.
-        # If brightness is at minimum, reset to highest brightness.
-        if up_state:
-            brightness -= 1
-            if not (1 <= brightness and brightness <= 8):
-                brightness = 8
-            tot.display().setBrightness(brightness) 
-            scheduler.scheduleEvent("writebackCfg")
-
-        # Pressing DOWN will toggle between displaymodes
-        # in this order: year, month, day, time
-        # If the displaymode goes off of time for a while, switch back to time.
-        # DOWN does nothing if calendar mode disabled.
-        if disable_calendar is False and down_state is True:
-            displaymode += 1
-            displaymode &= 3
-            scheduler.fireEvent("rerenderDisplay")
-            if displaymode != 0:
-                scheduler.scheduleEvent("autoreturnToDisplayMode0")
-            else:
-                scheduler.cancelEvent("autoreturnToDisplayMode0")
-
-        # Pressing and holding SET for long enough will go to configuration mode
-        # if we are allowed to configure the RTC at all.
-        # If any timesources are present, attempt synchronization before running config mode.
-        if rtc_read_only is False and set_state is True:
-            if (timesource_present is False or syncTime(tot, suppressError=False) is False):
-                configMode(tot)
-
-            # previously scheduled events are assigned to times that are no longer valid,
-            # and debounce logic needs to be reset anyway
-            resetState()
-            continue
+        if inputs.strobe() is True:
+            up_state = inputs.up()
+            down_state = inputs.down()
+            set_state = inputs.set()
+            dst_state = inputs.dst()
             
-        if dst_disable is False and dst_state is True:
-            dst = tot.cvars().get(u"config.clock",u"dst_active")
-            dst = not dst
-            tot.cvars().set(u"config.clock",u"dst_active",dst)
-            scheduler.scheduleEvent("writebackCfg")
-            scheduler.fireEvent("rerenderDisplay")
+            # Pressing UP changes brightness in descending order.
+            # If brightness is at minimum, reset to highest brightness.
+            if up_state:
+                brightness -= 1
+                if not (1 <= brightness and brightness <= 8):
+                    brightness = 8
+                tot.display().setBrightness(brightness) 
+                scheduler.scheduleEvent("writebackCfg")
+
+            # Pressing DOWN will toggle between displaymodes
+            # in this order: year, month, day, time
+            # If the displaymode goes off of time for a while, switch back to time.
+            # DOWN does nothing if calendar mode disabled.
+            if disable_calendar is False and down_state is True:
+                displaymode += 1
+                displaymode &= 3
+                scheduler.fireEvent("rerenderDisplay")
+                if displaymode != 0:
+                    scheduler.scheduleEvent("autoreturnToDisplayMode0")
+                else:
+                    scheduler.cancelEvent("autoreturnToDisplayMode0")
+
+            # Pressing and holding SET for long enough will go to configuration mode
+            # if we are allowed to configure the RTC at all.
+            # If any timesources are present, attempt synchronization before running config mode.
+            if rtc_read_only is False and set_state is True:
+                if (timesource_present is False or syncTime(tot, suppressError=False) is False):
+                    configMode(tot)
+
+                # previously scheduled events are assigned to times that are no longer valid,
+                # and debounce logic needs to be reset anyway
+                resetState()
+                continue
+                
+            if dst_disable is False and dst_state is True:
+                dst = tot.cvars().get(u"config.clock",u"dst_active")
+                dst = not dst
+                tot.cvars().set(u"config.clock",u"dst_active",dst)
+                scheduler.scheduleEvent("writebackCfg")
+                scheduler.fireEvent("rerenderDisplay")
 
         snooze()
 

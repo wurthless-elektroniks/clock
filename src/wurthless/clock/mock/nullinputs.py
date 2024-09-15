@@ -8,7 +8,7 @@ class NullInputs(Inputs):
         pass
 
     def strobe(self):
-        pass
+        return False
 
     def up(self):
         return False
