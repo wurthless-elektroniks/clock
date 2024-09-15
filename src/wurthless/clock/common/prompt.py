@@ -178,7 +178,7 @@ def promptDst(tot,inputs,dst):
             display_delay_ticks = DELAY_TICKS
             if flash_state is False:
                 # "dST"
-                tot.display().setDigitsBinary+-(0b00000000, 0b01011110, 0b01101101, 0b01111000)
+                tot.display().setDigitsBinary(0b00000000, 0b01011110, 0b01101101, 0b01111000)
             else: 
                 # either "oFF" or "on"
                 if inp is True:
