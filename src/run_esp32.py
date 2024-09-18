@@ -36,7 +36,7 @@ def runEsp32Wroom32E(invert_bits=False):
     cvars.load()
     tot.setCvars( cvars )
 
-    # pin assignments on v7
+    # pin assignments on v8 (v6/v7 no longer supported)
     cvars.configure(u"wurthless.clock.drivers.display.esp32maskdisplay",
                      { 
                        u"seg_a_pin": 4,
@@ -57,8 +57,8 @@ def runEsp32Wroom32E(invert_bits=False):
                      {
                        u"up_pin_id": 25,
                        u"down_pin_id": 33,
-                       u"set_pin_id":  32,
-                       u"dst_pin_id":  35
+                       u"set_pin_id": 32,
+                       u"dst_pin_id": 35
                     })
 
     # not enough CPU time in config mode to run the display

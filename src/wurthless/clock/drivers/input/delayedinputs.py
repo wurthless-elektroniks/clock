@@ -58,12 +58,12 @@ class DelayedInputs(Inputs):
 
     def strobe(self):
         self.inputs.strobe()
-        pressed = False
-        pressed |= self._up.strobe()
-        pressed |= self._down.strobe()
-        pressed |= self._set.strobe()
-        pressed |= self._dst.strobe()
-        return pressed
+        # mpy gotcha: true |= False => 1. 
+        up = self._up.strobe()
+        down = self._down.strobe()
+        set = self._set.strobe()
+        dst = self._dst.strobe()
+        return up or down or set or dst
         
     def up_delay(self, ticks):
         self._up.delay(ticks)

@@ -139,17 +139,16 @@ class Esp32MaskDisplay(Display):
                 andmask |= (1 << self.seg_pins[segment])
         self.andmask = ~andmask
 
-        frequency = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency")
+        self.strobe_frequency = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency")
         self.sm_state = 0
         self.sm_ptr = 0
         
-        self.timer = Timer(0, mode=Timer.PERIODIC, freq = frequency, callback=self._strobe)
+        self.timer = Timer(0, mode=Timer.PERIODIC, freq = self.strobe_frequency, callback=self._strobe)
 
         pwm_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"brightness_pwm_pin")
         
-        #self.brightness_pwm = PWM(Pin(pwm_pin))
-        #self.setBrightness(8)
-#        Pin(pwm_pin,Pin.OUT).value(1)
+        self.brightness_pwm = PWM(Pin(pwm_pin))
+        self.setBrightness(8)
 
     def _strobe(self,t):
         isr = disable_irq()
@@ -158,8 +157,7 @@ class Esp32MaskDisplay(Display):
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        pass
-        #self.brightness_pwm.init(freq = 2000, duty = int(1000*((brightness / 8))+23))
+        self.brightness_pwm.init(freq = self.strobe_frequency, duty = int(1000*((brightness / 8))+23))
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
@@ -189,6 +187,7 @@ class Esp32MaskDisplay(Display):
 
     def shutdown(self):
         self.timer.deinit()
+        self.brightness_pwm.deinit()
         
         # disable all digit drives so the display goes blank
         isr = disable_irq()

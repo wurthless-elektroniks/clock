@@ -62,11 +62,11 @@ async def index(request):
     return send_file(u"www/index.html")
 
 @server.get('/cfg.js')
-async def index(request):
+async def cfgjs(request):
     return send_file(u"www/cfg.js")
 
 @server.get('/cfg.css')
-async def index(request):
+async def cfgcss(request):
     return send_file(u"www/cfg.css")
 
 @server.get('/rest/settings')
