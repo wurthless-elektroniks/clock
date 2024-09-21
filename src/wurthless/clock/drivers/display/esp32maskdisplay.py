@@ -129,8 +129,7 @@ class Esp32MaskDisplay(Display):
                 Pin(p,Pin.OUT).value(0)
 
         self.digs = [ 0b00000000, 0b00000000, 0b00000000, 0b00000000 ]
-        self.last_digs = self.digs
-
+        
         # compute andmask
         andmask = 0
         for digit in range(0,4):
@@ -178,12 +177,9 @@ class Esp32MaskDisplay(Display):
                 bits >>= 1
             munged[digit] = v
 
-        if self.last_digs != munged:
-            isr = disable_irq()
-            self.digs = munged
-            enable_irq(isr)
-            
-            self.last_digs = self.digs
+        isr = disable_irq()
+        self.digs = munged
+        enable_irq(isr)
 
     def shutdown(self):
         self.timer.deinit()
