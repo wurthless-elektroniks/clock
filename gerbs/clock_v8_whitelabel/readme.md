@@ -31,6 +31,8 @@ convenient. You can build one easy with a switch, a pre-crimped JST cable, and a
 
 ### Power circuit 
 
+![](schematics/power.png)
+
 The 5v power rail coming in off the USB-C connector is knocked down to 3.3v by a TLV1117-33 voltage regulator.
 Two 5.1k resistors tell the USB-C power supply to give us some juice. As we will likely never need a full 3 amps
 of power, a 750 mA PTC resettable fuse is in line with the 5v power source in a bid to shut down any fireworks
