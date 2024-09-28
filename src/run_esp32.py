@@ -38,21 +38,10 @@ def runEsp32Wroom32E(invert_bits=False):
 
     # pin assignments on v8 (v6/v7 no longer supported)
     cvars.configure(u"wurthless.clock.drivers.display.esp32maskdisplay",
-                     { 
-                       u"seg_a_pin": 4,
-                       u"seg_b_pin": 16,
-                       u"seg_c_pin": 5,
-                       u"seg_d_pin": 17,
-                       u"seg_e_pin": 18,
-                       u"seg_f_pin": 13,
-                       u"seg_g_pin": 27,
-                       u"digit_0_pin": 23,
-                       u"digit_1_pin": 19,
-                       u"digit_2_pin": 21,
-                       u"digit_3_pin": 22,
-                       u"brightness_pwm_pin": 26,
-                       u"strobe_frequency": 4*60
+                    { 
+                       u"strobe_fast": True
                     })
+    
     cvars.configure(u"wurthless.clock.drivers.input.gpioinputs",
                      {
                        u"up_pin_id": 25,

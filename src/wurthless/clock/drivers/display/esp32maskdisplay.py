@@ -22,83 +22,90 @@ else:
     print(u"DANGER: platform not recognized (%s). defaulting to default esp32 gpio register. you're entering very dangerous territory if you start execution."%(sys.platform))
     GPIO_OUT_REG = 0x3FF44004
 
+# default pin assignments are for TMUCITW v8
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_a_pin",
              u"Int",
              u"LED segment A drive pin",
-             19)
+             4)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_b_pin",
              u"Int",
              u"LED segment B drive pin",
-             18)
+             16)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_c_pin",
              u"Int",
              u"LED segment C drive pin",
-             10)
+             5)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_d_pin",
              u"Int",
              u"LED segment D drive pin",
-             3)
+             17)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_e_pin",
              u"Int",
              u"LED segment E drive pin",
-             2)
+             18)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_f_pin",
              u"Int",
              u"LED segment F drive pin",
-             1)
+             13)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"seg_g_pin",
              u"Int",
              u"LED segment G drive pin",
-             0)
+             27)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_0_pin",
              u"Int",
              u"LED digit 0 drive pin",
-             5)
+             23)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_1_pin",
              u"Int",
              u"LED digit 1 drive pin",
-             6)
+             19)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_2_pin",
              u"Int",
              u"LED digit 2 drive pin",
-             7)
+             21)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"digit_3_pin",
              u"Int",
              u"LED digit 3 drive pin",
-             8)
+             22)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"brightness_pwm_pin",
              u"Int",
              u"LED brightness PWM pin",
-             25)
+             26)
 
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
              u"Int",
              u"Frequency at which we update the display",
-             int(4*60*4))
+             int((4*100)*4))
+
+registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
+             u"strobe_fast",
+             u"Boolean",
+             u"If True, write directly to GPIO register without preserving other I/O settings. Default is False (off).",
+             False)
 
 class Esp32MaskDisplay(Display):
     def __init__(self, tot):
@@ -142,12 +149,23 @@ class Esp32MaskDisplay(Display):
         self.sm_state = 0
         self.sm_ptr = 0
         
-        self.timer = Timer(0, mode=Timer.PERIODIC, freq = self.strobe_frequency, callback=self._strobe)
+        if cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_fast") is True:
+            cb = self._strobe_fast
+        else:
+            cb = self._strobe
+        
+        self.timer = Timer(0, mode=Timer.PERIODIC, freq = self.strobe_frequency, callback=cb)
 
         pwm_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"brightness_pwm_pin")
         
         self.brightness_pwm = PWM(Pin(pwm_pin))
         self.setBrightness(8)
+
+    def _strobe_fast(self, t):
+        isr = disable_irq()
+        mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr & 3]
+        self.sm_ptr += 1
+        enable_irq(isr)
 
     def _strobe(self,t):
         isr = disable_irq()
@@ -156,7 +174,7 @@ class Esp32MaskDisplay(Display):
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        self.brightness_pwm.init(freq = self.strobe_frequency, duty = int(1000*((brightness / 8))+23))
+        self.brightness_pwm.init(freq = self.strobe_frequency * 2, duty = int(1000*((brightness / 8))+23))
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
