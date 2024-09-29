@@ -317,13 +317,13 @@ def loop(tot: ToT):
         scheduler.cancelAllEvents()
         inputs.reset()
 
-        if cfg_save_pending:
+        if cfg_save_pending is True:
             scheduler.scheduleEvent("writebackCfg")
 
-        if timesource_present:
+        if timesource_present is True:
             scheduler.scheduleEvent("autosync")
 
-        if displaymode_change_pending:
+        if displaymode_change_pending is True:
             scheduler.fireEvent("autoreturnToDisplayMode0")
         else:
             scheduler.fireEvent("rerenderDisplay")
@@ -346,6 +346,7 @@ def loop(tot: ToT):
                 if not (1 <= brightness and brightness <= 8):
                     brightness = 8
                 tot.display().setBrightness(brightness) 
+                tot.cvars().set(u"config.display",u"brightness",brightness)
                 scheduler.scheduleEvent("writebackCfg")
 
             # Pressing DOWN will toggle between displaymodes
