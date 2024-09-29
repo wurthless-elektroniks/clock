@@ -8,7 +8,7 @@ from wurthless.clock.cvars.cvars import registerCvar
 
 global running_under_upy
 try:
-    from machine import Pin 
+    from machine import Pin,PWM
     running_under_upy = True
 except:
     running_under_upy = False
@@ -135,9 +135,11 @@ def serverMain(tot):
     # on ESP32 (probably other boards) where the display is driven through software
     # there will not be enough CPU time to update the display and handle server logic
     if tot.cvars().get("wurthless.clock.webserver", "disable_display_when_serving") is True:
+        tot.display().setDigitsBinary(0,0,0,0)
         tot.display().shutdown()
-    status_pin = tot.cvars().get("wurthless.clock.webserver", "server_active_pin")
-    if status_pin != -1 and running_under_upy is True:
-        Pin(status_pin,Pin.OUT).value(1)
+
+        status_pin = tot.cvars().get("wurthless.clock.webserver", "server_active_pin")
+        if status_pin != -1 and running_under_upy is True:
+            PWM(Pin(status_pin,Pin.OUT), freq=1, duty=512)
 
     server.run(port=80)

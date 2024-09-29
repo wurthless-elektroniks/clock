@@ -52,6 +52,7 @@ def runEsp32Wroom32E(invert_bits=False):
 
     # not enough CPU time in config mode to run the display
     cvars.set("wurthless.clock.webserver", "disable_display_when_serving", True)
+    cvars.set("wurthless.clock.webserver", "server_active_pin", 26)
 
     display = Esp32MaskDisplay(tot)
     if invert_bits is True:
