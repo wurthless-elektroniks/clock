@@ -26,6 +26,10 @@ html, body {
     justify-self: center;
     width: 100%;
 }
+
+a {
+    text-decoration: none;
+}
  
 .butane {
     justify-self: center;
@@ -40,6 +44,16 @@ html, body {
     width: 100%;
 
     text-align: center;
+}
+
+.butane p {
+    color: white;
+    font-weight: bold;
+}
+
+.butaneselectad p {
+    color: black;
+    font-weight: bold;
 }
 
 .butaneselectad {

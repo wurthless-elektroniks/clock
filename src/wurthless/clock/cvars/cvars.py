@@ -43,7 +43,7 @@ class CvarDefinition(object):
         return Cvar(self.registrant, self.name, self.datatype, self.description, self.default)
 
 # registerCvar(): Registers cvar.
-def registerCvar(registrant: str, name: str, datatype: str, description: str, default: Any):
+def registerCvar(registrant: str, name: str, datatype: str, description: str, default: any):
     '''
     Register a cvar.
     - registrant: name of the module to which this cvar belongs
@@ -83,20 +83,20 @@ class Cvars(object):
     def setWriter(self, writer: CvarWriter):
         self.writer = writer
 
-    def get(self, registrant: str, name: str) -> Any:
+    def get(self, registrant: str, name: str) -> any:
         '''
         Get value of the given cvar. If cvar not found, panic.
         '''
         key = registrant + u":" + name
         return self._find(registrant, name).getValue()
     
-    def set(self, registrant: str, name: str, value: Any):
+    def set(self, registrant: str, name: str, value: any):
         '''
         Set value of the given cvar. If cvar not found, panic.
         '''
         self._find(registrant, name).setValue(value)
 
-    def configure(self, registrant: str, kvmappings: dict[str,Any]):
+    def configure(self, registrant: str, kvmappings: dict[str,any]):
         '''
         Given dict of name->value, bulk set cvars for the given registrant.
         '''

@@ -7,6 +7,7 @@
 #
 
 import time
+from typing import Callable
 
 class EventFiresAfter(object):
     def __init__(self, seconds):
@@ -72,7 +73,7 @@ class Scheduler(object):
         finally:
             self._scheduler_executing = False
 
-    def createEvent(self, name: str, when: int, callback: function, repeat:bool=False):
+    def createEvent(self, name: str, when: int, callback: Callable[[],None], repeat:bool=False):
         '''
         Registers a new event but does not start it.
         Call restartEvent() to start it.
