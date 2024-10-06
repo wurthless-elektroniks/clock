@@ -17,8 +17,7 @@ WEBOBJS := $(OBJDIR)/$(WWWDIR)/index.html $(OBJDIR)/$(WWWDIR)/cfg.css $(OBJDIR)/
 
 all: mpy
 
-mpy: $(OBJS) $(WEBOBJS) $(OBJDIR)/secrets/factory.ini 
-	echo "piss"
+mpy: $(OBJS) $(WEBOBJS) $(OBJDIR)/secrets/factory.ini
 
 $(OBJDIR)/secrets/factory.ini: defaults/factory.ini
 	@mkdir -p $(@D)

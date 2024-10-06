@@ -26,11 +26,14 @@ microdot
 
 The ``microdot`` module defines a few classes that help implement HTTP-based
 servers for MicroPython and standard Python.
+
+--------
+NOTE: in TMUCIW land, many features have been removed to save memory/flash space.
+
 """
 import asyncio
 import io
 import json
-import time
 
 try:
     from inspect import iscoroutinefunction, iscoroutine
@@ -369,8 +372,6 @@ class Request:
         self.args = {}
         #: A dictionary with the headers included in the request.
         self.headers = headers
-        #: A dictionary with the cookies included in the request.
-        self.cookies = {}
         #: The parsed ``Content-Length`` header.
         self.content_length = 0
         #: The parsed ``Content-Type`` header.
@@ -388,10 +389,6 @@ class Request:
             self.content_length = int(self.headers['Content-Length'])
         if 'Content-Type' in self.headers:
             self.content_type = self.headers['Content-Type']
-        if 'Cookie' in self.headers:
-            for cookie in self.headers['Cookie'].split(';'):
-                name, value = cookie.strip().split('=', 1)
-                self.cookies[name] = value
 
         self._body = body
         self.body_used = False
@@ -553,13 +550,9 @@ class Response:
     """
     types_map = {
         'css': 'text/css',
-        'gif': 'image/gif',
         'html': 'text/html',
-        'jpg': 'image/jpeg',
         'js': 'application/javascript',
-        'json': 'application/json',
-        'png': 'image/png',
-        'txt': 'text/plain',
+        'json': 'application/json'
     }
 
     send_file_buffer_size = 1024
@@ -592,56 +585,6 @@ class Response:
             # this applies to bytes, file-like objects or generators
             self.body = body
         self.is_head = False
-
-    def set_cookie(self, cookie, value, path=None, domain=None, expires=None,
-                   max_age=None, secure=False, http_only=False,
-                   partitioned=False):
-        """Add a cookie to the response.
-
-        :param cookie: The cookie's name.
-        :param value: The cookie's value.
-        :param path: The cookie's path.
-        :param domain: The cookie's domain.
-        :param expires: The cookie expiration time, as a ``datetime`` object
-                        or a correctly formatted string.
-        :param max_age: The cookie's ``Max-Age`` value.
-        :param secure: The cookie's ``secure`` flag.
-        :param http_only: The cookie's ``HttpOnly`` flag.
-        :param partitioned: Whether the cookie is partitioned.
-        """
-        http_cookie = '{cookie}={value}'.format(cookie=cookie, value=value)
-        if path:
-            http_cookie += '; Path=' + path
-        if domain:
-            http_cookie += '; Domain=' + domain
-        if expires:
-            if isinstance(expires, str):
-                http_cookie += '; Expires=' + expires
-            else:  # pragma: no cover
-                http_cookie += '; Expires=' + time.strftime(
-                    '%a, %d %b %Y %H:%M:%S GMT', expires.timetuple())
-        if max_age is not None:
-            http_cookie += '; Max-Age=' + str(max_age)
-        if secure:
-            http_cookie += '; Secure'
-        if http_only:
-            http_cookie += '; HttpOnly'
-        if partitioned:
-            http_cookie += '; Partitioned'
-        if 'Set-Cookie' in self.headers:
-            self.headers['Set-Cookie'].append(http_cookie)
-        else:
-            self.headers['Set-Cookie'] = [http_cookie]
-
-    def delete_cookie(self, cookie, **kwargs):
-        """Delete a cookie.
-
-        :param cookie: The cookie's name.
-        :param kwargs: Any cookie opens and flags supported by
-                       ``set_cookie()`` except ``expires`` and ``max_age``.
-        """
-        self.set_cookie(cookie, '', expires='Thu, 01 Jan 1970 00:00:01 GMT',
-                        max_age=0, **kwargs)
 
     def complete(self):
         if isinstance(self.body, bytes) and \
@@ -749,21 +692,8 @@ class Response:
         return iter()
 
     @classmethod
-    def redirect(cls, location, status_code=302):
-        """Return a redirect response.
-
-        :param location: The URL to redirect to.
-        :param status_code: The 3xx status code to use for the redirect. The
-                            default is 302.
-        """
-        if '\x0d' in location or '\x0a' in location:
-            raise ValueError('invalid redirect URL')
-        return cls(status_code=status_code, headers={'Location': location})
-
-    @classmethod
     def send_file(cls, filename, status_code=200, content_type=None,
-                  stream=None, max_age=None, compressed=False,
-                  file_extension=''):
+                  stream=None, max_age=None, file_extension=''):
         """Send file contents in a response.
 
         :param filename: The filename of the file.
@@ -780,12 +710,6 @@ class Response:
                         seconds. If omitted, the value of the
                         :attr:`Response.default_send_file_max_age` attribute is
                         used.
-        :param compressed: Whether the file is compressed. If ``True``, the
-                           ``Content-Encoding`` header is set to ``gzip``. A
-                           string with the header value can also be passed.
-                           Note that when using this option the file must have
-                           been compressed beforehand. This option only sets
-                           the header.
         :param file_extension: A file extension to append to the ``filename``
                                parameter when opening the file, including the
                                dot. The extension given here is not considered
@@ -808,10 +732,6 @@ class Response:
         if max_age is not None:
             headers['Cache-Control'] = 'max-age={}'.format(max_age)
 
-        if compressed:
-            headers['Content-Encoding'] = compressed \
-                if isinstance(compressed, str) else 'gzip'
-
         f = stream or open(filename + file_extension, 'rb')
         return cls(body=f, status_code=status_code, headers=headers)
 
@@ -824,35 +744,8 @@ class URLPattern():
         pattern = ''
         use_regex = False
         for segment in url_pattern.lstrip('/').split('/'):
-            if segment and segment[0] == '<':
-                if segment[-1] != '>':
-                    raise ValueError('invalid URL pattern')
-                segment = segment[1:-1]
-                if ':' in segment:
-                    type_, name = segment.rsplit(':', 1)
-                else:
-                    type_ = 'string'
-                    name = segment
-                parser = None
-                if type_ == 'string':
-                    parser = self._string_segment
-                    pattern += '/([^/]+)'
-                elif type_ == 'int':
-                    parser = self._int_segment
-                    pattern += '/(-?\\d+)'
-                elif type_ == 'path':
-                    use_regex = True
-                    pattern += '/(.+)'
-                elif type_.startswith('re:'):
-                    use_regex = True
-                    pattern += '/({pattern})'.format(pattern=type_[3:])
-                else:
-                    raise ValueError('invalid URL segment type')
-                self.segments.append({'parser': parser, 'name': name,
-                                      'type': type_})
-            else:
-                pattern += '/' + segment
-                self.segments.append({'parser': self._static_segment(segment)})
+            pattern += '/' + segment
+            self.segments.append({'parser': self._static_segment(segment)})
         if use_regex:
             import re
             self.regex = re.compile('^' + pattern + '$')
@@ -942,7 +835,6 @@ class Microdot:
         self.error_handlers = {}
         self.shutdown_requested = False
         self.options_handler = self.default_options_handler
-        self.debug = False
         self.server = None
 
     def route(self, url_pattern, methods=None):
@@ -954,14 +846,6 @@ class Microdot:
         :param methods: The list of HTTP methods to be handled by the
                         decorated function. If omitted, only ``GET`` requests
                         are handled.
-
-        The URL pattern can be a static path (for example, ``/users`` or
-        ``/api/invoices/search``) or a path with dynamic components enclosed
-        in ``<`` and ``>`` (for example, ``/users/<id>`` or
-        ``/invoices/<number>/products``). Dynamic path components can also
-        include a type prefix, separated from the name with a colon (for
-        example, ``/users/<int:id>``). The type can be ``string`` (the
-        default), ``int``, ``path`` or ``re:[regular-expression]``.
 
         The first argument of the decorated function must be
         the request object. Any path arguments that are specified in the URL
@@ -991,12 +875,7 @@ class Microdot:
 
         This decorator can be used as an alias to the ``route`` decorator with
         ``methods=['GET']``.
-
-        Example::
-
-            @app.get('/users/<int:id>')
-            def get_user(request, id):
-                # ...
+        
         """
         return self.route(url_pattern, methods=['GET'])
 
@@ -1017,60 +896,6 @@ class Microdot:
                 # ...
         """
         return self.route(url_pattern, methods=['POST'])
-
-    def put(self, url_pattern):
-        """Decorator that is used to register a function as a ``PUT`` request
-        handler for a given URL.
-
-        :param url_pattern: The URL pattern that will be compared against
-                            incoming requests.
-
-        This decorator can be used as an alias to the ``route`` decorator with
-        ``methods=['PUT']``.
-
-        Example::
-
-            @app.put('/users/<int:id>')
-            def edit_user(request, id):
-                # ...
-        """
-        return self.route(url_pattern, methods=['PUT'])
-
-    def patch(self, url_pattern):
-        """Decorator that is used to register a function as a ``PATCH`` request
-        handler for a given URL.
-
-        :param url_pattern: The URL pattern that will be compared against
-                            incoming requests.
-
-        This decorator can be used as an alias to the ``route`` decorator with
-        ``methods=['PATCH']``.
-
-        Example::
-
-            @app.patch('/users/<int:id>')
-            def edit_user(request, id):
-                # ...
-        """
-        return self.route(url_pattern, methods=['PATCH'])
-
-    def delete(self, url_pattern):
-        """Decorator that is used to register a function as a ``DELETE``
-        request handler for a given URL.
-
-        :param url_pattern: The URL pattern that will be compared against
-                            incoming requests.
-
-        This decorator can be used as an alias to the ``route`` decorator with
-        ``methods=['DELETE']``.
-
-        Example::
-
-            @app.delete('/users/<int:id>')
-            def delete_user(request, id):
-                # ...
-        """
-        return self.route(url_pattern, methods=['DELETE'])
 
     def before_request(self, f):
         """Decorator to register a function to run before each request is
@@ -1146,49 +971,7 @@ class Microdot:
             return f
         return decorated
 
-    def mount(self, subapp, url_prefix=''):
-        """Mount a sub-application, optionally under the given URL prefix.
-
-        :param subapp: The sub-application to mount.
-        :param url_prefix: The URL prefix to mount the application under.
-        """
-        for methods, pattern, handler in subapp.url_map:
-            self.url_map.append(
-                (methods, URLPattern(url_prefix + pattern.url_pattern),
-                 handler))
-        for handler in subapp.before_request_handlers:
-            self.before_request_handlers.append(handler)
-        for handler in subapp.after_request_handlers:
-            self.after_request_handlers.append(handler)
-        for handler in subapp.after_error_request_handlers:
-            self.after_error_request_handlers.append(handler)
-        for status_code, handler in subapp.error_handlers.items():
-            self.error_handlers[status_code] = handler
-
-    @staticmethod
-    def abort(status_code, reason=None):
-        """Abort the current request and return an error response with the
-        given status code.
-
-        :param status_code: The numeric status code of the response.
-        :param reason: The reason for the response, which is included in the
-                       response body.
-
-        Example::
-
-            from microdot import abort
-
-            @app.route('/users/<int:id>')
-            def get_user(id):
-                user = get_user_by_id(id)
-                if user is None:
-                    abort(404)
-                return user.to_dict()
-        """
-        raise HTTPException(status_code, reason)
-
-    async def start_server(self, host='0.0.0.0', port=5000, debug=False,
-                           ssl=None):
+    async def start_server(self, host='0.0.0.0', port=5000):
         """Start the Microdot web server as a coroutine. This coroutine does
         not normally return, as the server enters an endless listening loop.
         The :func:`shutdown` function provides a method for terminating the
@@ -1205,8 +988,6 @@ class Microdot:
                      port 5000.
         :param debug: If ``True``, the server logs debugging information. The
                       default is ``False``.
-        :param ssl: An ``SSLContext`` instance or ``None`` if the server should
-                    not use TLS. The default is ``None``.
 
         This method is a coroutine.
 
@@ -1226,7 +1007,6 @@ class Microdot:
 
             asyncio.run(main())
         """
-        self.debug = debug
 
         async def serve(reader, writer):
             if not hasattr(writer, 'awrite'):  # pragma: no cover
@@ -1245,13 +1025,8 @@ class Microdot:
 
             await self.handle_request(reader, writer)
 
-        if self.debug:  # pragma: no cover
-            print('Starting async server on {host}:{port}...'.format(
-                host=host, port=port))
-
         try:
-            self.server = await asyncio.start_server(serve, host, port,
-                                                     ssl=ssl)
+            self.server = await asyncio.start_server(serve, host, port)
         except TypeError:  # pragma: no cover
             self.server = await asyncio.start_server(serve, host, port)
 
@@ -1269,7 +1044,7 @@ class Microdot:
                 # wait a bit and try again
                 await asyncio.sleep(0.1)
 
-    def run(self, host='0.0.0.0', port=5000, debug=False, ssl=None):
+    def run(self, host='0.0.0.0', port=5000):
         """Start the web server. This function does not normally return, as
         the server enters an endless listening loop. The :func:`shutdown`
         function provides a method for terminating the server gracefully.
@@ -1283,10 +1058,6 @@ class Microdot:
                      the host.
         :param port: The port number to listen for requests. The default is
                      port 5000.
-        :param debug: If ``True``, the server logs debugging information. The
-                      default is ``False``.
-        :param ssl: An ``SSLContext`` instance or ``None`` if the server should
-                    not use TLS. The default is ``None``.
 
         Example::
 
@@ -1300,8 +1071,7 @@ class Microdot:
 
             app.run(debug=True)
         """
-        asyncio.run(self.start_server(host=host, port=port, debug=debug,
-                                      ssl=ssl))  # pragma: no cover
+        asyncio.run(self.start_server(host=host, port=port))  # pragma: no cover
 
     def shutdown(self):
         """Request a server shutdown. The server will then exit its request
@@ -1363,10 +1133,6 @@ class Microdot:
                 pass
             else:
                 raise
-        if self.debug and req:  # pragma: no cover
-            print('{method} {path} {status_code}'.format(
-                method=req.method, path=req.path,
-                status_code=res.status_code))
 
     async def dispatch_request(self, req):
         after_request_handled = False
@@ -1458,7 +1224,4 @@ class Microdot:
 
 
 Response.already_handled = Response()
-
-abort = Microdot.abort
-redirect = Response.redirect
 send_file = Response.send_file
