@@ -228,7 +228,7 @@ def init(tot: ToT):
         return
     
     # if NIC present, bring it up
-    if tot.nic() is not None and tot.nic().isUp() is False:
+    if tot.cvars().get(u"config.nic", u"enable") is True and tot.nic() is not None and tot.nic().isUp() is False:
         tot.nic().initAsClient()
     
     if tot.rtc().readOnly() is False:
@@ -393,15 +393,15 @@ def clockMain(tot: ToT):
     if tot.inputs().down():
         burnin(tot)
     
-    # enter webserver config mode when SET is held on reset
-    force_server = tot.cvars().get(u"wurthless.clock.clockmain", u"force_server")
+    if tot.cvars().get(u"config.nic", u"enable") is True and tot.nic() is not None:
+        # enter webserver config mode when SET is held on reset
+        force_server = tot.cvars().get(u"wurthless.clock.clockmain", u"force_server")
+        if tot.inputs().set() or force_server:
+            # display "cfg"
+            tot.display().setBrightness(8)
+            tot.display().setDigitsBinary(0, 0b00111001, 0b01110001, 0b01111101)
 
-    if tot.inputs().set() or force_server:
-        # display "cfg"
-        tot.display().setBrightness(8)
-        tot.display().setDigitsBinary(0, 0b00111001, 0b01110001, 0b01111101)
-
-        serverMain(tot)
+            serverMain(tot)
 
     # the ghost of Arduino past refuses to go away
     init(tot)
