@@ -163,14 +163,16 @@ class Esp32MaskDisplay(Display):
 
     def _strobe_fast(self, t):
         isr = disable_irq()
-        mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr & 3]
+        mem32[GPIO_OUT_REG] = self.digs[self.sm_ptr]
         self.sm_ptr += 1
+        self.sm_ptr &= 3
         enable_irq(isr)
 
     def _strobe(self,t):
         isr = disable_irq()
-        mem32[GPIO_OUT_REG] = (mem32[GPIO_OUT_REG] & self.andmask) | self.digs[self.sm_ptr & 3]
+        mem32[GPIO_OUT_REG] = (mem32[GPIO_OUT_REG] & self.andmask) | self.digs[self.sm_ptr]
         self.sm_ptr += 1
+        self.sm_ptr &= 3
         enable_irq(isr)
 
     def setBrightness(self, brightness):

@@ -7,7 +7,10 @@
 #
 
 import time
-from typing import Callable
+try:
+    from typing import Callable
+except:
+    pass
 
 class EventFiresAfter(object):
     def __init__(self, seconds):
