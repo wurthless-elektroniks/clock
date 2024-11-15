@@ -9,7 +9,7 @@ from wurthless.clock.common.ntp import NtpTimeSource
 
 from wurthless.clock.drivers.display.esp32maskdisplay import Esp32MaskDisplay
 
-from wurthless.clock.drivers.input.gpioinputs import GpioInputs
+from wurthless.clock.drivers.input.esp32gpioinputs import Esp32GpioInputs
 from wurthless.clock.drivers.rtc.micropythonrtc import MicropythonRTC
 from wurthless.clock.drivers.nic.micropythonwifinic import MicropythonWifiNic
 from wurthless.clock.drivers.display.invertedbitdisplay import InvertedBitDisplay
@@ -36,18 +36,9 @@ def runEsp32Wroom32E(invert_bits=False):
     cvars.load()
     tot.setCvars( cvars )
 
-    # pin assignments on v8 (v6/v7 no longer supported)
     cvars.configure(u"wurthless.clock.drivers.display.esp32maskdisplay",
                     { 
                        u"strobe_fast": True
-                    })
-    
-    cvars.configure(u"wurthless.clock.drivers.input.gpioinputs",
-                     {
-                       u"up_pin_id": 25,
-                       u"down_pin_id": 33,
-                       u"set_pin_id": 32,
-                       u"dst_pin_id": 35
                     })
 
     # not enough CPU time in config mode to run the display
@@ -59,7 +50,7 @@ def runEsp32Wroom32E(invert_bits=False):
         display = InvertedBitDisplay(display)
 
     tot.setDisplay( display )
-    tot.setInputs( GpioInputs(tot) )
+    tot.setInputs( Esp32GpioInputs(tot) )
     tot.setRtc( MicropythonRTC() )
 
     # display INIT
