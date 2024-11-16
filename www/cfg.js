@@ -134,6 +134,9 @@ function submitForm() {
     .then( (response) => {
         document.getElementById("success").style.display = "";
         document.getElementById("form").remove();
+        
+        // scroll to top of page (needed on mobile)
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
     })
     .catch( (error) => {
         console.log(error);
@@ -158,8 +161,6 @@ function populateSettings() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    console.log("document load done.");
-
     populateSettings();
 
     var apname = document.getElementById("ap_name");
