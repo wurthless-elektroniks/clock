@@ -1,68 +1,15 @@
+
 # The Most Useless Clock in the World: The User Manual
 
 Congratulations! You were dumb or unlucky enough to buy, acquire, or otherwise use The Most Useless Clock in the World. You now have a janky, overpriced and unreliable clock that doesn't do much other than tell the time. But it does look stylish when viewed across a room.
 
 **If you're an end-user, this documentation is for you.** If you're just someone who wants to use this code as part of their own project (*who would?*), then it will still be useful in a way. However, most of the technical docs, if any, will live in the sourcecode.
 
-## Hardware revisions
+**If you're a developer**, [read this](development.md).
 
-This section only applies to those who have a würthless elektroniks-branded TMUCITW. If you're just checking out the code for your own use, you can at least appreciate the pretty pictures.
+## Revision history
 
-**Note that I'm not just putting these pictures here to jerk myself off!** They're here for an important reason: so you know which hardware revision you ended up with, and known issues with that revision in case you have trouble.
-
-### The ATMega Generation
-
-#### The original prototype
-
-![](proto.jpeg)
-
-It's nice to look at.
-
-#### Version 1
-
-![](v1.jpeg)
-
-**Version 1** is something I don't support anymore. It ran on ATMega328-based hardware with a MAX7219 driving the display and a DS1307 for RTC. As you can tell, that's extremely expensive and was a motivator for remaking the clock on much cheaper hardware. Much of the documentation below should apply to how it behaves. In case you give a shit, only three of these exist in the wild, although there could possibly be more if someone dumb enough to do so builds more of them using [the publicly available Gerbers and sourcecode](https://github.com/wurthless-elektroniks/clock_v1).
-
-**This version is known to have numerous issues**, mostly due to the use of the MAX7219 and DS1307 chips and the separate board design. The clock will freeze and glitch out if you touch it the wrong way. The DS1307 also needs a pulldown resistor in order to function at all when a battery is not connected. In non-technical parlance this means the coin cell you put in the battery holder will die in a few months when it should last years. When the battery dies, the clock will no longer reliably keep track of time until the battery is replaced.
-
-### The Raspberry Pi Pico W Generation
-
-**WARNING!** Versions 2, 3 and 4 are all subject to an issue where it is possible to backfeed power to another device. Version 5 has a diode in place to mitigate this issue. Do **NOT** plug any USB cable into the Micro USB port! It's there for debugging purposes only. 
-
-#### Version 2
-
-![](v2.jpeg)
-
-**Version 2** (*double the uselessness, double the destruction*) is the first RP2040-based version, now using the standard stylish black solder mask. **This board will typically come with bodges applied; while it's ugly, it's necessary for the clock to function at all.** Originally, DST and the master PWM transistor would be controlled entirely in software, but this was decided against because it would add code complexity and would not be safe or reliable (that master output control transistor has gone up in smoke on me several times during testing). The DST button, if present, will be glued onto the board next to the SET button. It is not pictured in this photo for whatever reason (i.e., I was lazy).
-
-#### Version 3
-
-![](v3.jpeg)
-
-**Version 3** (*for those about to clock... we salute you*) fixes the issues with v2, changes to a mini-USB port for power and has a bigger expansion port. It also has space for a TLV-1117-33 voltage regulator, but it is not populated as the Pico's built-in 3v3 voltage regulator works nicely enough. [Grab the Gerbers here.](/gerbs/clock_v3/)
-
-#### Version 4
-
-![](v4.jpeg)
-
-**Version 4** (*rock out with your USB-C clock out*) is a major revision to the board to make it smaller (and cheaper). The expansion port has been removed, and the pushbuttons are now surface mount. But, obviously, the biggest change is the switch to USB-C power, which was done because absolutely uses mini-USB for power applications. It's either that, or force the end users to use the awful, horrible, no-good piece of crap power interface that is Micro USB. **There are no known issues with this board (yet).**
-
-#### Version 5
-
-![](v5.jpeg)
-
-**Version 5** (*my clock is bigger than yours!*) is the final version to run on the Raspberry Pi Pico W. The LED matrix driver circuit is redone; the matrix is now driven by 5 volts and a BCR420UW6 is used for the master PWM output control. The clock is now able to be used with blue and purple LEDs, which wasn't possible on the older designs (although probably possible with the MAX7219). Thanks to more efficient space management on the board (and the spaghetti wire routing to go with it), the board size has also been slimmed down a bit more, at the cost of my sanity, because now there are tiny, impossible-to-solder dual NPN transistors switching the matrix. [Grab the Gerbers here.](/gerbs/clock_v5_whitelabel/)
-
-### The Future
-
-#### Version 6
-
-**Version 6** (*boom boom boom, i want you in my WROOM*) will be the first version to run on ESP32-based hardware. Exact details TBD.
-
-#### TMUCITW Junior
-
-**TMUCITW Junior** is yet to be decided on. It will almost certainly run on cheaper ESP32-based hardware and only support 12-hour time.
+[Read this](history.md) for details on each hardware revision and known issues with them.
 
 ## Initial Setup
 
@@ -74,7 +21,7 @@ Once connected to the network, open your web browser to: http://192.168.4.1
 
 If successful, you'll see a page like this:
 
-![](configpage.png)
+![](img/configpage.png)
 
 Here's what to enter:
 
@@ -109,7 +56,26 @@ However, the pushbuttons on the front will still be active. Here's what they do.
 * Pressing **DOWN** will toggle between the current time, year, month, and day. After a while, the clock resets to displaying the current time.
 * Holding **SET** will reconfigure the current time. If the clock is configured to synchronize time (e.g., over Wi-Fi), it will do so. In all other situations, this will send the clock back to manual configuration mode.
 * Holding **DST**, **if the Daylight Savings Time feature is not disabled,** will toggle DST. 
-* Pressing **RESET** at any time will force the clock to reboot.
+* Pressing **REBOOT** (**RESET** on older revisions) at any time will force the clock to reboot.
+
+## Daylight Savings Time
+
+**To toggle DST, hold the DST button for five seconds when the clock is running.**
+
+The Most Useless Clock in the World does *NOT* automatically adjust for Daylight Savings Time. It never has, it never will. DST is annoying to implement thanks to the many rules that vary between countries and are subject to change.
+
+To implement DST, the following changes would need to be made:
+
+* Implement all DST rules listed [here](https://en.wikipedia.org/wiki/Daylight_saving_time_by_country)
+* Automatic software updates to account for future rule changes
+* Implement DST rule selection
+
+This is as opposed to the other solution:
+
+* Add pushbutton to toggle DST
+* Force user to toggle DST manually
+
+When in doubt, keep it simple.
 
 ## Quality Assurance Policy
 
