@@ -31,6 +31,8 @@ To get your software running:
 ![](img/testbench.png)
 
 The TMUCITW software has the ability to run on your machine (using python3) for testing and quick development.
-Due to how development has progressed, it's no longer possible to run it easily.
-Details to follow when I care, but for now, the trick is to put together a directory structured like how bin/
-is, but with raw .py files. Then do `python3 run_pc.py` to run the simulator.
+
+Run `make mock` and it'll copy files into private/test. `cd` into that directory and then run `python3 run_pc.py` to use the simulator.
+
+**DANGER, MON FRÈRE:** Micropython and CPython (or other desktop Python runtime) are not the same. What you run on a PC might not work on Micropython,
+and vice-versa. Test everything end-to-end.
