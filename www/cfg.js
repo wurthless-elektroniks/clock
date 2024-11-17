@@ -43,10 +43,10 @@ var timezones = [
 
 function initTimeZones() {
     let utcoffsetSelector = document.getElementById("utcoffset");
-    for (var tz in timezones) {
+    for (let tz of timezones) {
         let opt = document.createElement("option");
-        opt.text = timezones[tz].label;
-        opt.value = timezones[tz].value;
+        opt.text = tz.label;
+        opt.value = tz.value;
         utcoffsetSelector.add(opt);
     } 
 }
@@ -67,7 +67,7 @@ function validateAccessPointName(apname) {
         return false;
     }
 
-    for (var i = 0; i < apname.length; i++) {
+    for (let i = 0; i < apname.length; i++) {
         let ch = apname.charCodeAt(i);
         if ( !(
               ch == 0x20 ||
@@ -91,6 +91,8 @@ function validateForm() {
     if (!validateAccessPointName(document.getElementById("ap_name").value)) {
         return false;
     }
+
+    // any other condition checks happen here...
 
     return true;
 }
@@ -146,7 +148,7 @@ function submitForm() {
 function populateSettings() {
     fetch("/rest/settings")
         .then( (response) => response.json() )
-        .then( (json) =>  {
+        .then( (json) => {
             document.getElementById("ap_name").value = json['wifi_ap_name'];
             document.getElementById("utcoffset").value = json['utc_offset_seconds'];
 
@@ -160,11 +162,11 @@ function populateSettings() {
         });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
     populateSettings();
 
     var apname = document.getElementById("ap_name");
-    apname.addEventListener('change', function(e) {
+    apname.addEventListener('change', (e) => {
         this.setCustomValidity('');
         if (!this.checkValidity()) {
             return;
