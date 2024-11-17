@@ -40,12 +40,19 @@ class DebouncedInputs(Inputs):
         self.inputs.reset()
 
     def strobe(self):
-        self.inputs.strobe()
+        if self.inputs.strobe() is False:
+            self._up.reset()
+            self._down.reset()
+            self._set.reset()
+            self._dst.reset()
+            return False
+
         # mpy gotcha: true |= False => 1, and not True as we'd expect
         up = self._up.strobe()
         down = self._down.strobe()
         set = self._set.strobe()
         dst = self._dst.strobe()
+        
         return up or down or set or dst
 
     def up(self):
