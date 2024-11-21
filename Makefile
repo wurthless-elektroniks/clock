@@ -7,6 +7,8 @@ PRIVATEDIR=private
 
 WWWOBJDIR=$(OBJDIR)/$(WWWDIR)
 
+MPYCROSS=$(PRIVATEDIR)/mpy-cross
+
 ifndef $(TARGET)
 	TARGET=all
 endif

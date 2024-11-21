@@ -69,8 +69,8 @@ registerCvar(u"wurthless.clock.clockmain",
 registerCvar(u"wurthless.clock.clockmain",
              u"tickrate",
              u"Int",
-             u"Framerate in Hz. Default is 30.",
-             30)
+             u"Framerate in Hz. Default is 25.",
+             25)
 
 def configMode(tot: ToT):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
