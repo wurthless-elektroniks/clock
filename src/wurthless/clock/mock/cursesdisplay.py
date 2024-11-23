@@ -26,6 +26,9 @@ class CursesDisplay(Display):
         self.dig_c = 0
         self.dig_d = 0
 
+        self.scr.idcok(False)
+        self.scr.idlok(False)
+
     def _refresh(self):
         screenstr = u"""
              aaaa   hhhh   oooo    vvvv
@@ -37,7 +40,7 @@ class CursesDisplay(Display):
              dddd   kkkk   rrrr    yyyy
             """
 
-        self.scr.clear()
+        self.scr.erase()
         chartab = {}
         appendCharTab(self.dig_a, ['a','b','c','d','e','f','g'], chartab)
         appendCharTab(self.dig_b, ['h','i','j','k','l','m','n'], chartab)
