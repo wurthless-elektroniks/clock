@@ -27,22 +27,21 @@ def inputTest(tot: ToT):
 
         time.sleep(0.1)
 
-
-
-
 def burnin(tot: ToT):
     while True:
         tot.display().setBrightness(8)
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
         time.sleep(5)
 
-        for j in range(0,10):
+        # segment drives
+        for j in range(0,2):
             for i in range(0,7):
                 dig = 1 << i
                 tot.display().setDigitsBinary(dig,dig,dig,dig)
                 time.sleep(0.5)
 
-        for j in range(0,10):
+        # digit drives
+        for j in range(0,4):
             tot.display().setDigitsBinary(0x7F, 0x00, 0x00, 0x00)
             time.sleep(0.5)
             tot.display().setDigitsBinary(0x00, 0x7F, 0x00, 0x00)
@@ -51,13 +50,23 @@ def burnin(tot: ToT):
             time.sleep(0.5)
             tot.display().setDigitsBinary(0x00, 0x00, 0x00, 0x7F)
             time.sleep(0.5)
+     
+        # anti-ghosting test (bad LEDs cause bleedovers)
+        # has to run at lowest brightness because that's when the problem is most obvious
+        tot.display().setBrightness(1)
+        for j in range(0,4):
+            tot.display().setDigitsBinary(0b01001001, 0b00110110, 0b01001001, 0b00110110)
+            time.sleep(0.5)
+            tot.display().setDigitsBinary(0b00110110, 0b01001001, 0b00110110, 0b01001001)
+            time.sleep(0.5)
 
+        # brightness test
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
-        for j in range(0,10):
+        for j in range(0,1):
             for i in range(0,8):
                 tot.display().setBrightness(8-i)
                 time.sleep(0.5)
             for i in range(0,8):
                 tot.display().setBrightness(1+i)
                 time.sleep(0.5)
-        
+   

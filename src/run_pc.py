@@ -93,6 +93,9 @@ def cursesMain(stdscr):
     if u"-server" in sys.argv:
         tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
 
+    if u"-burnin" in sys.argv:
+        tot.cvars().set(u"wurthless.clock.clockmain", u"force_burnin", True)
+
     tot.finalize()
 
     # go to it

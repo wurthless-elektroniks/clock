@@ -67,6 +67,12 @@ registerCvar(u"wurthless.clock.clockmain",
              False)
 
 registerCvar(u"wurthless.clock.clockmain",
+             u"force_burnin",
+             u"Boolean",
+             u"If True, force burn-in mode (needed for testing).",
+             False)
+
+registerCvar(u"wurthless.clock.clockmain",
              u"tickrate",
              u"Int",
              u"Framerate in Hz. Default is 25.",
@@ -394,7 +400,8 @@ def clockMain(tot: ToT):
         inputTest(tot)
 
     # if DOWN held on reset, go to burnin / demo mode
-    if tot.inputs().down():
+    force_burnin = tot.cvars().get(u"wurthless.clock.clockmain", u"force_burnin")
+    if force_burnin or tot.inputs().down():
         burnin(tot)
     
     if tot.cvars().get(u"config.nic", u"enable") is True and tot.nic() is not None:
