@@ -6,7 +6,8 @@
 # But then again, neither is the rest of this project.
 #
 
-import time
+import wurthless.clock.common.time64 as time
+
 try:
     from typing import Callable
 except:

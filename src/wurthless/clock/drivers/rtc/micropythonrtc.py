@@ -2,7 +2,6 @@
 # Default RTC provided by Micropython. Can be hardware- or software-based. We don't care as long as it keeps time.
 #
 
-import time
 from machine import RTC
 from wurthless.clock.api.rtc import Rtc
 from wurthless.clock.common.timestamp import timeTupleToTimestamp, timestampToTimeTuple

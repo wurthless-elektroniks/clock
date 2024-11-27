@@ -5,7 +5,7 @@
 # we can poll from will give us the time as a UTC timestamp.
 #
 
-import time
+import wurthless.clock.common.time64 as time
 
 def getTimestampForNextMinute(timestamp):
     firsttuple = timestampToTimeTuple(timestamp)
@@ -19,7 +19,6 @@ def getTimestampForNextMinute(timestamp):
         if firsttuple[4] != nexttuple[4]:
             break    
     return ts
-
 
 def timestampToTimeTuple(timestamp):
     return time.gmtime(timestamp)
