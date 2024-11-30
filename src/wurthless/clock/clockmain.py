@@ -188,9 +188,10 @@ def syncTime(tot: ToT, suppressError:bool=False) -> bool:
     t = 0
     for timesource in tot.timesources():
         t = timesource.getUtcTime()
-        if t != 0: break
+        if t > 0: break
     
-    if t != 0:
+    # TODO: this does NOT handle rate limit/"forget us" error codes yet.
+    if t > 0:
         tot.rtc().setUtcTime(t)
         return True
     elif tot.rtc().isUp() is True and suppressError is True:

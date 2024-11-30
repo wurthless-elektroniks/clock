@@ -5,7 +5,7 @@
 from wurthless.clock.api.tot import ToT
 from wurthless.clock.clockmain import clockMain
 
-from wurthless.clock.common.ntp import NtpTimeSource
+from wurthless.clock.common.ntp4timesource import Ntp4TimeSource
 
 from wurthless.clock.drivers.display.esp32maskdisplay import Esp32MaskDisplay
 
@@ -58,7 +58,7 @@ def runEsp32Wroom32E(invert_bits=False):
 
     # install NIC and NTP timesource
     tot.setNic( MicropythonWifiNic(tot) )
-    tot.setTimeSources( [ NtpTimeSource(tot) ] )
+    tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
 
     # force server mode if user hasn't configured wifi yet
     if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
