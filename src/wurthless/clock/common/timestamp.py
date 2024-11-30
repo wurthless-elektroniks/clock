@@ -5,7 +5,7 @@
 # we can poll from will give us the time as a UTC timestamp.
 #
 
-import time
+import wurthless.clock.common.time64 as time64
 
 def getTimestampForNextMinute(timestamp):
     firsttuple = timestampToTimeTuple(timestamp)
@@ -20,17 +20,16 @@ def getTimestampForNextMinute(timestamp):
             break    
     return ts
 
-
 def timestampToTimeTuple(timestamp):
-    return time.gmtime(timestamp)
+    return time64.gmtime(timestamp)
 
 def timeTupleToTimestamp(tuple):
     # piping the results of mktime directly to the caller can result in horrifically inaccurate timestamps,
     # because mktime assumes local timezone will be used.
     # we catch the delta in advance and return the correct timestamp that way.
     # wastes a bit of cpu time, but who cares.
-    delta = time.mktime(time.localtime()) - time.mktime(time.gmtime())
-    return int(time.mktime(tuple)) + delta
+    delta = time64.mktime(time64.localtime()) - time64.mktime(time64.gmtime())
+    return int(time64.mktime(tuple)) + delta
 
 # util function commonly used to render the current hour
 # return array [hour, is_pm]. if running in 24 hour mode, simply return [ hour, False ].

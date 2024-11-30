@@ -3,7 +3,6 @@
 #
 
 import sys
-import time
 from micropython import const
 from machine import Pin,Timer,mem32,disable_irq,enable_irq,PWM
 from wurthless.clock.cvars.cvars import registerCvar

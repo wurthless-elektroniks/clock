@@ -14,7 +14,7 @@ from wurthless.clock.cvars.cvars import Cvars
 from wurthless.clock.cvars.cvarwriter import TokenedCvarWriter
 
 
-from wurthless.clock.common.ntp import NtpTimeSource
+from wurthless.clock.common.ntp4timesource import Ntp4TimeSource
 
 from wurthless.clock.drivers.nic.stubnic import StubNic
 from wurthless.clock.drivers.rtc.py3rtc import Python3Rtc
@@ -80,7 +80,7 @@ def cursesMain(stdscr):
 
     if u"-ntp" in sys.argv or u"-server" in sys.argv:
         tot.setNic( StubNic() )
-        tot.setTimeSources( [ NtpTimeSource(tot) ] )
+        tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
     else:
         tot.setTimeSources( [] )
 

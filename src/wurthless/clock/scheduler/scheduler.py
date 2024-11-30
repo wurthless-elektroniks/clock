@@ -6,7 +6,8 @@
 # But then again, neither is the rest of this project.
 #
 
-import time
+import wurthless.clock.common.time64 as time64
+
 try:
     from typing import Callable
 except:
@@ -42,14 +43,14 @@ class Scheduler(object):
         self._event_dict = {}
         self._event_queue = []
 
-        self._last_time = int(time.time())
+        self._last_time = int(time64.time())
         self._scheduler_executing = False
 
     def tick(self):
         '''
         Run the scheduler main loop.
         '''
-        ts = int(time.time())
+        ts = int(time64.time())
         if self._last_time == ts:
             return
         self._last_time = ts
@@ -97,7 +98,7 @@ class Scheduler(object):
 
     def _enqueueEvent(self, event: Event):
         # calc next fire
-        ts = event._when._calcNextFire(int(time.time()))
+        ts = event._when._calcNextFire(int(time64.time()))
         event._fire_at = ts
 
         queue_size = len(self._event_queue)
