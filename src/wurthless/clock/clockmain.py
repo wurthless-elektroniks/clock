@@ -418,4 +418,9 @@ def clockMain(tot: ToT):
     # the ghost of Arduino past refuses to go away
     init(tot)
     while True:
-        loop(tot)
+        try:
+            loop(tot)
+        except Exception as e:
+            # display "ooPS"
+            tot.display().setDigitsBinary(0b01011100,0b01011100,0b01110011,0b01101101)
+            raise e
