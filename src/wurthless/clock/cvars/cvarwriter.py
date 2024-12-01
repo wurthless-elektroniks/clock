@@ -3,6 +3,7 @@
 #
 
 import binascii
+import os
 
 class CvarWriter(object):
     def __init__(self):
@@ -16,8 +17,29 @@ class CvarWriter(object):
 
 class TokenedCvarWriter(CvarWriter):
     def __init__(self):
-        self.preflights = []
+        self.preflights = [
+            # factory settings
+            u"secrets/factory.ini",
+
+            # stuff specific to this individual device (currently unused)
+            u"secrets/guid.ini"
+        ]
         self.path = u'secrets/secrets.ini'
+
+    def _load_optionals(self, cvardict, filenames):
+        for p in self.preflights:
+            try:
+                self.loadFrom(cvardict, p)
+            except Exception as e:
+                # suppress - preflights aren't 100% necessary
+                pass
+
+    def _scan_overrides(self) -> list:
+        result = []
+        for f in os.listdir("secrets/"):
+            if f.startswith("ext_") and f.endswith(".ini"):
+                result.append(f)
+        return result
 
     def addPreflight(self, path):
         self.preflights.append(path)
@@ -37,12 +59,9 @@ class TokenedCvarWriter(CvarWriter):
                 print(u"handled: %s"%(line))
 
     def load(self, cvardict):
-        for p in self.preflights:
-            try:
-                self.loadFrom(cvardict, p)
-            except Exception as e:
-                # suppress - preflights aren't 100% necessary
-                pass
+        self._load_optionals(cvardict, self.preflights)
+        self._load_optionals(cvardict, self._scan_overrides())
+        
         try:
             self.loadFrom(cvardict, self.path)
         except OSError as e:

@@ -59,7 +59,7 @@ def time():
     # micropython returns negative values upon overflow
     t = ltime.time()
     if t < 0:
-        return t + (2**32)
+        return t + 0x0000000100000000
     return t        
 
 def mktime(tuple):

@@ -64,9 +64,7 @@ def cursesMain(stdscr):
     tot = ToT()
 
     cvars = Cvars()
-    writer = TokenedCvarWriter()
-    writer.addPreflight(u"secrets/factory.ini")
-    cvars.setWriter(writer)
+    cvars.setWriter(TokenedCvarWriter())
     cvars.load()
     tot.setCvars( cvars )
 

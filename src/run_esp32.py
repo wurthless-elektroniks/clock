@@ -23,15 +23,7 @@ def runEsp32Wroom32E(invert_bits=False):
     tot = ToT()
 
     cvars = Cvars()
-    writer = TokenedCvarWriter()
-
-    # "factory" is the factory defaults
-    writer.addPreflight(u"secrets/factory.ini")
-    
-    # "guid" is device-specific stuff (serial number, device name, etc.)
-    writer.addPreflight(u"secrets/guid.ini")
-
-    cvars.setWriter(writer)
+    cvars.setWriter(TokenedCvarWriter())
 
     cvars.load()
     tot.setCvars( cvars )

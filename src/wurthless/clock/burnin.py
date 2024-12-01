@@ -64,10 +64,15 @@ def burnin(tot: ToT):
         # anti-ghosting test (bad LEDs cause bleedovers)
         # has to run at lowest brightness because that's when the problem is most obvious
         tot.display().setBrightness(1)
-        for j in range(0,8):
+        for j in range(0,4):
             tot.display().setDigitsBinary(0b01001001, 0b00110110, 0b01001001, 0b00110110)
             time.sleep(0.5)
             tot.display().setDigitsBinary(0b00110110, 0b01001001, 0b00110110, 0b01001001)
+            time.sleep(0.5)
+        for j in range(0,4):
+            tot.display().setDigitsBinary(0b01110001, 0b00001110, 0b01110001, 0b00001110)
+            time.sleep(0.5)
+            tot.display().setDigitsBinary(0b01111000, 0b00000111, 0b01111000, 0b00000111)
             time.sleep(0.5)
 
         # brightness test

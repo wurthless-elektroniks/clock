@@ -29,14 +29,7 @@ from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 def picoCommonInit(tot,invert_bits):
     cvars = Cvars()
     writer = TokenedCvarWriter()
-
-    # "factory" is the factory defaults
-    writer.addPreflight(u"secrets/factory.ini")
-    
-    # "guid" is device-specific stuff (serial number, device name, etc.)
-    writer.addPreflight(u"secrets/guid.ini")
-
-    cvars.setWriter(writer)
+    cvars.setWriter(TokenedCvarWriter())
 
     cvars.load()
     tot.setCvars( cvars )
@@ -47,7 +40,6 @@ def picoCommonInit(tot,invert_bits):
     tot.setDisplay(display)
     tot.setInputs( GpioInputs(tot) )
     tot.setRtc( MicropythonRTC() )
-
 
 #############################################################################
 #
