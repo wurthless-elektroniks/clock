@@ -19,18 +19,19 @@ class Ntp4TimeSource(TimeSource):
         if self.tot.nic().isUp() is False:
             return TIMESOURCE_GENERIC_ERROR
 
-        addr = socket.getaddrinfo(self.tot.cvars().get(u"wurthless.clock.common.ntp4",u"host"), 123)[0][-1]
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-        def _transact(query):
-            try:
+        try:
+            addr = socket.getaddrinfo(self.tot.cvars().get(u"wurthless.clock.common.ntp4",u"host"), 123)[0][-1]
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            
+            def _transact(query):
                 s.settimeout(self.tot.cvars().get(u"wurthless.clock.common.ntp4",u"timeout"))
                 res = s.sendto(query, addr)
                 return s.recv(48)
+            
+            try:
+                return ntpv4_transact(lambda q: _transact(q))
             finally:
                 s.close()
-        try:
-            return ntpv4_transact(lambda q: _transact(q))
         except Exception as e:
             print(u"Ntp4TimeSource: unable to grab time over NTP")
             return TIMESOURCE_GENERIC_ERROR
