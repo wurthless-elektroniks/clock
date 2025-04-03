@@ -106,6 +106,12 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"If True, write directly to GPIO register without preserving other I/O settings. Default is False (off).",
              False)
 
+registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
+             u"halfbright",
+             u"Boolean",
+             u"If True, use half-brightness mode. Default is False (off).",
+             False)
+
 class Esp32MaskDisplay(Display):
     def __init__(self, tot):
         cvars = tot.cvars()
@@ -158,6 +164,8 @@ class Esp32MaskDisplay(Display):
         pwm_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"brightness_pwm_pin")
         
         self.brightness_pwm = PWM(Pin(pwm_pin))
+
+        self._halfbright = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"halfbright")
         self.setBrightness(8)
 
     def _strobe_fast(self, t):
@@ -175,7 +183,10 @@ class Esp32MaskDisplay(Display):
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        self.brightness_pwm.init(freq = self.strobe_frequency * 2, duty = int(1000*((brightness / 8))+23))
+        duty = int(1000*((brightness / 8))+23)
+        if self._halfbright:
+            duty >>= 1
+        self.brightness_pwm.init(freq = self.strobe_frequency * 2, duty=duty)
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
