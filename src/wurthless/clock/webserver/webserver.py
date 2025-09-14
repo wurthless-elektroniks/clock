@@ -135,7 +135,7 @@ def serverMain(tot):
     # on ESP32 (probably other boards) where the display is driven through software
     # there will not be enough CPU time to update the display and handle server logic
     if tot.cvars().get("wurthless.clock.webserver", "disable_display_when_serving") is True:
-        tot.display().setDigitsBinary(0,0,0,0)
+        tot.display().blank()
         tot.display().shutdown()
 
         status_pin = tot.cvars().get("wurthless.clock.webserver", "server_active_pin")

@@ -11,6 +11,7 @@
 
 from wurthless.clock.api.display import Display
 from wurthless.clock.cvars.cvars import registerCvar
+from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
 from machine import Pin, PWM, mem32
 import rp2
@@ -87,7 +88,7 @@ def sevseg():
     jmp("0")                .side(0)      # blank display and repeat
     wrap()
 
-class Rp2040Display(Display):
+class Rp2040Display(SevenSegmentDisplay):
     def __init__(self, tot):
         segment_drive_base_pin = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"segment_drive_base_pin")
         digit_drive_base_pin   = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"digit_drive_base_pin")
@@ -110,11 +111,9 @@ class Rp2040Display(Display):
         self.sm = rp2.StateMachine(0, sevseg, freq=2000, out_base=Pin(segment_drive_base_pin), sideset_base=Pin(digit_drive_base_pin))
         self.brightness_pwm = PWM(Pin(brightness_pwm_pin, Pin.OUT))
 
-
-        
         # bring up display but in blank state.
         self.setBrightness(8)
-        self.setDigitsBinary(0,0,0,0)
+        self.blank()
         self.sm.active(1)
 
     def setBrightnessPwmRaw(self, freq, duty):

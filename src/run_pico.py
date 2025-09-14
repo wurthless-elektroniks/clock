@@ -7,6 +7,7 @@ from wurthless.clock.clockmain import clockMain
 from wurthless.clock.burnin import burnin
 
 from wurthless.clock.common.ntp4timesource import Ntp4TimeSource
+from wurthless.clock.common.messages import messagesDisplayInit
 
 from wurthless.clock.drivers.input.gpioinputs import GpioInputs
 from wurthless.clock.drivers.display.rp2040display import Rp2040Display
@@ -51,7 +52,7 @@ def runPicoW(invert_bits=False):
     picoCommonInit(tot,invert_bits)
 
     # display INIT
-    tot.display().setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
+    messagesDisplayInit(tot.display())
 
     # install NIC and NTP timesource
     tot.setNic( MicropythonWifiNic(tot) )
@@ -70,14 +71,13 @@ def runPicoGnss(invert_bits=False):
     picoCommonInit(tot,invert_bits)
 
     # display INIT
-    tot.display().setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
+    messagesDisplayInit(tot.display())
 
     nmea = NmeaDevice(UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(0), rx=Pin(1), timeout=300))
 
     # display number of GNSS satellites in view until the NMEA device signals it's ready
     while nmea.isUp() is False:
-        digs = sevensegNumbersToDigits(None, 5, nmea.getSatellitesVisible() / 10, nmea.getSatellitesVisible() % 10)
-        tot.display().setDigitsBinary(digs[0],digs[1],digs[2],digs[3])
+        tot.display().setDigitsNumeric(None, 5, nmea.getSatellitesVisible() / 10, nmea.getSatellitesVisible() % 10)
     
     tot.setTimeSources( [ NmeaTimeSource(nmea) ] )
     

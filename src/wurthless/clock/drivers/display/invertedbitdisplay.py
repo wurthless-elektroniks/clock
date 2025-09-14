@@ -3,8 +3,9 @@
 #
 
 from wurthless.clock.api.display import Display
+from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
-class InvertedBitDisplay(Display):
+class InvertedBitDisplay(SevenSegmentDisplay):
     def __init__(self, parent):
         self.parent = parent
 

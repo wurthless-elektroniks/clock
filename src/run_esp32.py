@@ -5,6 +5,7 @@
 from wurthless.clock.api.tot import ToT
 from wurthless.clock.clockmain import clockMain
 
+from wurthless.clock.common.messages import messagesDisplayInit
 from wurthless.clock.common.ntp4timesource import Ntp4TimeSource
 
 from wurthless.clock.drivers.display.esp32maskdisplay import Esp32MaskDisplay
@@ -46,7 +47,7 @@ def runEsp32Wroom32E(invert_bits=False):
     tot.setRtc( MicropythonRTC() )
 
     # display INIT
-    tot.display().setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
+    messagesDisplayInit(tot.display())
 
     # install NIC and NTP timesource
     tot.setNic( MicropythonWifiNic(tot) )

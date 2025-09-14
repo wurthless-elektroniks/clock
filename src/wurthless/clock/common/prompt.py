@@ -52,8 +52,7 @@ def promptFourDigit(tot, inputs, valin: int, minval: int=0, maxval: int=9999):
     
     def _rerender():
         bcd = unpackBcd(inp / 100, inp % 100)
-        digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-        display.setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+        display.setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
 
     _rerender()
     while True:
@@ -80,8 +79,7 @@ def promptTwoDigit(tot, inputs, valin, minval=0, maxval=99):
 
     def _rerender():
         bcd = unpackBcd(0, inp)
-        digs = sevensegNumbersToDigits( None, None, bcd[2], bcd[3]  )
-        display.setDigitsBinary( 0, 0, digs[2], digs[3] )
+        display.setDigitsNumeric( None, None, bcd[2], bcd[3]  )
 
     _rerender()
     while True:
@@ -120,9 +118,7 @@ def promptTime(tot, inputs, hour, minute):
     def _rerenderHour():
         hour_visible = autoformatHourIn12HourTime(tot, inp)
         bcd = unpackBcd(inp, 0)
-        digs = sevensegNumbersToDigits( bcd[0], bcd[1], None, None )
-
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )    
+        tot.display().setDigitsNumeric( bcd[0], bcd[1], None, None )
     
     _rerenderHour()
     
@@ -149,9 +145,7 @@ def promptTime(tot, inputs, hour, minute):
     def _rerenderMinute():
         hour_visible = autoformatHourIn12HourTime(tot, retval[0])
         bcd = unpackBcd(retval[0], inp)
-        digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+        tot.display().setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
 
     inp = minute
     _rerenderMinute()

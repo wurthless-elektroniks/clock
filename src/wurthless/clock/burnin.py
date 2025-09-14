@@ -5,9 +5,12 @@
 
 import time
 from wurthless.clock.api.tot import ToT
+from wurthless.clock.api.display import DisplayType
 
 def inputTest(tot: ToT):
-    tot.display().setBrightness(8)
+    display = tot.display()
+
+    display.setBrightness(8)
     while True:
         tot.inputs().strobe()
 
@@ -17,18 +20,64 @@ def inputTest(tot: ToT):
         dst = tot.inputs().dst()
 
         # TODO: account for clocks that only populate segs b/c on digit 0
-        button_on  = 0b00000100 
-        button_off = 0b01011100
+        if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
+            button_on  = 0b00000100
+            button_off = 0b01011100
 
-        tot.display().setDigitsBinary(button_on if up else button_off,
-                                      button_on if down else button_off,
-                                      button_on if set else button_off,
-                                      button_on if dst else button_off)
+            display.setDigitsBinary(button_on if up else button_off,
+                                        button_on if down else button_off,
+                                        button_on if set else button_off,
+                                        button_on if dst else button_off)
+        elif display.getDisplayType() == DisplayType.NUMERIC:
+            display.setDigitsNumeric(1 if up else 0,
+                                     1 if down else 0,
+                                     1 if set else 0,
+                                     1 if dst else 0)
 
         time.sleep(0.1)
 
-def burnin(tot: ToT):
+# numeric displays require different burn-in test
+def burninNumeric(tot: ToT):
+    while True:
+        tot.display().setDigitsNumeric(8,8,8,8)
+        time.sleep(0.5 * 8)
 
+        # all digits
+        for j in range(0,10):
+            tot.display().setDigitsNumeric(j,j,j,j)
+            time.sleep(0.5)
+
+        # digit 0
+        for j in range(0,10):
+            tot.display().setDigitsNumeric(j,None,None,None)
+            time.sleep(0.5)
+
+        # digit 1
+        for j in range(0,10):
+            tot.display().setDigitsNumeric(None,j,None,None)
+            time.sleep(0.5)
+        
+        # digit 2
+        for j in range(0,10):
+            tot.display().setDigitsNumeric(None,None,j,None)
+            time.sleep(0.5)
+        
+        # digit 3
+        for j in range(0,10):
+            tot.display().setDigitsNumeric(None,None,None,j)
+            time.sleep(0.5)
+
+        tot.display().setDigitsNumeric(8,8,8,8)
+
+        for j in range(0,1):
+            for i in range(0,8):
+                tot.display().setBrightness(8-i)
+                time.sleep(0.5)
+            for i in range(0,8):
+                tot.display().setBrightness(1+i)
+                time.sleep(0.5)
+
+def burninSevenSegment(tot: ToT):
     tot.display().setBrightness(8)
 
     # "tESt"
@@ -85,3 +134,9 @@ def burnin(tot: ToT):
                 tot.display().setBrightness(1+i)
                 time.sleep(0.5)
    
+def burnin(tot: ToT):
+    display_type = tot.display().getDisplayType()
+    if display_type == DisplayType.NUMERIC:
+        burninNumeric(tot)
+    elif display_type == DisplayType.SEVEN_SEGMENT:
+        burninSevenSegment(tot)

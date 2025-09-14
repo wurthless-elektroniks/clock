@@ -7,6 +7,7 @@ from micropython import const
 from machine import Pin,Timer,mem32,disable_irq,enable_irq,PWM
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.api.display import Display
+from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
 # i'm serious. we are accessing the hardware directly. it's too slow otherwise.
 # DANGER! this I/O register changes depending on what ESP32 we are using.
@@ -112,7 +113,7 @@ registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"If True, use half-brightness mode. Default is False (off).",
              False)
 
-class Esp32MaskDisplay(Display):
+class Esp32MaskDisplay(SevenSegmentDisplay):
     def __init__(self, tot):
         cvars = tot.cvars()
 

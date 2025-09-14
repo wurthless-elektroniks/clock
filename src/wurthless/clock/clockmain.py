@@ -14,8 +14,8 @@ except:
 
 from wurthless.clock.api.tot import ToT
 from wurthless.clock.burnin import burnin,inputTest
+from wurthless.clock.common.messages import messagesDisplaySync,messagesDisplayErr,messagesDisplayOops,messagesDisplayCfg
 from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp,autoformatHourIn12HourTime,getTimestampForNextMinute
-from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.webserver.webserver import serverMain
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
@@ -155,26 +155,22 @@ def renderDisplay(tot: ToT, mode: int):
         hour    = tuple[3]
         minute  = tuple[4]
         bcd = unpackBcd(hour, minute)
-        digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+        tot.display().setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
     elif mode == 1:
         year = tuple[0]
         bcd = unpackBcd(year / 100, year % 100)
         # 12-hour assumes that many of the segments on digit 0 will not be populated,
         # so in 12-hour mode, only display the last two digits of the year.
         # these things won't be working in 100 years time, because we'll all be dead by then
-        digs = sevensegNumbersToDigits( bcd[0], bcd[1], bcd[2], bcd[3] )
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+        tot.display().setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
     elif mode == 2:
         month = tuple[1]
         bcd = unpackBcd(0, month)
-        digs = sevensegNumbersToDigits( None, None, bcd[2], bcd[3] )
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+        tot.display().setDigitsNumeric( None, None, bcd[2], bcd[3] )
     elif mode == 3:
         day = tuple[2]
         bcd = unpackBcd(0, day)
-        digs = sevensegNumbersToDigits( None, None, bcd[2], bcd[3] )
-        tot.display().setDigitsBinary( digs[0], digs[1], digs[2], digs[3] )
+        tot.display().setDigitsNumeric( None, None, bcd[2], bcd[3] )
 
 def syncTime(tot: ToT, suppressError:bool=False) -> bool:
     '''
@@ -182,8 +178,8 @@ def syncTime(tot: ToT, suppressError:bool=False) -> bool:
     Return False otherwise.
     '''
     # display "SYNC"
-    tot.display().setDigitsBinary(0b01101101, 0b01101110, 0b00110111, 0b00111001)
-
+    messagesDisplaySync(tot.display())
+    
     # enumerate over all time sources until something answers
     t = 0
     for timesource in tot.timesources():
@@ -199,7 +195,7 @@ def syncTime(tot: ToT, suppressError:bool=False) -> bool:
         return False
     else:
         # otherwise, display "Err"
-        tot.display().setDigitsBinary(0, 0b01111001, 0b01010000, 0b01010000)
+        messagesDisplayErr(tot.display())
 
         # wait for user to press button
         while True:
@@ -207,8 +203,7 @@ def syncTime(tot: ToT, suppressError:bool=False) -> bool:
             if tot.inputs().set() is True:
                 break
 
-        # blank display
-        tot.display().setDigitsBinary(0, 0, 0, 0)
+        tot.display().blank()
         
         # wait for user to release button
         while True:
@@ -411,7 +406,7 @@ def clockMain(tot: ToT):
         if tot.inputs().set() or force_server:
             # display "cfg"
             tot.display().setBrightness(8)
-            tot.display().setDigitsBinary(0, 0b00111001, 0b01110001, 0b01111101)
+            messagesDisplayCfg(tot.display())
 
             serverMain(tot)
 
@@ -422,5 +417,5 @@ def clockMain(tot: ToT):
             loop(tot)
         except Exception as e:
             # display "ooPS"
-            tot.display().setDigitsBinary(0b01011100,0b01011100,0b01110011,0b01101101)
+            messagesDisplayOops(tot.display())
             raise e

@@ -8,6 +8,7 @@ from time import sleep
 
 from wurthless.clock.api.display import Display
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
+from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
 LITE = u'\u2591' 
 DARK = u'\u2592'
@@ -17,7 +18,7 @@ def appendCharTab(bits, chars, tab):
         bit = (bits >> i) & 1
         tab[chars[i]] = LITE if bit == 1 else DARK
 
-class CursesDisplay(Display):
+class CursesDisplay(SevenSegmentDisplay):
     def __init__(self, scr):
         self.scr = scr
         self.brightness = 8
