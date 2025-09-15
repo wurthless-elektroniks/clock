@@ -6,6 +6,7 @@
 import time
 from wurthless.clock.api.tot import ToT
 from wurthless.clock.api.display import DisplayType
+from wurthless.clock.common.messages import *
 
 def inputTest(tot: ToT):
     display = tot.display()
@@ -35,6 +36,21 @@ def inputTest(tot: ToT):
                                      1 if dst else 0)
 
         time.sleep(0.1)
+
+# common generic message function test
+def burninMessageTest(tot: ToT):
+    functions = [
+        messagesDisplayCfg,
+        messagesDisplayErr,
+        messagesDisplayInit,
+        messagesDisplayOops,
+        messagesDisplaySync,
+        messagesDisplayTest
+    ]
+
+    for f in functions:
+        f(tot.display())
+        time.sleep(0.5)
 
 # numeric displays require different burn-in test
 def burninNumeric(tot: ToT):
@@ -66,6 +82,8 @@ def burninNumeric(tot: ToT):
         for j in range(0,10):
             tot.display().setDigitsNumeric(None,None,None,j)
             time.sleep(0.5)
+
+        burninMessageTest(tot)
 
         tot.display().setDigitsNumeric(8,8,8,8)
 
@@ -123,6 +141,9 @@ def burninSevenSegment(tot: ToT):
             time.sleep(0.5)
             tot.display().setDigitsBinary(0b01111000, 0b00000111, 0b01111000, 0b00000111)
             time.sleep(0.5)
+
+        tot.display().setBrightness(8)
+        burninMessageTest(tot)
 
         # brightness test
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)

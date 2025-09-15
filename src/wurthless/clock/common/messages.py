@@ -11,8 +11,7 @@ def messagesDisplayInit(display: Display):
     if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
         display.setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
     elif display.getDisplayType() == DisplayType.NUMERIC:
-        # ????
-        pass
+        display.setDigitsNumeric(8, 8, 8, 8)
 
 def messagesDisplaySync(display: Display):
     '''
@@ -21,8 +20,7 @@ def messagesDisplaySync(display: Display):
     if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
         display.setDigitsBinary(0b01101101, 0b01101110, 0b00110111, 0b00111001)
     elif display.getDisplayType() == DisplayType.NUMERIC:
-        # ????
-        pass
+        display.setDigitsNumeric(9, 9, 9, 9)
 
 def messagesDisplayErr(display: Display):
     '''
@@ -31,18 +29,16 @@ def messagesDisplayErr(display: Display):
     if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
         display.setDigitsBinary(0, 0b01111001, 0b01010000, 0b01010000)
     elif display.getDisplayType() == DisplayType.NUMERIC:
-        # ????
-        pass
+        display.setDigitsNumeric(6, None, 0, 0)
 
 def messagesDisplayOops(display: Display):
     '''
     Displays "Oops", i.e., an exception was thrown in the mainloop.
     '''
     if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
-        display.setDigitsBinary(0, 0b01111001, 0b01010000, 0b01010000)
+        display.setDigitsBinary(0b01011100,0b01011100,0b01110011,0b01101101)
     elif display.getDisplayType() == DisplayType.NUMERIC:
-        # ????
-        pass
+        display.setDigitsNumeric(6, None, 9, 9)
 
 def messagesDisplayTest(display: Display):
     '''
@@ -51,8 +47,7 @@ def messagesDisplayTest(display: Display):
     if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
         display.setDigitsBinary(0b011111000, 0b01111001, 0b01101101, 0b011111000)
     elif display.getDisplayType() == DisplayType.NUMERIC:
-        # ????
-        pass
+        display.setDigitsNumeric(4, None, 9, 9)
 
 def messagesDisplayCfg(display: Display):
     '''
@@ -61,6 +56,4 @@ def messagesDisplayCfg(display: Display):
     if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
         display.setDigitsBinary(0, 0b00111001, 0b01110001, 0b01111101)
     elif display.getDisplayType() == DisplayType.NUMERIC:
-        # ????
-        pass
-    
+        display.setDigitsNumeric(4, None, 1, 1)

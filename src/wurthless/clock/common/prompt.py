@@ -3,6 +3,7 @@
 # Moved out of clockmain.py and cleaned up
 #
 
+from wurthless.clock.api.display import DisplayType
 from wurthless.clock.common.bcd import unpackBcd
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.common.timestamp import autoformatHourIn12HourTime
@@ -171,18 +172,29 @@ def promptDst(tot,inputs,dst):
     flash_state = False
     display_delay_ticks = 0
     inp = dst
+
+    display_type = tot.display().getDisplayType()
+
     while True:
         if display_delay_ticks == 0:
             display_delay_ticks = DELAY_TICKS
-            if flash_state is False:
-                # "dST"
-                tot.display().setDigitsBinary(0b00000000, 0b01011110, 0b01101101, 0b01111000)
-            else: 
-                # either "oFF" or "on"
-                if inp is True:
-                    tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01010100, 0b00000000)
+
+            if display_type == DisplayType.SEVEN_SEGMENT:
+                if flash_state is False:
+                    # "dST"
+                    tot.display().setDigitsBinary(0b00000000, 0b01011110, 0b01101101, 0b01111000)
                 else:
-                    tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01110001, 0b01110001)
+                    # either "oFF" or "on"
+                    if inp is True:
+                        tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01010100, 0b00000000)
+                    else:
+                        tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01110001, 0b01110001)
+            elif display_type == DisplayType.NUMERIC:
+                tot.display().setDigitsNumeric(
+                    6, 5, 7, 1 if inp is True else 0
+                )
+                tot.display().setBrightness(8 if flash_state is True else 2)
+
         else:
             display_delay_ticks -= 1
 
