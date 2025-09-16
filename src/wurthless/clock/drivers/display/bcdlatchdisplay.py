@@ -5,7 +5,7 @@ Used with first version of the Nixie driver circuit
 
 import time
 from machine import Pin, PWM
-from wurthless.clock.api.display import Display,DisplayType
+from wurthless.clock.api.display import Display,DISPLAY_TYPE_NUMERIC
 from wurthless.clock.cvars.cvars import registerCvar
 
 registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
@@ -117,7 +117,7 @@ class BcdLatchDisplay(Display):
         self.setDigitsNumeric(None, None, None, None)
 
     def getDisplayType(self):
-        return DisplayType.NUMERIC
+        return DISPLAY_TYPE_NUMERIC
     
     def setBrightnessPwmRaw(self, freq, duty):
         self._brightness_pwm.freq(freq)

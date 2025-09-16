@@ -1,9 +1,6 @@
-from enum import Enum
-
-class DisplayType(Enum):
-    SEVEN_SEGMENT = 0
-    
-    NUMERIC = 1
+# micropython does NOT support enum!!
+DISPLAY_TYPE_SEVEN_SEGMENT = 0
+DISPLAY_TYPE_NUMERIC       = 1
 
 class Display(object):
     '''

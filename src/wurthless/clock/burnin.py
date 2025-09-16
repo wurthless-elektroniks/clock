@@ -5,7 +5,7 @@
 
 import time
 from wurthless.clock.api.tot import ToT
-from wurthless.clock.api.display import DisplayType
+from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN_SEGMENT
 from wurthless.clock.common.messages import *
 
 def inputTest(tot: ToT):
@@ -21,7 +21,7 @@ def inputTest(tot: ToT):
         dst = tot.inputs().dst()
 
         # TODO: account for clocks that only populate segs b/c on digit 0
-        if display.getDisplayType() == DisplayType.SEVEN_SEGMENT:
+        if display.getDisplayType() == DISPLAY_TYPE_SEVEN_SEGMENT:
             button_on  = 0b00000100
             button_off = 0b01011100
 
@@ -29,7 +29,7 @@ def inputTest(tot: ToT):
                                         button_on if down else button_off,
                                         button_on if set else button_off,
                                         button_on if dst else button_off)
-        elif display.getDisplayType() == DisplayType.NUMERIC:
+        elif display.getDisplayType() == DISPLAY_TYPE_NUMERIC:
             display.setDigitsNumeric(1 if up else 0,
                                      1 if down else 0,
                                      1 if set else 0,
@@ -157,7 +157,7 @@ def burninSevenSegment(tot: ToT):
    
 def burnin(tot: ToT):
     display_type = tot.display().getDisplayType()
-    if display_type == DisplayType.NUMERIC:
+    if display_type == DISPLAY_TYPE_NUMERIC:
         burninNumeric(tot)
-    elif display_type == DisplayType.SEVEN_SEGMENT:
+    elif display_type == DISPLAY_TYPE_SEVEN_SEGMENT:
         burninSevenSegment(tot)

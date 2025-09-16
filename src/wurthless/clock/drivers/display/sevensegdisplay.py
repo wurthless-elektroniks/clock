@@ -2,12 +2,12 @@
 Base seven-segment display
 '''
 
-from wurthless.clock.api.display import Display, DisplayType
+from wurthless.clock.api.display import Display, DISPLAY_TYPE_SEVEN_SEGMENT
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 
 class SevenSegmentDisplay(Display):
     def getDisplayType(self):
-        return DisplayType.SEVEN_SEGMENT
+        return DISPLAY_TYPE_SEVEN_SEGMENT
     
     def setDigitsNumeric(self, a, b, c, d):
         digs = sevensegNumbersToDigits(a, b, c, d)

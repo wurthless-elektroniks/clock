@@ -3,7 +3,7 @@
 # Moved out of clockmain.py and cleaned up
 #
 
-from wurthless.clock.api.display import DisplayType
+from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN_SEGMENT
 from wurthless.clock.common.bcd import unpackBcd
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.common.timestamp import autoformatHourIn12HourTime
@@ -179,7 +179,7 @@ def promptDst(tot,inputs,dst):
         if display_delay_ticks == 0:
             display_delay_ticks = DELAY_TICKS
 
-            if display_type == DisplayType.SEVEN_SEGMENT:
+            if display_type == DISPLAY_TYPE_SEVEN_SEGMENT:
                 if flash_state is False:
                     # "dST"
                     tot.display().setDigitsBinary(0b00000000, 0b01011110, 0b01101101, 0b01111000)
@@ -189,7 +189,7 @@ def promptDst(tot,inputs,dst):
                         tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01010100, 0b00000000)
                     else:
                         tot.display().setDigitsBinary(0b00000000, 0b1011100, 0b01110001, 0b01110001)
-            elif display_type == DisplayType.NUMERIC:
+            elif display_type == DISPLAY_TYPE_NUMERIC:
                 tot.display().setDigitsNumeric(
                     6, 5, 7, 1 if inp is True else 0
                 )

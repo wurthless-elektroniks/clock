@@ -6,7 +6,7 @@ Used for first version of IV-11 driver.
 
 import time
 from machine import Pin, PWM
-from wurthless.clock.api.display import Display,DisplayType
+from wurthless.clock.api.display import Display
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
