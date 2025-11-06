@@ -6,12 +6,12 @@ import curses
 from curses import wrapper
 from time import sleep
 
-from wurthless.clock.api.display import Display
+from wurthless.clock.api.display import Display, COLON_STATE_BLINK, COLON_STATE_OFF, COLON_STATE_ON
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
-LITE = u'\u2591' 
-DARK = u'\u2592'
+LITE = '\u2591'
+DARK = '\u2592'
 
 def appendCharTab(bits, chars, tab):
     for i in range(0,7):
@@ -30,15 +30,17 @@ class CursesDisplay(SevenSegmentDisplay):
         self.scr.idcok(False)
         self.scr.idlok(False)
 
+        self._colon_state = 0
+
     def _refresh(self):
         screenstr = u"""
-             aaaa   hhhh   oooo    vvvv
-            f    b m    i t    p  0    w
-            f    b m    i t    p  0    w
-             gggg   nnnn   uuuu    1111
-            e    c l    j s    q  z    x
-            e    c l    j s    q  z    x
-             dddd   kkkk   rrrr    yyyy
+             aaaa   hhhh       oooo    vvvv
+            f    b m    i  @  t    p  0    w
+            f    b m    i     t    p  0    w
+             gggg   nnnn       uuuu    1111
+            e    c l    j     s    q  z    x
+            e    c l    j  @  s    q  z    x
+             dddd   kkkk       rrrr    yyyy
             """
 
         self.scr.erase()
@@ -70,6 +72,14 @@ class CursesDisplay(SevenSegmentDisplay):
                 x = 0
             elif c == '\r':
                 x = 0
+            elif c == '@':
+                charout = '!' if self._colon_state == COLON_STATE_BLINK else \
+                          (LITE if self._colon_state == COLON_STATE_ON else DARK)
+                self.scr.addch(y,
+                               x,
+                               charout,
+                               (curses.A_DIM if charout == DARK else (curses.A_NORMAL|color_tab[self.brightness]))
+                               )
             else:
                 self.scr.addch(y,x,chartab[c], (curses.A_DIM if chartab[c] == DARK else (curses.A_NORMAL|color_tab[self.brightness])) )
             x += 1
@@ -87,4 +97,7 @@ class CursesDisplay(SevenSegmentDisplay):
         self.dig_d = d
         self._refresh()
 
-
+    def setColonState(self, colon_state):
+        self._colon_state = colon_state
+        self._refresh()
+    

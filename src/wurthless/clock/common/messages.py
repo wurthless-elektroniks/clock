@@ -2,7 +2,7 @@
 Common messages/statuses displayed on the clock.
 '''
 
-from wurthless.clock.api.display import Display,DISPLAY_TYPE_NUMERIC,DISPLAY_TYPE_SEVEN_SEGMENT
+from wurthless.clock.api.display import Display,DISPLAY_TYPE_NUMERIC,DISPLAY_TYPE_SEVEN_SEGMENT, COLON_STATE_OFF
 
 def messagesDisplayInit(display: Display):
     '''
@@ -12,6 +12,7 @@ def messagesDisplayInit(display: Display):
         display.setDigitsBinary(0b00000110, 0b00110111, 0b00000110, 0b01111000)
     elif display.getDisplayType() == DISPLAY_TYPE_NUMERIC:
         display.setDigitsNumeric(8, 8, 8, 8)
+    display.setColonState(COLON_STATE_OFF)
 
 def messagesDisplaySync(display: Display):
     '''
@@ -21,6 +22,7 @@ def messagesDisplaySync(display: Display):
         display.setDigitsBinary(0b01101101, 0b01101110, 0b00110111, 0b00111001)
     elif display.getDisplayType() == DISPLAY_TYPE_NUMERIC:
         display.setDigitsNumeric(9, 9, 9, 9)
+    display.setColonState(COLON_STATE_OFF)
 
 def messagesDisplayErr(display: Display):
     '''
@@ -30,6 +32,7 @@ def messagesDisplayErr(display: Display):
         display.setDigitsBinary(0, 0b01111001, 0b01010000, 0b01010000)
     elif display.getDisplayType() == DISPLAY_TYPE_NUMERIC:
         display.setDigitsNumeric(6, None, 0, 0)
+    display.setColonState(COLON_STATE_OFF)
 
 def messagesDisplayOops(display: Display):
     '''
@@ -39,6 +42,7 @@ def messagesDisplayOops(display: Display):
         display.setDigitsBinary(0b01011100,0b01011100,0b01110011,0b01101101)
     elif display.getDisplayType() == DISPLAY_TYPE_NUMERIC:
         display.setDigitsNumeric(6, None, 9, 9)
+    display.setColonState(COLON_STATE_OFF)
 
 def messagesDisplayTest(display: Display):
     '''
@@ -48,6 +52,7 @@ def messagesDisplayTest(display: Display):
         display.setDigitsBinary(0b011111000, 0b01111001, 0b01101101, 0b011111000)
     elif display.getDisplayType() == DISPLAY_TYPE_NUMERIC:
         display.setDigitsNumeric(4, None, 9, 9)
+    display.setColonState(COLON_STATE_OFF)
 
 def messagesDisplayCfg(display: Display):
     '''
@@ -57,3 +62,4 @@ def messagesDisplayCfg(display: Display):
         display.setDigitsBinary(0, 0b00111001, 0b01110001, 0b01111101)
     elif display.getDisplayType() == DISPLAY_TYPE_NUMERIC:
         display.setDigitsNumeric(4, None, 1, 1)
+    display.setColonState(COLON_STATE_OFF)

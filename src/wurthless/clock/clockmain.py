@@ -12,6 +12,7 @@ try:
 except:
     sleep_ms = lambda a : time.sleep(a / 1000)
 
+from wurthless.clock.api.display import COLON_STATE_BLINK, COLON_STATE_OFF, COLON_STATE_ON
 from wurthless.clock.api.tot import ToT
 from wurthless.clock.burnin import burnin,inputTest
 from wurthless.clock.common.messages import messagesDisplaySync,messagesDisplayErr,messagesDisplayOops,messagesDisplayCfg
@@ -81,6 +82,8 @@ registerCvar(u"wurthless.clock.clockmain",
 def configMode(tot: ToT):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
 
+    tot.display().setColonState(COLON_STATE_OFF)
+
     # brightness always 8 coming into this loop
     tot.display().setBrightness(8)
 
@@ -117,6 +120,7 @@ def configMode(tot: ToT):
 
         day = promptMonthOrDay(tot, inputs, day, maxdays)
 
+    tot.display().setColonState(COLON_STATE_ON)
     updated_time = promptTime(tot, inputs, hour, minute)
     hour    = updated_time[0]
     minute  = updated_time[1]
@@ -156,6 +160,7 @@ def renderDisplay(tot: ToT, mode: int):
         minute  = tuple[4]
         bcd = unpackBcd(hour, minute)
         tot.display().setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
+        tot.display().setColonState(COLON_STATE_BLINK)
     elif mode == 1:
         year = tuple[0]
         bcd = unpackBcd(year / 100, year % 100)
@@ -163,14 +168,17 @@ def renderDisplay(tot: ToT, mode: int):
         # so in 12-hour mode, only display the last two digits of the year.
         # these things won't be working in 100 years time, because we'll all be dead by then
         tot.display().setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
+        tot.display().setColonState(COLON_STATE_OFF)
     elif mode == 2:
         month = tuple[1]
         bcd = unpackBcd(0, month)
         tot.display().setDigitsNumeric( None, None, bcd[2], bcd[3] )
+        tot.display().setColonState(COLON_STATE_OFF)
     elif mode == 3:
         day = tuple[2]
         bcd = unpackBcd(0, day)
         tot.display().setDigitsNumeric( None, None, bcd[2], bcd[3] )
+        tot.display().setColonState(COLON_STATE_OFF)
 
 def syncTime(tot: ToT, suppressError:bool=False) -> bool:
     '''
