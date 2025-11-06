@@ -1,0 +1,24 @@
+IVL2-7/5 pinout
+
+Left to right, bottom side (nipple pointing leftwards):
+
+ 1 - Cathode
+ 2 - Grid 1 (10's of hours)
+ 3 - Segment - top dot (Grid 3 only)
+ 4 - Segment G
+ 5 - Segment E
+ 6 - Grid 2 (1's of hours)
+ 7 - Segment C
+ 8 - Grid 3 (dots/colon)
+ 9 - Segment - bottom dot (Grid 3 only)
+10 - Segment D
+11 - Grid 4 (10's of minutes)
+12 - Segment B
+13 - Segment F
+14 - Segment A
+15 - Grid 5 (1's of minutes)
+16 - Cathode
+
+Top side, from left to right:
+
+Cathode, G1, G2, G3, G4, G5, Cathode
