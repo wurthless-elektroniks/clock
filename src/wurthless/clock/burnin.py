@@ -5,7 +5,7 @@
 
 import time
 from wurthless.clock.api.tot import ToT
-from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN_SEGMENT
+from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN_SEGMENT, COLON_STATE_BLINK
 from wurthless.clock.common.messages import *
 
 def inputTest(tot: ToT):
@@ -105,20 +105,26 @@ def burninSevenSegment(tot: ToT):
 
     while True:
         tot.display().setBrightness(8)
+        tot.display().setColonState(1)
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
         time.sleep(0.5 * 8)
 
         # segment drives
         for j in range(0,2):
+            tot.display().setColonState(0)
             for i in range(0,7):
                 dig = 1 << i
                 tot.display().setDigitsBinary(dig,dig,dig,dig)
                 time.sleep(0.5)
+            tot.display().setDigitsBinary(0,0,0,0)
+            tot.display().setColonState(1)
+            time.sleep(0.5)
             tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
             time.sleep(0.5)
 
         # digit drives
         for j in range(0,4):
+            tot.display().setColonState(0)
             tot.display().setDigitsBinary(0x7F, 0x00, 0x00, 0x00)
             time.sleep(0.5)
             tot.display().setDigitsBinary(0x00, 0x7F, 0x00, 0x00)
@@ -126,6 +132,9 @@ def burninSevenSegment(tot: ToT):
             tot.display().setDigitsBinary(0x00, 0x00, 0x7F, 0x00)
             time.sleep(0.5)
             tot.display().setDigitsBinary(0x00, 0x00, 0x00, 0x7F)
+            time.sleep(0.5)
+            tot.display().setDigitsBinary(0,0,0,0)
+            tot.display().setColonState(1)
             time.sleep(0.5)
      
         # anti-ghosting test (bad LEDs cause bleedovers)
@@ -148,6 +157,7 @@ def burninSevenSegment(tot: ToT):
         # brightness test
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
         for j in range(0,1):
+            tot.display().setColonState(COLON_STATE_BLINK)
             for i in range(0,8):
                 tot.display().setBrightness(8-i)
                 time.sleep(0.5)
