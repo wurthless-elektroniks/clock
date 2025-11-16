@@ -20,9 +20,11 @@ from wurthless.clock.cvars.cvarwriter import TokenedCvarWriter
 
 # must-init cvars must be defined, so don't remove this
 import config
-from machine import Pin,UART
+from machine import Pin,UART,Timer
 from wurthless.clock.drivers.nmea.nmeadevice import NmeaDevice
 from wurthless.clock.drivers.nmea.nmeatimesource import NmeaTimeSource
+
+from wurthless.clock.common.rp2040hbridgedriver import hbridge_init
 
 def picoIvlCommonInit(tot):
     cvars = Cvars()
@@ -45,6 +47,7 @@ def picoIvlCommonInit(tot):
 
     tot.setRtc( MicropythonRTC() )
 
+    hbridge_init(2)
 
 def runPicoW():
     tot = ToT()
