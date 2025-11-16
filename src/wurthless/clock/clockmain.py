@@ -79,6 +79,12 @@ registerCvar(u"wurthless.clock.clockmain",
              u"Framerate in Hz. Default is 25.",
              25)
 
+registerCvar("wurthless.clock.clockmain",
+             "nixieroto",
+             "Boolean",
+             "If True, rotate all digits at the minute mark (avoids Nixie cathode poisoning). Default is False.",
+             False)
+
 def configMode(tot: ToT):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
 
@@ -276,6 +282,8 @@ def loop(tot: ToT):
 
     cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
 
+    nixieroto = tot.cvars().get(u"wurthless.clock.clockmain",u"nixieroto")
+
     global displaymode
     displaymode = 0
     timesource_present = tot.timesources() is not None and tot.timesources() != []
@@ -295,6 +303,14 @@ def loop(tot: ToT):
         delayedinputs.dst_delay(dst_set_hold_delay_tick_count)        
         inputs = DebouncedInputs(delayedinputs)
 
+    def _rerenderDisplay():
+        if nixieroto and displaymode == 0 and (tot.rtc().getUtcTime() % 60) < 3:
+            for i in range(0,10):
+                tot.display().setDigitsNumeric(i,i,i,i)
+                sleep_ms(200)
+
+        renderDisplay(tot, displaymode)
+
     scheduler = Scheduler()
 
     scheduler.createEvent("writebackCfg",
@@ -303,7 +319,7 @@ def loop(tot: ToT):
 
     scheduler.createEvent("rerenderDisplay",
                           EVENT_FIRES_EVERY_MINUTE,
-                          lambda: renderDisplay(tot, displaymode),
+                          _rerenderDisplay,
                           repeat=True)
                           
     def autosyncAttempt():
