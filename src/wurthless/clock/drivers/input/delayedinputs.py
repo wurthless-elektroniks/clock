@@ -95,3 +95,7 @@ class DelayedInputs(Inputs):
 
     def dst(self):
         return self._dst.output()
+    
+    def is_dst_dipswitch(self):
+        return self.inputs.is_dst_dipswitch()
+    

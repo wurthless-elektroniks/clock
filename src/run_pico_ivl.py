@@ -25,6 +25,7 @@ from wurthless.clock.drivers.nmea.nmeadevice import NmeaDevice
 from wurthless.clock.drivers.nmea.nmeatimesource import NmeaTimeSource
 
 from wurthless.clock.common.rp2040hbridgedriver import hbridge_init
+from wurthless.clock.drivers.input.dstdipswitchinputs import DstDipswitchInputs
 
 def picoIvlCommonInit(tot):
     cvars = Cvars()
@@ -43,7 +44,12 @@ def picoIvlCommonInit(tot):
     tot.cvars().set("wurthless.clock.drivers.input.gpioinputs", "down_pin_id", 7)
     tot.cvars().set("wurthless.clock.drivers.input.gpioinputs", "set_pin_id", 8)
     tot.cvars().set("wurthless.clock.drivers.input.gpioinputs", "dst_pin_id", 9)
-    tot.setInputs( GpioInputs(tot) )
+    
+    inputs = GpioInputs(tot)
+    
+    inputs = DstDipswitchInputs(inputs)
+    
+    tot.setInputs( inputs )
 
     tot.setRtc( MicropythonRTC() )
 

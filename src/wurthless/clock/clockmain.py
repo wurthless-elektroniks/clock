@@ -87,6 +87,7 @@ registerCvar("wurthless.clock.clockmain",
 
 def configMode(tot: ToT):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
+    dst_active = tot.cvars().get("config.clock", "dst_active")
 
     tot.display().setColonState(COLON_STATE_OFF)
 
@@ -94,12 +95,13 @@ def configMode(tot: ToT):
     tot.display().setBrightness(8)
 
     # wrap inputs (simplifies keeping track of pushbutton states between prompts)
-    inputs = DebouncedInputs(tot.inputs())
+    direct_inputs = tot.inputs()
+    inputs = DebouncedInputs(direct_inputs)
     inputs.strobe()
 
     # if RTC already configured, grab current time
     if tot.rtc().isUp():
-        timetuple = timestampToTimeTuple( tot.rtc().getUtcTime() + utc_offset )        
+        timetuple = timestampToTimeTuple( tot.rtc().getUtcTime() + utc_offset + (3600 if dst_active else 0))
         year  = timetuple[0]
         month = timetuple[1]
         day   = timetuple[2]
@@ -132,12 +134,17 @@ def configMode(tot: ToT):
     minute  = updated_time[1]
 
     # last input to prompt for is DST (if not inhibited by software)
+    tot.display().setColonState(COLON_STATE_OFF)
     dst_active = False
-    if tot.cvars().get(u"config.clock",u"dst_disable") is False:
-        dst_active = tot.cvars().get(u"config.clock",u"dst_active")
+
+    if inputs.is_dst_dipswitch():
+        direct_inputs.strobe()
+        dst_active = direct_inputs.dst()
+    elif tot.cvars().get("config.clock", "dst_disable") is False:
         dst_active = promptDst(tot, inputs, dst_active)
-        tot.cvars().set(u"config.clock",u"dst_active",dst_active)
-        tot.cvars().save()
+
+    tot.cvars().set("config.clock", "dst_active", dst_active)
+    tot.cvars().save()
 
     # pack results and set RTC
     packed_time = ( year, month, day, hour, minute, 0, 0, 0, 0 )
@@ -274,6 +281,7 @@ def loop(tot: ToT):
         brightness = 8
     tot.display().setBrightness(brightness) 
 
+    dst_is_dipswitch = tot.inputs().is_dst_dipswitch()
     set_and_dst_no_debounce = tot.cvars().get(u"wurthless.clock.clockmain", u"set_and_dst_no_debounce")
     disable_calendar = tot.cvars().get(u"wurthless.clock.clockmain", u"disable_calendar")
 
@@ -295,12 +303,13 @@ def loop(tot: ToT):
     ticks_per_second = int(1000.0 / tick_time_ms)
     dst_set_hold_delay_tick_count = ticks_per_second * 5
 
+    direct_inputs = inputs
     if set_and_dst_no_debounce is False:
         delayedinputs = DelayedInputs(inputs)
         delayedinputs.up_delay(0)
         delayedinputs.down_delay(0)
         delayedinputs.set_delay(dst_set_hold_delay_tick_count)
-        delayedinputs.dst_delay(dst_set_hold_delay_tick_count)        
+        delayedinputs.dst_delay(dst_set_hold_delay_tick_count)
         inputs = DebouncedInputs(delayedinputs)
 
     def _rerenderDisplay():
@@ -366,6 +375,13 @@ def loop(tot: ToT):
     while True:
         scheduler.tick()
         if inputs.strobe() is False:
+            if dst_is_dipswitch:
+                current_dst_setting = tot.cvars().get("config.clock", "dst_active")
+                new_dst_setting = direct_inputs.dst()
+                if new_dst_setting != current_dst_setting:
+                    tot.cvars().set("config.clock", "dst_active",new_dst_setting)
+                    scheduler.fireEvent("rerenderDisplay")
+
             sleep_ms(tick_time_ms)
             continue
 
@@ -403,7 +419,7 @@ def loop(tot: ToT):
             # and debounce logic needs to be reset anyway
             resetState()
   
-        elif dst_disable is False and inputs.dst() is True:
+        elif dst_is_dipswitch is False and dst_disable is False and inputs.dst() is True:
             dst = tot.cvars().get(u"config.clock",u"dst_active")
             dst = not dst
             tot.cvars().set(u"config.clock",u"dst_active",dst)
@@ -416,7 +432,7 @@ def loop(tot: ToT):
 def clockMain(tot: ToT):
     tot.inputs().strobe()
 
-    if tot.inputs().dst():
+    if tot.inputs().is_dst_dipswitch() is False and tot.inputs().dst():
         inputTest(tot)
 
     # if DOWN held on reset, go to burnin / demo mode

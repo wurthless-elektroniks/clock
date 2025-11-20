@@ -49,3 +49,8 @@ class Inputs(object):
         '''
         return False
     
+    def is_dst_dipswitch(self) -> bool:
+        '''
+        Return True if DST is a dipswitch rather than a button.
+        '''
+        return False
