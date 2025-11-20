@@ -359,6 +359,10 @@ def loop(tot: ToT):
         scheduler.cancelAllEvents()
         inputs.reset()
 
+        # execute scheduler tick once (prevents infinite loop if new time setting
+        # is less than the current one)
+        scheduler.tick()
+
         if cfg_save_pending is True:
             scheduler.scheduleEvent("writebackCfg")
 
