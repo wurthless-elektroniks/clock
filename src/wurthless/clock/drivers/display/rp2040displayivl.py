@@ -11,7 +11,7 @@ import rp2
 from rp2 import PIO
 
 
-DIGIT_DRIVE_BASE_PIN = 11 # + 12, 13, 14, 15
+DIGIT_DRIVE_BASE_PIN = 11 # + 12, 13, 14
 SEGMENT_DRIVE_BASE_PIN = 16 # + 17, 18, 19, 20, 21, 22
 PWM_PIN = 10
 
@@ -46,7 +46,7 @@ DEFAULT_BRIGHTNESS_TABLE = [
 
 # Copypasted code, but now that I know how it works, here are comments.
 # Segments are on the output pins, digit drives are on the sideset pins.
-@rp2.asm_pio(out_init=[PIO.OUT_LOW]*7, sideset_init=[PIO.OUT_LOW]*5)
+@rp2.asm_pio(out_init=[PIO.OUT_LOW]*7, sideset_init=[PIO.OUT_LOW]*4)
 def sevseg():
     wrap_target()
     label("0")
@@ -56,19 +56,29 @@ def sevseg():
     # digits have to be strobed this way or else there will be ghosting
     out(pins, 8)            .side(0)      # clock out bits while digit disabled
     nop()                   .side(1)      # enable the digit
-    set(pins, 0)            .side(16)     # clear pins, enable colon segment
+    nop()                   .side(1)
+    nop()                   .side(1)
+    nop()                   .side(1)
+    set(pins, 0)            .side(0)     # clear pins
 
+    # inner 2 digits tend to be brighter than the outer 2
+    # so they don't get strobed as fast
     out(pins, 8)            .side(0)
     nop()                   .side(2)
-    set(pins, 0)            .side(16)
+    nop()                   .side(2)
+    set(pins, 0)            .side(0)
 
     out(pins, 8)            .side(0)
     nop()                   .side(4)
-    set(pins, 0).side(16)
+    nop()                   .side(4)
+    set(pins, 0)            .side(0)
     
     out(pins, 8)            .side(0)
     nop()                   .side(8)
-    set(pins, 0)            .side(16)
+    nop()                   .side(8)
+    nop()                   .side(8)
+    nop()                   .side(8)
+    set(pins, 0)            .side(0)
     
     jmp("0")                .side(0)      # blank display and repeat
     wrap()
@@ -86,7 +96,7 @@ class Rp2040IvlDisplay(SevenSegmentDisplay):
             Pin(i, Pin.OUT)
             if low_power_drives is True:
                 mem32[0x4001c004 + (i*4)] = (mem32[0x4001c004 + (i*4)] & 0b11001111)
-        for i in range(digit_drive_base_pin,   digit_drive_base_pin+5):
+        for i in range(digit_drive_base_pin,   digit_drive_base_pin+4):
             Pin(i, Pin.OUT)
             if low_power_drives is True:
                 mem32[0x4001c004 + (i*4)] = (mem32[0x4001c004 + (i*4)] & 0b11001111)
