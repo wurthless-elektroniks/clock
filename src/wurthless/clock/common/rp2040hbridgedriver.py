@@ -18,5 +18,5 @@ def hbridge_pio():
 def hbridge_init(gpio_base: int):
     Pin(gpio_base, Pin.OUT)
     Pin(gpio_base+1, Pin.OUT)
-    sm = rp2.StateMachine(1, hbridge_pio, freq=2400, set_base=Pin(gpio_base))
+    sm = rp2.StateMachine(7, hbridge_pio, freq=2400, set_base=Pin(gpio_base))
     sm.active(1)

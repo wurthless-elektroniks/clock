@@ -44,43 +44,37 @@ DEFAULT_BRIGHTNESS_TABLE = [
 #
 ################################################################################################################
 
-# Copypasted code, but now that I know how it works, here are comments.
-# Segments are on the output pins, digit drives are on the sideset pins.
-@rp2.asm_pio(out_init=[PIO.OUT_LOW]*7, sideset_init=[PIO.OUT_LOW]*4)
+# more appropriate refresh rate is 120 Hz or so, but the PIO can't run at that low a frequency,
+# so we have to use hacks to simulate that
+@rp2.asm_pio(out_init=[PIO.OUT_LOW]*7, set_init=[PIO.OUT_LOW]*4)
 def sevseg():
     wrap_target()
-    label("0")
-    pull(noblock)           .side(0)      # get whatever the CPU wants us to display
-    mov(x, osr)             .side(0)      # push to output shift register (all values 8 bits, msb unused)
+    pull(noblock)     # get whatever the CPU wants us to display
+    mov(x, osr)       # push to output shift register (all values 8 bits, msb unused)
     
     # digits have to be strobed this way or else there will be ghosting
-    out(pins, 8)            .side(0)      # clock out bits while digit disabled
-    nop()                   .side(1)      # enable the digit
-    nop()                   .side(1)
-    nop()                   .side(1)
-    nop()                   .side(1)
-    set(pins, 0)            .side(0)     # clear pins
+    out(pins, 8)      # clock out bits while digit disabled
+    set(pins, 1)
+    nop() [3]
+    set(pins, 0)      # clear pins
 
     # inner 2 digits tend to be brighter than the outer 2
     # so they don't get strobed as fast
-    out(pins, 8)            .side(0)
-    nop()                   .side(2)
-    nop()                   .side(2)
-    set(pins, 0)            .side(0)
+    out(pins, 8)      # clock out bits while digit disabled
+    set(pins, 2)
+    nop() [1]
+    set(pins, 0)      # clear pins
 
-    out(pins, 8)            .side(0)
-    nop()                   .side(4)
-    nop()                   .side(4)
-    set(pins, 0)            .side(0)
+    out(pins, 8)      # clock out bits while digit disabled
+    set(pins, 4)
+    nop() [1]
+    set(pins, 0)      # clear pins.
+
+    out(pins, 8)      # clock out bits while digit disabled
+    set(pins, 8)
+    nop() [3]
+    set(pins, 0)      # clear pins
     
-    out(pins, 8)            .side(0)
-    nop()                   .side(8)
-    nop()                   .side(8)
-    nop()                   .side(8)
-    nop()                   .side(8)
-    set(pins, 0)            .side(0)
-    
-    jmp("0")                .side(0)      # blank display and repeat
     wrap()
 
 class Rp2040IvlDisplay(SevenSegmentDisplay):
@@ -103,7 +97,11 @@ class Rp2040IvlDisplay(SevenSegmentDisplay):
                 
         # init brightness table here...
 
-        self.sm = rp2.StateMachine(0, sevseg, freq=2000, out_base=Pin(segment_drive_base_pin), sideset_base=Pin(digit_drive_base_pin))
+        self.sm = rp2.StateMachine(0,
+                                   sevseg,
+                                   freq=2000,
+                                   out_base=Pin(segment_drive_base_pin),
+                                   set_base=Pin(digit_drive_base_pin))
         self.brightness_pwm = PWM(Pin(brightness_pwm_pin, Pin.OUT))
 
         # bring up display but in blank state.
