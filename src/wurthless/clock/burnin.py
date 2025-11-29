@@ -154,6 +154,12 @@ def burninSevenSegment(tot: ToT):
         tot.display().setBrightness(8)
         burninMessageTest(tot)
 
+        # digits test - needed to catch problems with decorators
+        for _ in range(2):
+            for j in range(0,10):
+                tot.display().setDigitsNumeric(j,j,j,j)
+                time.sleep(0.5)
+
         # brightness test
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
         for j in range(0,1):

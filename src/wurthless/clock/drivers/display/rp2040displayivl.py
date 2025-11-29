@@ -10,15 +10,29 @@ from machine import Pin, PWM, mem32
 import rp2
 from rp2 import PIO
 
+# these match ivl clock v1 (remember to decorate with scrambledbitsdisplay!)
+registerCvar("wurthless.clock.drivers.display.rp2040displayivl",
+             "segment_drive_base_pin",
+             "Int",
+             "Segment drive base pin. Default is GPIO 5 (6,7,8,9,10,11 will also be used here)",
+             5)
 
-DIGIT_DRIVE_BASE_PIN = 11 # + 12, 13, 14
-SEGMENT_DRIVE_BASE_PIN = 16 # + 17, 18, 19, 20, 21, 22
-PWM_PIN = 10
+registerCvar("wurthless.clock.drivers.display.rp2040displayivl",
+             "digit_drive_base_pin",
+             "Int",
+             "Digit drive base pin. Default is GPIO 12 (13,14,15 will also be used here)",
+             12)
 
-registerCvar(u"wurthless.clock.drivers.display.rp2040displayivl",
-             u"low_power_drives",
-             u"Boolean",
-             u"If true, reduces current drive power on the segment and digit control GPIOs. Default is True.",
+registerCvar("wurthless.clock.drivers.display.rp2040displayivl",
+             "brightness_pwm_pin",
+             "Int",
+             "PWM pin for controlling brightness. Default is GPIO 3.",
+             3)
+
+registerCvar("wurthless.clock.drivers.display.rp2040displayivl",
+             "low_power_drives",
+             "Boolean",
+             "If true, reduces current drive power on the segment and digit control GPIOs. Default is True.",
              True)
 
 # brightness table as frequency/duty cycle.
@@ -79,9 +93,9 @@ def sevseg():
 
 class Rp2040IvlDisplay(SevenSegmentDisplay):
     def __init__(self, tot):
-        segment_drive_base_pin = SEGMENT_DRIVE_BASE_PIN
-        digit_drive_base_pin   = DIGIT_DRIVE_BASE_PIN
-        brightness_pwm_pin     = PWM_PIN
+        segment_drive_base_pin = tot.cvars().get("wurthless.clock.drivers.display.rp2040displayivl", "segment_drive_base_pin")
+        digit_drive_base_pin   = tot.cvars().get("wurthless.clock.drivers.display.rp2040displayivl", "digit_drive_base_pin")
+        brightness_pwm_pin     = tot.cvars().get("wurthless.clock.drivers.display.rp2040displayivl", "brightness_pwm_pin")
 
         # attempt to grab I/Os here by setting them all as outputs
         # it is better to have them setup in a known state than to assume the statemachine will do everything for us

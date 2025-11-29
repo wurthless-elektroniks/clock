@@ -77,6 +77,7 @@ async def settingsGet(request):
         'dst_active': g_tot.cvars().get(u"config.clock",u"dst_active"),
         'dst_disable': g_tot.cvars().get(u"config.clock",u"dst_disable"),
         'utc_offset_seconds': g_tot.cvars().get(u"config.clock",u"utc_offset_seconds"),
+        'dst_is_dipswitch': g_tot.inputs().is_dst_dipswitch()
     },200
 
 @server.post('/rest/settings')
@@ -88,9 +89,14 @@ async def settingsPost(request):
             'message': 'no-post-data'
         },400
 
-    requiredFields = [ 'wifi_ap_name', 'wifi_ap_password', 'dst_active', 'dst_disable', 'utc_offset_seconds' ]
+    dst_is_dipswitch = g_tot.inputs().is_dst_dipswitch()
 
-    for f in requiredFields:
+    required_fields = [ 'wifi_ap_name', 'wifi_ap_password', 'utc_offset_seconds' ]
+
+    if dst_is_dipswitch is False:
+        required_fields += [ 'dst_active', 'dst_disable' ]
+
+    for f in required_fields:
         if f not in restdata:
             return {
                 'result': 'error',
@@ -99,9 +105,10 @@ async def settingsPost(request):
 
     ap_name = restdata['wifi_ap_name']
     ap_password = restdata['wifi_ap_password']
-    dst_active = restdata['dst_active']
-    dst_disable = restdata['dst_disable']
     utc_offset_seconds = restdata['utc_offset_seconds']
+    if dst_is_dipswitch is False:
+        dst_active = restdata['dst_active']
+        dst_disable = restdata['dst_disable']
 
     if validateWifiAccessPointName(ap_name) is False:
         return {
@@ -116,9 +123,10 @@ async def settingsPost(request):
 
     g_tot.cvars().set(u"config.nic",u"wifi_ap_name", ap_name )
     g_tot.cvars().set(u"config.nic",u"wifi_ap_password", ap_password )
-    g_tot.cvars().set(u"config.clock",u"dst_disable", dst_disable)
-    g_tot.cvars().set(u"config.clock",u"dst_active", dst_active)
     g_tot.cvars().set(u"config.clock",u"utc_offset_seconds", utc_offset_seconds)
+    if dst_is_dipswitch is False:
+        g_tot.cvars().set(u"config.clock",u"dst_disable", dst_disable)
+        g_tot.cvars().set(u"config.clock",u"dst_active", dst_active)
 
     g_tot.cvars().save()
 

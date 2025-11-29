@@ -151,13 +151,16 @@ function populateSettings() {
         .then( (json) => {
             document.getElementById("ap_name").value = json['wifi_ap_name'];
             document.getElementById("utcoffset").value = json['utc_offset_seconds'];
-
-            if (json['dst_disable'] === true) {
-                selectDstDisabled();
-            } else if (json['dst_active'] === true) {
-                selectDstOn();
+            if (json['dst_is_dipswitch'] === true) {
+                document.getElementById("dst_adj").style.display = "";
             } else {
-                selectDstOff();
+                if (json['dst_disable'] === true) {
+                    selectDstDisabled();
+                } else if (json['dst_active'] === true) {
+                    selectDstOn();
+                } else {
+                    selectDstOff();
+                }
             }
         });
 }
