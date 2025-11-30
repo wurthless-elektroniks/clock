@@ -3,12 +3,12 @@
 # Requires Microdot to run.
 #
 
-import machine
 from microdot import Microdot,send_file
 from wurthless.clock.cvars.cvars import registerCvar
 
 global running_under_upy
 try:
+    import machine
     from machine import Pin,PWM
     running_under_upy = True
 except:
@@ -83,10 +83,13 @@ async def settingsGet(request):
 
 @server.get('/rest/reboot')
 async def reboot(request):
-    # never returns
-    machine.reset()
+    if running_under_upy:
+        # never returns
+        machine.reset()
+    else:
+        print("reboot called but we're not in micropython land, so i'm not doing anything.")
 
-    return None
+    return {},200
 
 @server.post('/rest/settings')
 async def settingsPost(request):
