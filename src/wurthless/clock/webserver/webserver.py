@@ -3,6 +3,7 @@
 # Requires Microdot to run.
 #
 
+import machine
 from microdot import Microdot,send_file
 from wurthless.clock.cvars.cvars import registerCvar
 
@@ -79,6 +80,13 @@ async def settingsGet(request):
         'utc_offset_seconds': g_tot.cvars().get(u"config.clock",u"utc_offset_seconds"),
         'dst_is_dipswitch': g_tot.inputs().is_dst_dipswitch()
     },200
+
+@server.get('/rest/reboot')
+async def reboot(request):
+    # never returns
+    machine.reset()
+
+    return None
 
 @server.post('/rest/settings')
 async def settingsPost(request):

@@ -139,6 +139,9 @@ function submitForm() {
         
         // scroll to top of page (needed on mobile)
         document.body.scrollTop = document.documentElement.scrollTop = 0;
+
+        // request a reboot (don't care about errors)
+        fetch("/rest/reboot");
     })
     .catch( (error) => {
         console.log(error);
@@ -152,7 +155,7 @@ function populateSettings() {
             document.getElementById("ap_name").value = json['wifi_ap_name'];
             document.getElementById("utcoffset").value = json['utc_offset_seconds'];
             if (json['dst_is_dipswitch'] === true) {
-                document.getElementById("dst_adj").style.display = "";
+                document.getElementById("dst_adj").style.visibility = "hidden";
             } else {
                 if (json['dst_disable'] === true) {
                     selectDstDisabled();
