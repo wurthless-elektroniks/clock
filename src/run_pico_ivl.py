@@ -57,6 +57,7 @@ def picoIvlCommonInit(tot):
     tot.setInputs( inputs )
     tot.setRtc( MicropythonRTC() )
 
+    hbridge_init(20)
 
 def runPicoW():
     tot = ToT()
