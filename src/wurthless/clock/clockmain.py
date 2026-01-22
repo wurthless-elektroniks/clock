@@ -163,16 +163,28 @@ def renderDisplay(tot: ToT, mode: int):
     utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
     dst_active = tot.cvars().get(u"config.clock",u"dst_active")
 
+
     utctime += utc_offset
     if dst_active is True:
         utctime += 3600
 
     tuple = timestampToTimeTuple(utctime)
     if mode == 0:
+        display_12hr_time = tot.cvars().get("config.clock","display_12hr_time")
         hour    = tuple[3]
         minute  = tuple[4]
+
+        if display_12hr_time:
+            hour = hour % 12
+            if hour == 0:
+                hour = 12
+
         bcd = unpackBcd(hour, minute)
-        tot.display().setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
+        tot.display().setDigitsNumeric(bcd[0] if display_12hr_time is False or bcd[0] >= 1 else None,
+                                       bcd[1],
+                                       bcd[2],
+                                       bcd[3])
+
         tot.display().setColonState(COLON_STATE_BLINK)
     elif mode == 1:
         year = tuple[0]

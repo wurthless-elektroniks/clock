@@ -30,6 +30,12 @@ registerCvar(u"config.clock",
              u"If true, disable DST entirely (needed in territories where there is no DST). Default is False (off).",
              False)
 
+registerCvar("config.clock",
+             "display_12hr_time",
+             "Boolean",
+             "Display 12 hour time in main loop. Default is False (prefer 24 hour time).",
+             False)
+
 registerCvar(u"config.nic",
              u"enable",
              u"Boolean",

@@ -97,6 +97,21 @@ function validateForm() {
     return true;
 }
 
+function changeHourFormatSelection(which) {
+    document.getElementById("use_12hour").className = "butane";
+    document.getElementById("use_24hour").className = "butane";
+    
+    document.getElementById(which).className = "butaneselectad";
+}
+
+function select12HourTime() {
+    changeHourFormatSelection("use_12hour");
+}
+
+function select24HourTime() {
+    changeHourFormatSelection("use_24hour");
+}
+
 function changeDstSelection(which) {
     document.getElementById("dst_off").className = "butane";
     document.getElementById("dst_on").className = "butane";
@@ -123,7 +138,8 @@ function submitForm() {
         'wifi_ap_password': document.getElementById("ap_password").value,
         'utc_offset_seconds': document.getElementById("utcoffset").value,
         'dst_active': document.getElementById("dst_on").className === "butaneselectad",
-        'dst_disable': document.getElementById("dst_disable").className === "butaneselectad"
+        'dst_disable': document.getElementById("dst_disable").className === "butaneselectad",
+        'display_12hr_time': document.getElementById("use_12hour").className === "butaneselectad"
     };
 
     fetch("/rest/settings",{
@@ -134,6 +150,11 @@ function submitForm() {
         body: JSON.stringify(restreq)
     }).then( (response) => response.json() )
     .then( (response) => {
+        if (response['result'] === 'error') {
+            alert("oops... something went wrong");
+            return;
+        }
+
         document.getElementById("success").style.display = "";
         document.getElementById("form").remove();
         
@@ -164,6 +185,12 @@ function populateSettings() {
                 } else {
                     selectDstOff();
                 }
+            }
+
+            if (json['display_12hr_time'] === true) {
+                select12HourTime();
+            } else {
+                select24HourTime();
             }
         });
 }

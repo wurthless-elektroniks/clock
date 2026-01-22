@@ -31,8 +31,13 @@
                 <!-- populated by js -->
             </select>
         </div>
+        <div class="field" id="use_12hr">
+            <h2>display 12 hour or 24 hour time?</h2>
+            <a href="#" onclick="select24HourTime();"><div class="butaneselectad" id="use_24hour"><p>24 hour</p></div></a>
+            <a href="#" onclick="select12HourTime();"><div class="butane" id="use_12hour"><p>12 hour</p></div></a>
+        </div>
         <div class="field" id="dst_adj">
-            <h2>dst adjust</h1>
+            <h2>dst adjust</h2>
             <a href="#" onclick="selectDstOff();"><div class="butane" id="dst_off"><p>off</p></div></a>
             <a href="#" onclick="selectDstOn();"><div class="butaneselectad" id="dst_on"><p>on</p></div></a>
             <a href="#" onclick="selectDstDisabled();"><div class="butane" id="dst_disable"><p>disable DST</p><p><sub>(if you're in a region that doesn't use DST)</sub></p></div></a>

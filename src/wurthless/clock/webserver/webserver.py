@@ -78,7 +78,8 @@ async def settingsGet(request):
         'dst_active': g_tot.cvars().get(u"config.clock",u"dst_active"),
         'dst_disable': g_tot.cvars().get(u"config.clock",u"dst_disable"),
         'utc_offset_seconds': g_tot.cvars().get(u"config.clock",u"utc_offset_seconds"),
-        'dst_is_dipswitch': g_tot.inputs().is_dst_dipswitch()
+        'dst_is_dipswitch': g_tot.inputs().is_dst_dipswitch(),
+        'display_12hr_time': g_tot.cvars().get("config.clock", "display_12hr_time")
     },200
 
 @server.get('/rest/reboot')
@@ -102,7 +103,7 @@ async def settingsPost(request):
 
     dst_is_dipswitch = g_tot.inputs().is_dst_dipswitch()
 
-    required_fields = [ 'wifi_ap_name', 'wifi_ap_password', 'utc_offset_seconds' ]
+    required_fields = [ 'wifi_ap_name', 'wifi_ap_password', 'utc_offset_seconds', 'display_12hr_time' ]
 
     if dst_is_dipswitch is False:
         required_fields += [ 'dst_active', 'dst_disable' ]
@@ -117,6 +118,7 @@ async def settingsPost(request):
     ap_name = restdata['wifi_ap_name']
     ap_password = restdata['wifi_ap_password']
     utc_offset_seconds = restdata['utc_offset_seconds']
+    display_12hr_time = restdata['display_12hr_time']
     if dst_is_dipswitch is False:
         dst_active = restdata['dst_active']
         dst_disable = restdata['dst_disable']
@@ -138,6 +140,8 @@ async def settingsPost(request):
     if dst_is_dipswitch is False:
         g_tot.cvars().set(u"config.clock",u"dst_disable", dst_disable)
         g_tot.cvars().set(u"config.clock",u"dst_active", dst_active)
+
+    g_tot.cvars().set("config.clock", "display_12hr_time", display_12hr_time)
 
     g_tot.cvars().save()
 
