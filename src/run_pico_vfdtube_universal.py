@@ -24,7 +24,7 @@ from machine import Pin,UART,Timer
 from wurthless.clock.common.rp2040hbridgedriver import hbridge_init
 from wurthless.clock.drivers.input.dstdipswitchinputs import DstDipswitchInputs
 
-def picoVfdCommonInit(tot):
+def picoVfdCommonInit(tot, is_iv22: bool = False):
     cvars = Cvars()
     writer = TokenedCvarWriter()
     cvars.setWriter(TokenedCvarWriter())
@@ -37,15 +37,29 @@ def picoVfdCommonInit(tot):
     # the iv22 display board segments are wired according to how they are
     # in a datasheet. this is a mistake on my end but it turns out it's easier
     # to route the PCB this way. might end up changing this for v2...
-    display = ScrambledBitsDisplay(display, {
-        0: 0,
-        1: 5,
-        2: 2,
-        3: 1,
-        4: 3,
-        5: 6,
-        6: 4
-    })
+
+    if is_iv22:
+        display = ScrambledBitsDisplay(display, {
+            0: 0,
+            1: 5,
+            2: 2,
+            3: 1,
+            4: 3,
+            5: 6,
+            6: 4
+        })
+    else:
+        # this is the default scrambling; the shift registers are wired this way
+        # to make things easier to route on the board
+        display = ScrambledBitsDisplay(display, {
+            0: 0,
+            1: 6,
+            2: 5,
+            3: 4,
+            4: 3,
+            5: 2,
+            6: 1
+        })
     
     tot.setDisplay(display)
     
@@ -65,9 +79,9 @@ def picoVfdCommonInit(tot):
 
     # hbridge_init(16)
 
-def runPicoW():
+def runPicoW(is_iv22: bool = False):
     tot = ToT()
-    picoVfdCommonInit(tot)
+    picoVfdCommonInit(tot, is_iv22=is_iv22)
 
     # display INIT
     messagesDisplayInit(tot.display())
