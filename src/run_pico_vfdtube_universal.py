@@ -24,7 +24,7 @@ from machine import Pin,UART,Timer
 from wurthless.clock.common.rp2040hbridgedriver import hbridge_init
 from wurthless.clock.drivers.input.dstdipswitchinputs import DstDipswitchInputs
 
-def picoVfdCommonInit(tot, is_iv22: bool = False):
+def picoVfdCommonInit(tot, is_iv22: bool = False, is_dst_toggle_momentary: bool = False):
     cvars = Cvars()
     writer = TokenedCvarWriter()
     cvars.setWriter(TokenedCvarWriter())
@@ -69,7 +69,10 @@ def picoVfdCommonInit(tot, is_iv22: bool = False):
     tot.cvars().set("wurthless.clock.drivers.input.gpioinputs", "dst_pin_id",  11)
     
     inputs = GpioInputs(tot)
-    inputs = DstDipswitchInputs(inputs)
+    
+    if is_dst_toggle_momentary is False:
+        inputs = DstDipswitchInputs(inputs)
+
     tot.setInputs( inputs )
     tot.setRtc( MicropythonRTC() )
 
@@ -79,9 +82,9 @@ def picoVfdCommonInit(tot, is_iv22: bool = False):
 
     # hbridge_init(16)
 
-def runPicoW(is_iv22: bool = False):
+def runPicoW(is_iv22: bool = False, is_dst_toggle_momentary: bool = False):
     tot = ToT()
-    picoVfdCommonInit(tot, is_iv22=is_iv22)
+    picoVfdCommonInit(tot, is_iv22=is_iv22, is_dst_toggle_momentary=is_dst_toggle_momentary)
 
     # display INIT
     messagesDisplayInit(tot.display())
