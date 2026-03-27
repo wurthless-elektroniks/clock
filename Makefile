@@ -22,6 +22,7 @@ WEBOBJS := $(OBJDIR)/$(WWWDIR)/index.html $(OBJDIR)/$(WWWDIR)/cfg.css $(OBJDIR)/
 all: mpy mock
 
 mpy: $(OBJS) $(WEBOBJS) $(OBJDIR)/secrets/factory.ini
+	git log -1 --pretty=format:"%H" > $(OBJDIR)/git.txt
 
 $(OBJDIR)/secrets/factory.ini: defaults/factory.ini
 	@mkdir -p $(@D)
@@ -53,7 +54,9 @@ MOCKDIR = $(PRIVATEDIR)/test
 
 TESTPYS    := $(subst $(SRCDIR),$(MOCKDIR),$(SOURCES:%.py=%.py))
 TESTWEBOBJS := $(MOCKDIR)/$(WWWDIR)/index.html $(MOCKDIR)/$(WWWDIR)/cfg.css $(MOCKDIR)/$(WWWDIR)/cfg.js
+
 mock: $(TESTPYS) $(TESTWEBOBJS) $(MOCKDIR)/secrets/factory.ini
+	git log -1 --pretty=format:"%H" > $(MOCKDIR)/git.txt
 
 $(PRIVATEDIR):
 	mkdir -p $@

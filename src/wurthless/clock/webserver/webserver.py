@@ -62,6 +62,10 @@ async def indexhtml(request):
 async def index(request):
     return send_file(u"www/index.html")
 
+@server.get('/git.txt')
+async def cfgjs(request):
+    return send_file("git.txt", content_type="text/plain")
+
 @server.get('/cfg.js')
 async def cfgjs(request):
     return send_file(u"www/cfg.js")

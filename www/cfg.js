@@ -195,6 +195,12 @@ function populateSettings() {
         });
 }
 
+function populateGitCommit() {
+    fetch("/git.txt").then( response => {
+        response.text().then( body => document.getElementById("gitcommit").innerText = "git commit: "+body );
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     populateSettings();
 
@@ -212,4 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("form").style.visibility = "visible";
     initTimeZones();
+
+    populateGitCommit();
 });

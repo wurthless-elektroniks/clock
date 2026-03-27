@@ -35,9 +35,9 @@ a {
 .butane {
     justify-self: center;
     border-color: white;
-    border-width: 5px;
-    border-top: 5px white solid;
-    border-bottom: 5px white solid;
+    border-width: 4px;
+    border-top: 4px white solid;
+    border-bottom: 4px white solid;
     border-left: 5px white solid;
     border-right: 5px white solid;
     background-color: gray;
@@ -50,19 +50,22 @@ a {
 .butane p {
     color: white;
     font-weight: bold;
+    font-size: 0.8rem;
+
 }
 
 .butaneselectad p {
     color: black;
     font-weight: bold;
+    font-size: 0.8rem;
 }
 
 .butaneselectad {
     justify-self: center;
     border-color: gray;
     border-width: 5px;
-    border-top: 5px gray solid;
-    border-bottom: 5px gray solid;
+    border-top: 4px gray solid;
+    border-bottom: 4px gray solid;
     border-left: 5px gray solid;
     border-right: 5px gray solid;
     background-color: white;
@@ -87,7 +90,7 @@ select {
 button {
     justify-self: center;
     width: 100%;
-    font-size: 1em;
+    font-size: 2em;
 }
 
 h1 {
@@ -95,6 +98,11 @@ h1 {
     width: 100%;
     text-align: center;
     overflow: hidden;
+    white-space: nowrap; 
+    font-size: 1rem;
+}
+
+h2 {
     white-space: nowrap; 
     font-size: 1rem;
 }
