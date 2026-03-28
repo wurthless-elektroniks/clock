@@ -7,6 +7,7 @@ from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN
 from wurthless.clock.common.bcd import unpackBcd
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.common.timestamp import autoformatHourIn12HourTime
+from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, BRIGHTNESS_MINIMUM_VALUE
 
 import time
 
@@ -28,7 +29,7 @@ class DisplayFlasher:
     def tick(self):
         self.counter -= 1
         if self.counter == 0:
-            self.display.setBrightness( 8 if self.even_odd else 2 )
+            self.display.setBrightness( BRIGHTNESS_MAXIMUM_VALUE if self.even_odd else BRIGHTNESS_MINIMUM_VALUE )
             self.even_odd = not self.even_odd
             self.counter = self.flash_ticks
 
@@ -36,7 +37,7 @@ class DisplayFlasher:
         self.flash_ticks = DELAY_TICKS
         self.counter = self.flash_ticks
         self.even_odd = True  # even = fullbrite, odd = lowbrite
-        self.display.setBrightness(8)
+        self.display.setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
 
 def clamp(val: int, minval: int, maxval: int) -> int:
     inp = val
@@ -193,7 +194,7 @@ def promptDst(tot,inputs,dst):
                 tot.display().setDigitsNumeric(
                     6, 5, 7, 1 if inp is True else 0
                 )
-                tot.display().setBrightness(8 if flash_state is True else 2)
+                tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE if flash_state else BRIGHTNESS_MINIMUM_VALUE)
 
         else:
             display_delay_ticks -= 1

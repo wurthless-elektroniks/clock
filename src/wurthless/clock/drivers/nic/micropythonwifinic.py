@@ -8,28 +8,28 @@ import time
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.api.nic import Nic
 
+# Defines device name on network, if possible. Default is blank (let network stack pick it for us)
 registerCvar(u"wurthless.clock.drivers.nic.micropythonwifinic",
              u"device_name",
              u"String",
-             u"Defines device name on network, if possible. Default is blank (let network stack pick it for us)",
              u"")
 
+# In server mode, defines accesspoint name. Default is TMUCITW.
 registerCvar(u"wurthless.clock.drivers.nic.micropythonwifinic",
              u"server_ap_name",
              u"String",
-             u"In server mode, defines accesspoint name. Default is TMUCITW.",
              u"TMUCITW")
 
+# In server mode, defines accesspoint password. Default is wurthless.
 registerCvar(u"wurthless.clock.drivers.nic.micropythonwifinic",
              u"server_ap_password",
              u"String",
-             u"In server mode, defines accesspoint password. Default is wurthless.",
              u"wurthless")
 
+# Timeout when connecting to access point. Default is 10.
 registerCvar(u"wurthless.clock.drivers.nic.micropythonwifinic",
              u"max_wait",
              u"Int",
-             u"Timeout when connecting to access point. Default is 10.",
              10)
 
 class MicropythonWifiNic(Nic):

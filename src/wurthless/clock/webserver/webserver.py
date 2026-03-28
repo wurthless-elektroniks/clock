@@ -16,8 +16,17 @@ except:
 
 server = Microdot()
 
-registerCvar(u"wurthless.clock.webserver", u"disable_display_when_serving", u"Boolean", u"If True, shutdown display driver while running server. Default is False.", False)
-registerCvar(u"wurthless.clock.webserver", u"server_active_pin", u"Int", u"I/O pin that will be pulled high when server mode is active. Default is -1 (disable).", -1)
+# If True, shutdown display driver while running server. Default is False.
+registerCvar("wurthless.clock.webserver",
+             "disable_display_when_serving",
+             "Boolean",
+             False)
+
+# I/O pin that will be pulled high when server mode is active. Default is -1 (disable).
+registerCvar("wurthless.clock.webserver",
+             "server_active_pin",
+             "Int",
+             -1)
 
 # unfortunately, we have to store the ToT as a global...
 global g_tot
@@ -63,7 +72,7 @@ async def index(request):
     return send_file(u"www/index.html")
 
 @server.get('/git.txt')
-async def cfgjs(request):
+async def gittxt(request):
     return send_file("git.txt", content_type="text/plain")
 
 @server.get('/cfg.js')
@@ -168,5 +177,12 @@ def serverMain(tot):
         status_pin = tot.cvars().get("wurthless.clock.webserver", "server_active_pin")
         if status_pin != -1 and running_under_upy is True:
             PWM(Pin(status_pin,Pin.OUT), freq=1, duty=512)
+
+    # set to true to debug statistics on micropython.
+    # very important for diagnosing memory crunch issues that cause the webserver to lock up
+    if running_under_upy:
+        import gc
+        gc.collect()
+        print(f"{gc.mem_alloc()} bytes wired, {gc.mem_free()} bytes free")
 
     server.run(port=80)

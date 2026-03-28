@@ -5,6 +5,7 @@ For IVL2-7/5 project - kept separate from rp2040display.py due to 5 sideset line
 from wurthless.clock.api.display import Display
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
+from wurthless.clock.common.pwmu16brightnessctrl import PwmU16BrightnessController
 
 from machine import Pin, PWM, mem32
 import rp2
@@ -34,23 +35,6 @@ registerCvar("wurthless.clock.drivers.display.rp2040displayivl",
              "Boolean",
              "If true, reduces current drive power on the segment and digit control GPIOs. Default is True.",
              True)
-
-# brightness table as frequency/duty cycle.
-# you might need to change these if there is no resistor in-line with the master output transistor's base,
-# or else you run the risk of frying the LEDs.
-# these assume that there's a resistor in-line or that the LEDs can tolerate 3v3 directly.
-# in my own experience it's fine to use a 2k resistor on the base of the master (brightness) transistor
-# and not do a whole lot else.
-DEFAULT_BRIGHTNESS_TABLE = [
-    [ 2000, int(65535 * (3/10)) ],
-    [ 2000, int(65535 * (4/10)) ],
-    [ 2000, int(65535 * (5/10)) ],
-    [ 2000, int(65535 * (6/10)) ],
-    [ 2000, int(65535 * (7/10)) ],
-    [ 2000, int(65535 * (8/10)) ],
-    [ 2000, int(65535 * (9/10)) ],
-    [ 2000, int(65535 * (10/10)) ]
-]
 
 ################################################################################################################
 #
@@ -109,32 +93,20 @@ class Rp2040IvlDisplay(SevenSegmentDisplay):
             if low_power_drives is True:
                 mem32[0x4001c004 + (i*4)] = (mem32[0x4001c004 + (i*4)] & 0b11001111)
                 
-        # init brightness table here...
-
         self.sm = rp2.StateMachine(0,
                                    sevseg,
                                    freq=2000,
                                    out_base=Pin(segment_drive_base_pin),
                                    set_base=Pin(digit_drive_base_pin))
-        self.brightness_pwm = PWM(Pin(brightness_pwm_pin, Pin.OUT))
+        
+        self._brightness_ctrl = PwmU16BrightnessController(brightness_pwm_pin, 2000)
 
         # bring up display but in blank state.
-        self.setBrightness(8)
         self.blank()
         self.sm.active(1)
 
-    def setBrightnessPwmRaw(self, freq, duty):
-        self.brightness_pwm.freq(freq)
-        self.brightness_pwm.duty_u16(duty)
-
     def setBrightness(self, brightness):
-        if brightness < 1:
-            brightness = 1
-        if brightness > 8:
-            brightness = 8
-
-        brightness -= 1
-        self.setBrightnessPwmRaw( DEFAULT_BRIGHTNESS_TABLE[brightness][0], DEFAULT_BRIGHTNESS_TABLE[brightness][1] )
+        self._brightness_ctrl.setBrightness(brightness)
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 255)
@@ -142,4 +114,3 @@ class Rp2040IvlDisplay(SevenSegmentDisplay):
         c = int(c & 255)
         d = int(d & 255)
         self.sm.put( d | c << 8 | b << 16 | a << 24 )
-

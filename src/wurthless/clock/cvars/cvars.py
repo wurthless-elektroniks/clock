@@ -6,11 +6,10 @@ known_cvars = {}
 # class Cvar: Single cvar instance
 #
 class Cvar(object):
-    def __init__(self, registrant, name, datatype, description, default):
+    def __init__(self, registrant, name, datatype, default):
         self.registrant = registrant
         self.name = name
         self.datatype = datatype
-        self.description = description
         self.default = default
         self.setValue(default)
 
@@ -32,29 +31,27 @@ class Cvar(object):
 
 
 class CvarDefinition(object):
-    def __init__(self, registrant, name, datatype, description, default):
+    def __init__(self, registrant, name, datatype, default):
         self.registrant = registrant
         self.name = name
         self.datatype = datatype
-        self.description = description
         self.default = default
     
     def instantiate(self):
-        return Cvar(self.registrant, self.name, self.datatype, self.description, self.default)
+        return Cvar(self.registrant, self.name, self.datatype, self.default)
 
 # registerCvar(): Registers cvar.
-def registerCvar(registrant: str, name: str, datatype: str, description: str, default: any):
+def registerCvar(registrant: str, name: str, datatype: str, default: any):
     '''
     Register a cvar.
     - registrant: name of the module to which this cvar belongs
     - name: name of the cvar itself. This is unique to that module.
     - datatype: String indicating datatype, which must be a primitive: Int, Double, String, etc.
-    - description: Documentation about what that cvar is.
     - default: Default value for this cvar.
 
     Cvars are registered internally as "registrant:name".
     '''
-    defn = CvarDefinition(registrant, name, datatype, description, default)
+    defn = CvarDefinition(registrant, name, datatype, default)
     key = registrant + u':' + name
     known_cvars[ registrant + u':' + name ] = defn
     print(u"registered cvar: %s" % (key))

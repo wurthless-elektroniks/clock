@@ -8,8 +8,17 @@ try:
 except:
     import socket
 
-registerCvar(u"wurthless.clock.common.ntp4", u"host",    u"String", u"NTP server to use when fetching time.", u"pool.ntp.org")
-registerCvar(u"wurthless.clock.common.ntp4", u"timeout", u"Int",    u"NTP socket timeout.", 1)
+# NTP server to use when fetching time.
+registerCvar("wurthless.clock.common.ntp4",
+             "host",
+             "String",
+             "pool.ntp.org")
+
+# NTP socket timeout.
+registerCvar("wurthless.clock.common.ntp4",
+             "timeout",
+             "Int",
+            1)
 
 class Ntp4TimeSource(TimeSource):
     def __init__(self, tot):

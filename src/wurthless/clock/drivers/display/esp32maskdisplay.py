@@ -8,6 +8,7 @@ from machine import Pin,Timer,mem32,disable_irq,enable_irq,PWM
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.api.display import Display
 from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
+from wurthless.clock.common.pwmbrightnessctrl import PwmBrightnessController
 
 # i'm serious. we are accessing the hardware directly. it's too slow otherwise.
 # DANGER! this I/O register changes depending on what ESP32 we are using.
@@ -23,115 +24,45 @@ else:
     GPIO_OUT_REG = 0x3FF44004
 
 # default pin assignments are for TMUCITW v8
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"seg_a_pin",
-             u"Int",
-             u"LED segment A drive pin",
-             4)
+# cvars are no longer used here because of their heavy memory usage
+# and because TMUCITW v8 is the final LED revision (for now).
+SEG_A_PIN = 4
+SEG_B_PIN = 16
+SEG_C_PIN = 5
+SEG_D_PIN = 17
+SEG_E_PIN = 18
+SEG_F_PIN = 13
+SEG_G_PIN = 27
+DIGIT_0_PIN = 23
+DIGIT_1_PIN = 19
+DIGIT_2_PIN = 21
+DIGIT_3_PIN = 22
+BRIGHTNESS_PIN = 26
 
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"seg_b_pin",
-             u"Int",
-             u"LED segment B drive pin",
-             16)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"seg_c_pin",
-             u"Int",
-             u"LED segment C drive pin",
-             5)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"seg_d_pin",
-             u"Int",
-             u"LED segment D drive pin",
-             17)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"seg_e_pin",
-             u"Int",
-             u"LED segment E drive pin",
-             18)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"seg_f_pin",
-             u"Int",
-             u"LED segment F drive pin",
-             13)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"seg_g_pin",
-             u"Int",
-             u"LED segment G drive pin",
-             27)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"digit_0_pin",
-             u"Int",
-             u"LED digit 0 drive pin",
-             23)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"digit_1_pin",
-             u"Int",
-             u"LED digit 1 drive pin",
-             19)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"digit_2_pin",
-             u"Int",
-             u"LED digit 2 drive pin",
-             21)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"digit_3_pin",
-             u"Int",
-             u"LED digit 3 drive pin",
-             22)
-
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"brightness_pwm_pin",
-             u"Int",
-             u"LED brightness PWM pin",
-             26)
-
+# Frequency at which we update the display
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_frequency",
              u"Int",
-             u"Frequency at which we update the display",
              int((4*100)*4))
 
+# If True, write directly to GPIO register without preserving other I/O settings. Default is False (off).
 registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
              u"strobe_fast",
              u"Boolean",
-             u"If True, write directly to GPIO register without preserving other I/O settings. Default is False (off).",
              False)
 
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"halfbright",
-             u"Boolean",
-             u"If True, use half-brightness mode. Default is False (off).",
+# If True, use half-brightness mode. Default is False (off).
+registerCvar("wurthless.clock.drivers.display.esp32maskdisplay",
+             "halfbright",
+             "Boolean",
              False)
 
 class Esp32MaskDisplay(SevenSegmentDisplay):
     def __init__(self, tot):
         cvars = tot.cvars()
 
-        seg_a_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_a_pin" )
-        seg_b_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_b_pin" )
-        seg_c_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_c_pin" )
-        seg_d_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_d_pin" )
-        seg_e_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_e_pin" )
-        seg_f_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_f_pin" )
-        seg_g_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"seg_g_pin" )
-
-        dig_0_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_0_pin" )
-        dig_1_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_1_pin" )
-        dig_2_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_2_pin" )
-        dig_3_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"digit_3_pin" )
-       
-        self.seg_pins = [ seg_a_pin, seg_b_pin, seg_c_pin, seg_d_pin, seg_e_pin, seg_f_pin, seg_g_pin ]
-        self.dig_pins = [ dig_0_pin, dig_1_pin, dig_2_pin, dig_3_pin ]
+        self.seg_pins = [ SEG_A_PIN, SEG_B_PIN, SEG_C_PIN, SEG_D_PIN, SEG_E_PIN, SEG_F_PIN, SEG_G_PIN ]
+        self.dig_pins = [ DIGIT_0_PIN, DIGIT_1_PIN, DIGIT_2_PIN, DIGIT_3_PIN ]
 
         # force system to mark all pins as outputs
         for p in self.seg_pins+self.dig_pins:
@@ -162,12 +93,9 @@ class Esp32MaskDisplay(SevenSegmentDisplay):
         
         self.timer = Timer(0, mode=Timer.PERIODIC, freq = self.strobe_frequency, callback=cb)
 
-        pwm_pin = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"brightness_pwm_pin")
-        
-        self.brightness_pwm = PWM(Pin(pwm_pin))
-
-        self._halfbright = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"halfbright")
-        self.setBrightness(8)
+        pwm_pin = BRIGHTNESS_PIN
+        halfbright = cvars.get("wurthless.clock.drivers.display.esp32maskdisplay", "halfbright")
+        self._brightness_ctrl = PwmBrightnessController(pwm_pin, self.strobe_frequency, half_brightness=halfbright)
 
     def _strobe_fast(self, t):
         isr = disable_irq()
@@ -184,10 +112,7 @@ class Esp32MaskDisplay(SevenSegmentDisplay):
         enable_irq(isr)
 
     def setBrightness(self, brightness):
-        duty = int(1000*((brightness / 8))+23)
-        if self._halfbright:
-            duty >>= 1
-        self.brightness_pwm.init(freq = self.strobe_frequency * 2, duty=duty)
+        self._brightness_ctrl.setBrightness(brightness)
 
     def setDigitsBinary(self, a, b, c, d):
         a = int(a & 0x7F)
@@ -214,7 +139,7 @@ class Esp32MaskDisplay(SevenSegmentDisplay):
 
     def shutdown(self):
         self.timer.deinit()
-        self.brightness_pwm.deinit()
+        self._brightness_ctrl.deinit()
         
         # disable all digit drives so the display goes blank
         isr = disable_irq()

@@ -8,10 +8,13 @@ from wurthless.clock.api.tot import ToT
 from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN_SEGMENT, COLON_STATE_BLINK
 from wurthless.clock.common.messages import *
 
+from wurthless.clock.common.brightness import BRIGHTNESS_MINIMUM_VALUE, BRIGHTNESS_MAXIMUM_VALUE, \
+                                              BRIGHTNESS_TOTAL_STEPS, decrement_brightness, increment_brightness
+
 def inputTest(tot: ToT):
     display = tot.display()
 
-    display.setBrightness(8)
+    display.setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
     while True:
         tot.inputs().strobe()
 
@@ -52,6 +55,20 @@ def burninMessageTest(tot: ToT):
         f(tot.display())
         time.sleep(0.5)
 
+def _brightness_test(tot: ToT):
+    for __ in range(0,1):
+        brightness = BRIGHTNESS_MAXIMUM_VALUE
+        for _ in range(BRIGHTNESS_TOTAL_STEPS):
+            tot.display().setBrightness(brightness)
+            brightness = decrement_brightness(brightness)
+            time.sleep(0.5)
+        
+        brightness = BRIGHTNESS_MINIMUM_VALUE
+        for _ in range(BRIGHTNESS_TOTAL_STEPS):
+            tot.display().setBrightness(brightness)
+            brightness = increment_brightness(brightness)
+            time.sleep(0.5)
+
 # numeric displays require different burn-in test
 def burninNumeric(tot: ToT):
     while True:
@@ -86,25 +103,18 @@ def burninNumeric(tot: ToT):
         burninMessageTest(tot)
 
         tot.display().setDigitsNumeric(8,8,8,8)
-
-        for j in range(0,1):
-            for i in range(0,8):
-                tot.display().setBrightness(8-i)
-                time.sleep(0.5)
-            for i in range(0,8):
-                tot.display().setBrightness(1+i)
-                time.sleep(0.5)
+        _brightness_test(tot)
 
 def burninSevenSegment(tot: ToT):
-    tot.display().setBrightness(8)
+    tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
 
     # "tESt"
-    tot.display().setDigitsBinary(0b011111000, 0b01111001, 0b01101101, 0b011111000)
+    messagesDisplayTest(tot.display())
 
     time.sleep(5)
 
     while True:
-        tot.display().setBrightness(8)
+        tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
         tot.display().setColonState(1)
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
         time.sleep(0.5 * 8)
@@ -139,7 +149,7 @@ def burninSevenSegment(tot: ToT):
      
         # anti-ghosting test (bad LEDs cause bleedovers)
         # has to run at lowest brightness because that's when the problem is most obvious
-        tot.display().setBrightness(1)
+        tot.display().setBrightness(BRIGHTNESS_MINIMUM_VALUE)
         for j in range(0,4):
             tot.display().setDigitsBinary(0b01001001, 0b00110110, 0b01001001, 0b00110110)
             time.sleep(0.5)
@@ -151,7 +161,7 @@ def burninSevenSegment(tot: ToT):
             tot.display().setDigitsBinary(0b01111000, 0b00000111, 0b01111000, 0b00000111)
             time.sleep(0.5)
 
-        tot.display().setBrightness(8)
+        tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
         burninMessageTest(tot)
 
         # digits test - needed to catch problems with decorators
@@ -162,15 +172,9 @@ def burninSevenSegment(tot: ToT):
 
         # brightness test
         tot.display().setDigitsBinary(0x7F, 0x7F, 0x7F, 0x7F)
-        for j in range(0,1):
-            tot.display().setColonState(COLON_STATE_BLINK)
-            for i in range(0,8):
-                tot.display().setBrightness(8-i)
-                time.sleep(0.5)
-            for i in range(0,8):
-                tot.display().setBrightness(1+i)
-                time.sleep(0.5)
-   
+        tot.display().setColonState(COLON_STATE_BLINK)
+        _brightness_test(tot)
+        
 def burnin(tot: ToT):
     display_type = tot.display().getDisplayType()
     if display_type == DISPLAY_TYPE_NUMERIC:

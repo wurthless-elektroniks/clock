@@ -25,64 +25,68 @@ from wurthless.clock.common.prompt import promptYear, promptMonthOrDay, promptTi
 from wurthless.clock.common.bcd import unpackBcd
 from wurthless.clock.scheduler.scheduler import Scheduler, EVENT_FIRES_EVERY_MINUTE, EVENT_FIRES_IMMEDIATELY, EventFiresAfter
 
+from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, decrement_brightness, increment_brightness, clamp_brightness
+
 ################################################################################################################
 #
 # Cvars (specific to the logic in this file)
 #
 ################################################################################################################
 
+# If True, pressing SET and DST execute their actions immediately (needed when running in curses).
+# Default behavior is False (user must hold buttons to execute those actions).
 registerCvar(u"wurthless.clock.clockmain",
              u"set_and_dst_no_debounce",
              u"Boolean",
-             u"If True, pressing SET and DST execute their actions immediately (needed when running in curses). Default behavior is False (user must hold buttons to execute those actions).",
              False)
 
+# If True, disable calendar, and assume all date settings will be 2023-01-01.
+# Default is False (calendar is enabled).
 registerCvar(u"wurthless.clock.clockmain",
              u"disable_calendar",
              u"Boolean",
-             u"If True, disable calendar, and assume all date settings will be 2023-01-01. Default is False (calendar is enabled).",
              False)
 
+# If True, digit 0 only has segments B and C populated, with segment A indicating p.m. Default is False.
 registerCvar(u"wurthless.clock.clockmain",
              u"digit_0_truncated",
              u"Boolean",
-             u"If True, digit 0 only has segments B and C populated, with segmetn A indicating p.m. Default is False.",
              False)
 
+# Interval time in seconds between clock synchronization. Default is 7200 (every 2 hours). Used only if timesources are present.
 registerCvar(u"wurthless.clock.clockmain",
              u"autosync_frequency",
              u"Int",
-             u"Interval time in seconds between clock synchronization. Default is 7200 (every 2 hours). Used only if timesources are present.",
              7200)
 
+# Interval time in seconds to delay saving settings. Default is 1800 (30 minutes). Needed to prevent wearing down the system flash.
 registerCvar(u"wurthless.clock.clockmain",
              u"settings_write_delay",
              u"Int",
-             u"Interval time in seconds to delay saving settings. Default is 1800 (30 minutes). Needed to prevent wearing down the system flash.",
              1800)
 
+# If True, force server mode (needed for testing).
 registerCvar(u"wurthless.clock.clockmain",
              u"force_server",
              u"Boolean",
-             u"If True, force server mode (needed for testing).",
              False)
 
+# If True, force burn-in mode (needed for testing).
 registerCvar(u"wurthless.clock.clockmain",
              u"force_burnin",
              u"Boolean",
-             u"If True, force burn-in mode (needed for testing).",
              False)
 
+# Framerate in Hz. Default is 25.
 registerCvar(u"wurthless.clock.clockmain",
              u"tickrate",
              u"Int",
-             u"Framerate in Hz. Default is 25.",
              25)
 
+# If True, rotate all digits at the minute mark (avoids Nixie cathode poisoning). Default is False.
 registerCvar("wurthless.clock.clockmain",
              "nixieroto",
              "Boolean",
-             "If True, rotate all digits at the minute mark (avoids Nixie cathode poisoning). Default is False.",
              False)
 
 def configMode(tot: ToT):
@@ -91,8 +95,8 @@ def configMode(tot: ToT):
 
     tot.display().setColonState(COLON_STATE_OFF)
 
-    # brightness always 8 coming into this loop
-    tot.display().setBrightness(8)
+    # brightness always maximum coming into this loop
+    tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
 
     # wrap inputs (simplifies keeping track of pushbutton states between prompts)
     direct_inputs = tot.inputs()
@@ -288,9 +292,7 @@ def init(tot: ToT):
 ################################################################################################################
 
 def loop(tot: ToT):
-    brightness = tot.cvars().get(u"config.display",u"brightness")
-    if not (1 <= brightness and brightness <= 8):
-        brightness = 8
+    brightness = clamp_brightness(tot.cvars().get("config.display","brightness"))
     tot.display().setBrightness(brightness) 
 
     dst_is_dipswitch = tot.inputs().is_dst_dipswitch()
@@ -404,11 +406,10 @@ def loop(tot: ToT):
         # Pressing UP changes brightness in descending order.
         # If brightness is at minimum, reset to highest brightness.
         if inputs.up():
-            brightness -= 1
-            if not (1 <= brightness and brightness <= 8):
-                brightness = 8
-            tot.display().setBrightness(brightness) 
-            tot.cvars().set(u"config.display",u"brightness",brightness)
+            brightness = decrement_brightness(brightness)
+            tot.display().setBrightness(brightness)
+            
+            tot.cvars().set("config.display","brightness",brightness)
             scheduler.scheduleEvent("writebackCfg")
 
         # Pressing DOWN will toggle between displaymodes
@@ -461,7 +462,7 @@ def clockMain(tot: ToT):
         force_server = tot.cvars().get(u"wurthless.clock.clockmain", u"force_server")
         if tot.inputs().set() or force_server:
             # display "cfg"
-            tot.display().setBrightness(8)
+            tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
             messagesDisplayCfg(tot.display())
 
             serverMain(tot)

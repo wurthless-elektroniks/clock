@@ -17,9 +17,10 @@ class Display(object):
         
     def setBrightness(self, brightness: int):
         '''
-        Set brightness to a value between 1 and 8. If the device doesn't support brightness, this does nothing.
+        Set display brightness.
+        If the device doesn't support brightness, this does nothing.
         '''
-        raise RuntimeError("unimplemented")
+        # this function intentionally left blank
 
     def getDisplayType(self):
         raise RuntimeError("unimplemented")

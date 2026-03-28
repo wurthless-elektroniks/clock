@@ -15,6 +15,3 @@ class I2CSevenSegmentDisplay(SevenSegmentDisplay):
     
     def setDigitsBinary(self, a, b, c, d):
         self._i2c.writeto(0x69, bytes([1, a, b, c, d]))
-
-    def setBrightness(self, brightness):
-        pass # TODO
