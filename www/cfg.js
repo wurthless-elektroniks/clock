@@ -192,13 +192,9 @@ function populateSettings() {
             } else {
                 select24HourTime();
             }
-        });
-}
 
-function populateGitCommit() {
-    fetch("/git.txt").then( response => {
-        response.text().then( body => document.getElementById("gitcommit").innerText = "git commit: "+body );
-    });
+            document.getElementById("gitcommit").innerText = "git commit: "+json['git'];
+        });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -219,5 +215,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("form").style.visibility = "visible";
     initTimeZones();
 
-    populateGitCommit();
 });

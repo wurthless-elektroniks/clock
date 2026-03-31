@@ -12,13 +12,13 @@ def configureEsp32C3IoPins():
 
         # micropython sucks and will not let us grab pins 18 or 19 as I/Os
         # although, hilariously, it allows us to try grabbing pins 11-17.
-        print(u"******* ESP32-C3 detected. hacking around micropython limitations *******")
-        print(u"killing USB-JTAG. if i don't see you on the other side, adios!")
+        print("******* ESP32-C3 detected. hacking around micropython limitations *******")
+        print("killing USB-JTAG. if i don't see you on the other side, adios!")
 
         # disable USB PHY
         mem32[0x60043018] = 0x00000000
 
-        print(u"grabbing pins 18/19 and setting them up as outputs")
+        print("grabbing pins 18/19 and setting them up as outputs")
 
         # set pins 18/19 as outputs
         mem32[0x60004024] |= (1 << 18) | (1 << 19)
@@ -32,4 +32,4 @@ def configureEsp32C3IoPins():
         mem32[0x6000904C] = 0b0000111101101011
         mem32[0x60009050] = 0b0000111101101011
 
-        print(u"esp32c3 platform configured. have a nice day!")
+        print("esp32c3 platform configured. have a nice day!")

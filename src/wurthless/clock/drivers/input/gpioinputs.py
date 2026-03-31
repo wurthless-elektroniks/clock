@@ -7,17 +7,17 @@ from machine import Pin
 from wurthless.clock.cvars.cvars import registerCvar
 
 # Cvars - these assume RPi Pico-based hardware
-registerCvar(u"wurthless.clock.drivers.input.gpioinputs", u"up_pin_id",    u"Int", u"GPIO pin for UP button.", 7)
-registerCvar(u"wurthless.clock.drivers.input.gpioinputs", u"down_pin_id",  u"Int", u"GPIO pin for DOWN button.", 8)
-registerCvar(u"wurthless.clock.drivers.input.gpioinputs", u"set_pin_id",   u"Int", u"GPIO pin for SET button.", 9)
-registerCvar(u"wurthless.clock.drivers.input.gpioinputs", u"dst_pin_id",   u"Int", u"GPIO pin for DST button.", 11)
+registerCvar("wurthless.clock.drivers.input.gpioinputs", "up_pin_id",    "Int", 7)
+registerCvar("wurthless.clock.drivers.input.gpioinputs", "down_pin_id",  "Int", 8)
+registerCvar("wurthless.clock.drivers.input.gpioinputs", "set_pin_id",   "Int", 9)
+registerCvar("wurthless.clock.drivers.input.gpioinputs", "dst_pin_id",   "Int", 11)
 
 class GpioInputs(Inputs):
     def __init__(self, tot):
-        up_pin_id = tot.cvars().get(u"wurthless.clock.drivers.input.gpioinputs", u"up_pin_id")
-        down_pin_id = tot.cvars().get(u"wurthless.clock.drivers.input.gpioinputs", u"down_pin_id")
-        set_pin_id = tot.cvars().get(u"wurthless.clock.drivers.input.gpioinputs", u"set_pin_id")
-        dst_pin_id = tot.cvars().get(u"wurthless.clock.drivers.input.gpioinputs", u"dst_pin_id")
+        up_pin_id = tot.cvars().get("wurthless.clock.drivers.input.gpioinputs", "up_pin_id")
+        down_pin_id = tot.cvars().get("wurthless.clock.drivers.input.gpioinputs", "down_pin_id")
+        set_pin_id = tot.cvars().get("wurthless.clock.drivers.input.gpioinputs", "set_pin_id")
+        dst_pin_id = tot.cvars().get("wurthless.clock.drivers.input.gpioinputs", "dst_pin_id")
 
         self.up_pin = Pin(up_pin_id, Pin.IN, Pin.PULL_UP)
         self.down_pin = Pin(down_pin_id, Pin.IN, Pin.PULL_UP)

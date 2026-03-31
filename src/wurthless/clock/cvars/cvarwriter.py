@@ -19,12 +19,12 @@ class TokenedCvarWriter(CvarWriter):
     def __init__(self):
         self.preflights = [
             # factory settings
-            u"secrets/factory.ini",
+            "secrets/factory.ini",
 
             # stuff specific to this individual device (currently unused)
-            u"secrets/guid.ini"
+            "secrets/guid.ini"
         ]
-        self.path = u'secrets/secrets.ini'
+        self.path = 'secrets/secrets.ini'
 
     def _load_optionals(self, cvardict, filenames):
         for p in self.preflights:
@@ -50,13 +50,13 @@ class TokenedCvarWriter(CvarWriter):
                 if line.startswith("#"):
                     continue
                 # preserve base64 nonsense
-                line = line.split(u"=",1)
-                print(u"handling: %s"%(line))
+                line = line.split("=",1)
+                print(f"handling: {line}")
                 value = str( binascii.a2b_base64(bytearray(line[1], 'utf-8')), 'utf-8' )
                 if line[0] not in cvardict:
-                    raise RuntimeError(u"cvardict doesn't know cvar: %s"%(line[0]))
+                    raise RuntimeError(f"cvardict doesn't know cvar: {line[0]}")
                 cvardict[line[0]].setValue(value)
-                print(u"handled: %s"%(line))
+                print(f"handled: {line}")
 
     def load(self, cvardict):
         self._load_optionals(cvardict, self.preflights)
@@ -69,8 +69,8 @@ class TokenedCvarWriter(CvarWriter):
 
     def save(self, cvardict):
         with open(self.path, "w") as f:
-            f.write(u"# tmucitw config, do not modify this as values will get overwritten\n")
+            f.write("# tmucitw config, do not modify this as values will get overwritten\n")
             for cvar in cvardict.values():
                 # any cvar that is not user-configurable does not get saved.
-                if cvar.registrant.startswith(u"config"):
-                    f.write(u"%s:%s=%s"%(cvar.registrant,cvar.name, str( binascii.b2a_base64(bytearray(str(cvar.getValue()),'utf-8')), 'utf-8') ) )
+                if cvar.registrant.startswith("config"):
+                    f.write("%s:%s=%s"%(cvar.registrant,cvar.name, str( binascii.b2a_base64(bytearray(str(cvar.getValue()),'utf-8')), 'utf-8') ) )

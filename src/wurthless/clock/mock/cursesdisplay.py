@@ -10,6 +10,8 @@ from wurthless.clock.api.display import Display, COLON_STATE_BLINK, COLON_STATE_
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
+from wurthless.clock.common.brightness import clamp_brightness, BRIGHTNESS_MAXIMUM_VALUE
+
 LITE = '\u2591'
 DARK = '\u2592'
 
@@ -33,7 +35,7 @@ class CursesDisplay(SevenSegmentDisplay):
         self._colon_state = 0
 
     def _refresh(self):
-        screenstr = u"""
+        screenstr = """
              aaaa   hhhh       oooo    vvvv
             f    b m    i  @  t    p  0    w
             f    b m    i     t    p  0    w
@@ -87,7 +89,11 @@ class CursesDisplay(SevenSegmentDisplay):
         self.scr.refresh()
 
     def setBrightness(self, brightness):
-        self.brightness = brightness
+        if BRIGHTNESS_MAXIMUM_VALUE == 16:
+            self.brightness = clamp_brightness(brightness >> 1)
+        elif BRIGHTNESS_MAXIMUM_VALUE == 8:
+            self.brightness = brightness
+        
         self._refresh()
 
     def setDigitsBinary(self,a,b,c,d):

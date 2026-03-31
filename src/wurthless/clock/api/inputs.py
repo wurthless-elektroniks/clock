@@ -1,8 +1,3 @@
-BUTTON_UP_PRESSED   = (1 << 0)
-BUTTON_DOWN_PRESSED = (1 << 1)
-BUTTON_SET_PRESSED  = (1 << 2)
-BUTTON_DST_PRESSED  = (1 << 3)
-
 class Inputs(object):
     '''
     Interface to the input device. The input device defines four buttons (up, down, set, DST).

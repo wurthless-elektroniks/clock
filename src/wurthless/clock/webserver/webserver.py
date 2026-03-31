@@ -5,14 +5,19 @@
 
 from microdot import Microdot,send_file
 from wurthless.clock.cvars.cvars import registerCvar
+from wurthless.clock.common.upy import RUNNING_UNDER_UPY, reboot as _reboot
 
-global running_under_upy
+
+GIT = "undefined"
 try:
+    import git
+    GIT = git.GIT
+except:
+    pass
+
+if RUNNING_UNDER_UPY:
     import machine
     from machine import Pin,PWM
-    running_under_upy = True
-except:
-    running_under_upy = False
 
 server = Microdot()
 
@@ -44,65 +49,57 @@ def validateWifiAccessPointName(string):
         return False
 
     # also catches precisely one leading space
-    if l[0] in [ u'\u0021',  u'\u0023',  u'\u003B', u'\u0020' ]:
+    if l[0] in [ '\u0021',  '\u0023',  '\u003B', '\u0020' ]:
         return False
     
     for i in l:
-        if (i == u'\u0020' or \
-             i == u'\u0021' or \
-             i == u'\u0023' or \
-             (u'\u0025' <= i and i <= u'\u002A') or \
-             (u'\u002C' <= i and i <= u'\u003E') or \
-             (u'\u0040' <= i and i <= u'\u005A') or \
-             (u'\u005E' <= i and i <= u'\u007E')) is False:
+        if (i == '\u0020' or \
+             i == '\u0021' or \
+             i == '\u0023' or \
+             ('\u0025' <= i and i <= '\u002A') or \
+             ('\u002C' <= i and i <= '\u003E') or \
+             ('\u0040' <= i and i <= '\u005A') or \
+             ('\u005E' <= i and i <= '\u007E')) is False:
             return False
         
     # catch trailing space
-    if l[len(l)-1] == u'\u0020':
+    if l[len(l)-1] == '\u0020':
         return False
     
     return True
 
 @server.get('/index.html')
 async def indexhtml(request):
-    return send_file(u"www/index.html")
+    return send_file("www/index.html")
 
 @server.get('/')
 async def index(request):
-    return send_file(u"www/index.html")
-
-@server.get('/git.txt')
-async def gittxt(request):
-    return send_file("git.txt", content_type="text/plain")
+    return send_file("www/index.html")
 
 @server.get('/cfg.js')
 async def cfgjs(request):
-    return send_file(u"www/cfg.js")
+    return send_file("www/cfg.js")
 
 @server.get('/cfg.css')
 async def cfgcss(request):
-    return send_file(u"www/cfg.css")
+    return send_file("www/cfg.css")
 
 @server.get('/rest/settings')
 async def settingsGet(request):
     # do NOT send password back to the client, ever. EVER.
     return {
-        'wifi_ap_name': g_tot.cvars().get(u"config.nic",u"wifi_ap_name"),
-        'dst_active': g_tot.cvars().get(u"config.clock",u"dst_active"),
-        'dst_disable': g_tot.cvars().get(u"config.clock",u"dst_disable"),
-        'utc_offset_seconds': g_tot.cvars().get(u"config.clock",u"utc_offset_seconds"),
+        'wifi_ap_name': g_tot.cvars().get("config.nic","wifi_ap_name"),
+        'dst_active': g_tot.cvars().get("config.clock","dst_active"),
+        'dst_disable': g_tot.cvars().get("config.clock","dst_disable"),
+        'utc_offset_seconds': g_tot.cvars().get("config.clock","utc_offset_seconds"),
         'dst_is_dipswitch': g_tot.inputs().is_dst_dipswitch(),
-        'display_12hr_time': g_tot.cvars().get("config.clock", "display_12hr_time")
+        'display_12hr_time': g_tot.cvars().get("config.clock", "display_12hr_time"),
+        'git': GIT
     },200
 
 @server.get('/rest/reboot')
 async def reboot(request):
-    if running_under_upy:
-        # never returns
-        machine.reset()
-    else:
-        print("reboot called but we're not in micropython land, so i'm not doing anything.")
-
+    _reboot()
     return {},200
 
 @server.post('/rest/settings')
@@ -147,12 +144,12 @@ async def settingsPost(request):
     # utc_offset_seconds must be int
     # ap_name/ap_password must be strings
 
-    g_tot.cvars().set(u"config.nic",u"wifi_ap_name", ap_name )
-    g_tot.cvars().set(u"config.nic",u"wifi_ap_password", ap_password )
-    g_tot.cvars().set(u"config.clock",u"utc_offset_seconds", utc_offset_seconds)
+    g_tot.cvars().set("config.nic","wifi_ap_name", ap_name )
+    g_tot.cvars().set("config.nic","wifi_ap_password", ap_password )
+    g_tot.cvars().set("config.clock","utc_offset_seconds", utc_offset_seconds)
     if dst_is_dipswitch is False:
-        g_tot.cvars().set(u"config.clock",u"dst_disable", dst_disable)
-        g_tot.cvars().set(u"config.clock",u"dst_active", dst_active)
+        g_tot.cvars().set("config.clock","dst_disable", dst_disable)
+        g_tot.cvars().set("config.clock","dst_active", dst_active)
 
     g_tot.cvars().set("config.clock", "display_12hr_time", display_12hr_time)
 
@@ -175,12 +172,12 @@ def serverMain(tot):
         tot.display().shutdown()
 
         status_pin = tot.cvars().get("wurthless.clock.webserver", "server_active_pin")
-        if status_pin != -1 and running_under_upy is True:
+        if status_pin != -1 and RUNNING_UNDER_UPY is True:
             PWM(Pin(status_pin,Pin.OUT), freq=1, duty=512)
 
     # set to true to debug statistics on micropython.
     # very important for diagnosing memory crunch issues that cause the webserver to lock up
-    if running_under_upy:
+    if RUNNING_UNDER_UPY:
         import gc
         gc.collect()
         print(f"{gc.mem_alloc()} bytes wired, {gc.mem_free()} bytes free")

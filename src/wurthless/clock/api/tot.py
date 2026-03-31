@@ -23,7 +23,7 @@ class ToT(object):
 
     def assertNotFinalized(self):
         if self._finalized is True:
-            raise RuntimeError(u"this ToT is finalized")
+            raise RuntimeError("this ToT is finalized")
 
     def nic(self) -> (Nic | None):
         '''

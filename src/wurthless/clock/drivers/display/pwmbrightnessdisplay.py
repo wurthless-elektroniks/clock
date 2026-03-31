@@ -10,7 +10,8 @@ an idea that never panned out. Legacy drivers will use the PwmBrightnessControll
 '''
 
 from wurthless.clock.drivers.display.decorateddisplay import DecoratedDisplay
-from wurthless.clock.common.pwmbrightnessctrl import PwmBrightnessController,PwmU16BrightnessController
+from wurthless.clock.common.pwmbrightnessctrl import PwmBrightnessController
+from wurthless.clock.common.pwmu16brightnessctrl import PwmU16BrightnessController
 
 class PwmBrightnessDisplay(DecoratedDisplay):
     def __init__(self,

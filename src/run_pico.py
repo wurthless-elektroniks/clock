@@ -24,10 +24,11 @@ import config
 from machine import Pin,UART
 from wurthless.clock.drivers.nmea.nmeadevice import NmeaDevice
 from wurthless.clock.drivers.nmea.nmeatimesource import NmeaTimeSource
+from wurthless.clock.common.upy import make_const
 
 
-DISPLAY_DRIVER_SEVEN_SEGMENT_LED = 0
-DISPLAY_DRIVER_NIXIE             = 1
+DISPLAY_DRIVER_SEVEN_SEGMENT_LED = make_const(0)
+DISPLAY_DRIVER_NIXIE             = make_const(1)
 
 # Pico/Pico W share common hardware configuration for the LED matrix, switches, etc.
 def picoCommonInit(tot, invert_bits, display_driver):
@@ -43,6 +44,7 @@ def picoCommonInit(tot, invert_bits, display_driver):
         if invert_bits is True:
             display = InvertedBitDisplay(display)
     elif display_driver == DISPLAY_DRIVER_NIXIE:
+        # TODO: doesn't belong here, should be moved out at some point.
         display = BcdLatchDisplay(tot)
 
     tot.setDisplay(display)
@@ -66,8 +68,8 @@ def runPicoW(invert_bits=False, display_driver = DISPLAY_DRIVER_SEVEN_SEGMENT_LE
     tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
 
     # force server mode if user hasn't configured wifi yet
-    if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
-        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+    if tot.cvars().get("config.nic", "enable") and tot.cvars().get("config.nic","wifi_ap_name") == "":
+        tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
     tot.finalize()
     clockMain(tot)

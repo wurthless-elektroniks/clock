@@ -17,7 +17,6 @@ from wurthless.clock.api.tot import ToT
 from wurthless.clock.burnin import burnin,inputTest
 from wurthless.clock.common.messages import messagesDisplaySync,messagesDisplayErr,messagesDisplayOops,messagesDisplayCfg
 from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp,autoformatHourIn12HourTime,getTimestampForNextMinute
-from wurthless.clock.webserver.webserver import serverMain
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
 from wurthless.clock.drivers.input.delayedinputs import DelayedInputs
@@ -27,6 +26,8 @@ from wurthless.clock.scheduler.scheduler import Scheduler, EVENT_FIRES_EVERY_MIN
 
 from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, decrement_brightness, increment_brightness, clamp_brightness
 
+from wurthless.clock.webserver.webserver import serverMain
+
 ################################################################################################################
 #
 # Cvars (specific to the logic in this file)
@@ -35,52 +36,52 @@ from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, decremen
 
 # If True, pressing SET and DST execute their actions immediately (needed when running in curses).
 # Default behavior is False (user must hold buttons to execute those actions).
-registerCvar(u"wurthless.clock.clockmain",
-             u"set_and_dst_no_debounce",
-             u"Boolean",
+registerCvar("wurthless.clock.clockmain",
+             "set_and_dst_no_debounce",
+             "Boolean",
              False)
 
 # If True, disable calendar, and assume all date settings will be 2023-01-01.
 # Default is False (calendar is enabled).
-registerCvar(u"wurthless.clock.clockmain",
-             u"disable_calendar",
-             u"Boolean",
+registerCvar("wurthless.clock.clockmain",
+             "disable_calendar",
+             "Boolean",
              False)
 
 # If True, digit 0 only has segments B and C populated, with segment A indicating p.m. Default is False.
-registerCvar(u"wurthless.clock.clockmain",
-             u"digit_0_truncated",
-             u"Boolean",
+registerCvar("wurthless.clock.clockmain",
+             "digit_0_truncated",
+             "Boolean",
              False)
 
 # Interval time in seconds between clock synchronization. Default is 7200 (every 2 hours). Used only if timesources are present.
-registerCvar(u"wurthless.clock.clockmain",
-             u"autosync_frequency",
-             u"Int",
+registerCvar("wurthless.clock.clockmain",
+             "autosync_frequency",
+             "Int",
              7200)
 
 # Interval time in seconds to delay saving settings. Default is 1800 (30 minutes). Needed to prevent wearing down the system flash.
-registerCvar(u"wurthless.clock.clockmain",
-             u"settings_write_delay",
-             u"Int",
+registerCvar("wurthless.clock.clockmain",
+             "settings_write_delay",
+             "Int",
              1800)
 
 # If True, force server mode (needed for testing).
-registerCvar(u"wurthless.clock.clockmain",
-             u"force_server",
-             u"Boolean",
+registerCvar("wurthless.clock.clockmain",
+             "force_server",
+             "Boolean",
              False)
 
 # If True, force burn-in mode (needed for testing).
-registerCvar(u"wurthless.clock.clockmain",
-             u"force_burnin",
-             u"Boolean",
+registerCvar("wurthless.clock.clockmain",
+             "force_burnin",
+             "Boolean",
              False)
 
 # Framerate in Hz. Default is 25.
-registerCvar(u"wurthless.clock.clockmain",
-             u"tickrate",
-             u"Int",
+registerCvar("wurthless.clock.clockmain",
+             "tickrate",
+             "Int",
              25)
 
 # If True, rotate all digits at the minute mark (avoids Nixie cathode poisoning). Default is False.
@@ -90,7 +91,7 @@ registerCvar("wurthless.clock.clockmain",
              False)
 
 def configMode(tot: ToT):
-    utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
+    utc_offset = tot.cvars().get("config.clock","utc_offset_seconds")
     dst_active = tot.cvars().get("config.clock", "dst_active")
 
     tot.display().setColonState(COLON_STATE_OFF)
@@ -121,7 +122,7 @@ def configMode(tot: ToT):
     # prompt, in order: year, month, date, hour, minute
     # If the calendar function is disabled, just prompt for hour and minute
 
-    if tot.cvars().get(u"wurthless.clock.clockmain",u"disable_calendar") is False:
+    if tot.cvars().get("wurthless.clock.clockmain","disable_calendar") is False:
         year = promptYear(tot, inputs, year)
         month = promptMonthOrDay(tot, inputs, month, 12)
         maxdays = 30
@@ -155,7 +156,7 @@ def configMode(tot: ToT):
     tot.rtc().setUtcTime( (timeTupleToTimestamp(packed_time) - utc_offset ) - ( 3600 if dst_active is True else 0 ) )
     
     # restore brightness before returning to caller, as there's no guarantee the caller will do that for us
-    tot.display().setBrightness(tot.cvars().get(u"config.display",u"brightness"))
+    tot.display().setBrightness(tot.cvars().get("config.display","brightness"))
 
 #
 # Draw/update the display
@@ -164,9 +165,8 @@ def renderDisplay(tot: ToT, mode: int):
     # get UTC time straight from the RTC (VERY SLOW)
     utctime = tot.rtc().getUtcTime()
 
-    utc_offset = tot.cvars().get(u"config.clock",u"utc_offset_seconds")
-    dst_active = tot.cvars().get(u"config.clock",u"dst_active")
-
+    utc_offset = tot.cvars().get("config.clock","utc_offset_seconds")
+    dst_active = tot.cvars().get("config.clock","dst_active")
 
     utctime += utc_offset
     if dst_active is True:
@@ -260,21 +260,23 @@ def init(tot: ToT):
     # At the very least, we need the display installed,
     # else panic and exit immediately
     if tot.display() is None:
-        print(u"Display driver not installed, no point continuing execution.")
+        print("Display driver not installed, no point continuing execution.")
         return
     
     # If no RTC, panic
     if tot.rtc() is None:
-        print(u"No RTC installed, no point continuing execution.")
+        print("No RTC installed, no point continuing execution.")
         return
     
     # if NIC present, bring it up
-    if tot.cvars().get(u"config.nic", u"enable") is True and tot.nic() is not None and tot.nic().isUp() is False:
+    if tot.cvars().get("config.nic", "enable") is True and tot.nic() is not None and tot.nic().isUp() is False:
         tot.nic().initAsClient()
+
+    
     
     if tot.rtc().readOnly() is False:
         # Synchronize time to timesource, if one is available.
-        if tot.timesources() is not None and tot.timesources() != []:
+        if tot.cvars().get("config.clock", "force_manual") is False and tot.timesources() is not None and tot.timesources() != []:
             syncTime(tot)
 
         # If RTC is not setup by this point, prompt for time.
@@ -282,7 +284,7 @@ def init(tot: ToT):
             configMode(tot)
 
     elif tot.rtc().isUp() is False:
-        print(u"Read-only RTC is not started. Make your code less shitty please.")
+        print("Read-only RTC is not started. Make your code less shitty please.")
         return
 
 ################################################################################################################
@@ -296,15 +298,16 @@ def loop(tot: ToT):
     tot.display().setBrightness(brightness) 
 
     dst_is_dipswitch = tot.inputs().is_dst_dipswitch()
-    set_and_dst_no_debounce = tot.cvars().get(u"wurthless.clock.clockmain", u"set_and_dst_no_debounce")
-    disable_calendar = tot.cvars().get(u"wurthless.clock.clockmain", u"disable_calendar")
+    set_and_dst_no_debounce = tot.cvars().get("wurthless.clock.clockmain", "set_and_dst_no_debounce")
+    disable_calendar = tot.cvars().get("wurthless.clock.clockmain", "disable_calendar")
 
     rtc_read_only = tot.rtc().readOnly() 
-    dst_disable = tot.cvars().get(u"config.clock",u"dst_disable") 
+    dst_disable = tot.cvars().get("config.clock","dst_disable")
+    cfg_writeback_delay = tot.cvars().get("wurthless.clock.clockmain","settings_write_delay")
 
-    cfg_writeback_delay = tot.cvars().get(u"wurthless.clock.clockmain",u"settings_write_delay")
+    force_manual = tot.cvars().get("config.clock", "force_manual") is False
 
-    nixieroto = tot.cvars().get(u"wurthless.clock.clockmain",u"nixieroto")
+    nixieroto = tot.cvars().get("wurthless.clock.clockmain","nixieroto")
 
     global displaymode
     displaymode = 0
@@ -312,10 +315,10 @@ def loop(tot: ToT):
     
     inputs = tot.inputs()
 
-    tickrate = tot.cvars().get(u"wurthless.clock.clockmain",u"tickrate")
+    tickrate = tot.cvars().get("wurthless.clock.clockmain","tickrate")
     tick_time_ms = int((1.0 / tickrate)*1000.0)
     ticks_per_second = int(1000.0 / tick_time_ms)
-    dst_set_hold_delay_tick_count = ticks_per_second * 5
+    dst_set_hold_delay_tick_count = ticks_per_second * 3
 
     direct_inputs = inputs
     if set_and_dst_no_debounce is False:
@@ -350,7 +353,7 @@ def loop(tot: ToT):
         resetState()
 
     scheduler.createEvent("autosync",
-                            EventFiresAfter(tot.cvars().get(u"wurthless.clock.clockmain",u"autosync_frequency")),
+                            EventFiresAfter(tot.cvars().get("wurthless.clock.clockmain","autosync_frequency")),
                             lambda: autosyncAttempt(),
                             repeat=True)
 
@@ -429,7 +432,7 @@ def loop(tot: ToT):
         # if we are allowed to configure the RTC at all.
         # If any timesources are present, attempt synchronization before running config mode.
         elif rtc_read_only is False and inputs.set() is True:
-            if (timesource_present is False or syncTime(tot, suppressError=False) is False):
+            if (force_manual or timesource_present is False or syncTime(tot, suppressError=False) is False):
                 configMode(tot)
 
             # previously scheduled events are assigned to times that are no longer valid,
@@ -437,14 +440,18 @@ def loop(tot: ToT):
             resetState()
   
         elif dst_is_dipswitch is False and dst_disable is False and inputs.dst() is True:
-            dst = tot.cvars().get(u"config.clock",u"dst_active")
+            dst = tot.cvars().get("config.clock","dst_active")
             dst = not dst
-            tot.cvars().set(u"config.clock",u"dst_active",dst)
+            tot.cvars().set("config.clock","dst_active",dst)
             scheduler.scheduleEvent("writebackCfg")
             scheduler.fireEvent("rerenderDisplay")
 
         # ---- end handle inputs ----
         sleep_ms(tick_time_ms)
+
+def go_config_mode(tot):
+    from wurthless.clock.configmode import config_mode
+    config_mode(tot)
 
 def clockMain(tot: ToT):
     tot.inputs().strobe()
@@ -453,19 +460,36 @@ def clockMain(tot: ToT):
         inputTest(tot)
 
     # if DOWN held on reset, go to burnin / demo mode
-    force_burnin = tot.cvars().get(u"wurthless.clock.clockmain", u"force_burnin")
+    force_burnin = tot.cvars().get("wurthless.clock.clockmain", "force_burnin")
     if force_burnin or tot.inputs().down():
         burnin(tot)
-    
-    if tot.cvars().get(u"config.nic", u"enable") is True and tot.nic() is not None:
-        # enter webserver config mode when SET is held on reset
-        force_server = tot.cvars().get(u"wurthless.clock.clockmain", u"force_server")
-        if tot.inputs().set() or force_server:
-            # display "cfg"
-            tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
-            messagesDisplayCfg(tot.display())
 
+    force_server = tot.cvars().get("wurthless.clock.clockmain", "force_server")
+    if tot.inputs().set() or force_server:
+        tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
+        messagesDisplayCfg(tot.display())
+
+        set_still_held = True
+        num_ticks = 3 * 1000
+
+        for _ in range(num_ticks):
+            sleep_ms( int((1/(num_ticks)) * 1000) )
+            tot.inputs().strobe()
+            if tot.inputs().set() is False:
+                set_still_held = False
+        
+        if set_still_held:
+            go_config_mode(tot)
+
+        if tot.cvars().get("config.nic", "enable") is True and tot.nic() is not None:
+            # wait two seconds - if SET is still pressed, run configmode.py,
+            # else start WiFi as normal
             serverMain(tot)
+        else:
+            # go directly to config mode
+            go_config_mode(tot)
+
+
 
     # the ghost of Arduino past refuses to go away
     init(tot)

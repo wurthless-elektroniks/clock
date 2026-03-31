@@ -12,7 +12,7 @@ def nmeaParseGsv(message: str) -> (list[int]|None):
     On success, return list of ints [ msg_count, msg_number, num_sats_visible ].
     On failure, return None.
     '''
-    matches = re.match(u"^\\$[A-Z][A-Z]GSV,([0-9]),([0-9]),([0-9][0-9])",message)
+    matches = re.match("^\\$[A-Z][A-Z]GSV,([0-9]),([0-9]),([0-9][0-9])",message)
 
     if matches is None:
         return None
@@ -26,7 +26,7 @@ def nmeaParseZda(message: str) -> (list[int] | None):
     On failure, return None.
     Checksum of message is not validated.
     '''
-    matches = re.match(u"^\\$[A-Z][A-Z]ZDA,([0-9][0-9])([0-9][0-9])([0-9][0-9])\\.[0-9]+,([0-9][0-9]),([0-9][0-9]),([0-9][0-9][0-9][0-9]),([0-9][0-9]),([0-9][0-9])",message)
+    matches = re.match("^\\$[A-Z][A-Z]ZDA,([0-9][0-9])([0-9][0-9])([0-9][0-9])\\.[0-9]+,([0-9][0-9]),([0-9][0-9]),([0-9][0-9][0-9][0-9]),([0-9][0-9]),([0-9][0-9])",message)
     if matches is None:
         return None
 

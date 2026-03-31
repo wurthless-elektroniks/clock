@@ -17,14 +17,14 @@ class Cvar(object):
         pass
 
     def setValue(self, value):
-        if self.datatype == u"Int":
+        if self.datatype == "Int":
             self.value = int(value)
-        elif self.datatype == u"Boolean":
-            self.value = value == u"True" or value is True
-        elif self.datatype == u"String":
+        elif self.datatype == "Boolean":
+            self.value = value == "True" or value is True
+        elif self.datatype == "String":
             self.value = str(value)
         else:
-            raise RuntimeError(u"unrecognized datatype: %s"%(self.datatype))
+            raise RuntimeError(f"unrecognized datatype: {self.datatype}")
         
     def getValue(self):
         return self.value
@@ -52,9 +52,9 @@ def registerCvar(registrant: str, name: str, datatype: str, default: any):
     Cvars are registered internally as "registrant:name".
     '''
     defn = CvarDefinition(registrant, name, datatype, default)
-    key = registrant + u':' + name
-    known_cvars[ registrant + u':' + name ] = defn
-    print(u"registered cvar: %s" % (key))
+    key = registrant + ':' + name
+    known_cvars[ key ] = defn
+    print(f"reg cvar: {key}")
 
 class Cvars(object):
     '''
@@ -65,17 +65,17 @@ class Cvars(object):
         self.cvars = {}
 
         for i in known_cvars.values():
-            key = i.registrant + u":" + i.name
+            key = i.registrant + ":" + i.name
             self.cvars[key] = i.instantiate()
 
         self.writer = None
 
     def _find(self, registrant: str, name: str) -> Cvar:
-        key = registrant + u":" + name
+        key = registrant + ":" + name
         if key in self.cvars:
             return self.cvars[key]
 
-        raise RuntimeError(u"cvar not registered/recognized: %s\n\nentire cvar table is: %s" %(key, self.cvars))
+        raise RuntimeError(f"cvar not registered/recognized: {key}\n\nentire cvar table is: {self.cvars}")
 
     def setWriter(self, writer: CvarWriter):
         self.writer = writer
@@ -84,7 +84,7 @@ class Cvars(object):
         '''
         Get value of the given cvar. If cvar not found, panic.
         '''
-        key = registrant + u":" + name
+        key = registrant + ":" + name
         return self._find(registrant, name).getValue()
     
     def set(self, registrant: str, name: str, value: any):

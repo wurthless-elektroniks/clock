@@ -17,10 +17,10 @@ if sys.implementation._machine.find("ESP32C3") >= 0:
     # for esp32c3, have to check implementation, platform will be esp32 and that's too ambiguous
     import wurthless.clock.drivers.machine.esp32c3 as esp32c3
     esp32c3.configureEsp32C3IoPins()
-elif sys.platform == u'esp32':
+elif sys.platform == 'esp32':
     GPIO_OUT_REG = 0x3FF44004
 else:
-    print(u"DANGER: platform not recognized (%s). defaulting to default esp32 gpio register. you're entering very dangerous territory if you start execution."%(sys.platform))
+    print(f"DANGER: platform not recognized {sys.platform}. defaulting to default esp32 gpio register. you're entering very dangerous territory if you start execution.")
     GPIO_OUT_REG = 0x3FF44004
 
 # default pin assignments are for TMUCITW v8
@@ -40,15 +40,15 @@ DIGIT_3_PIN = 22
 BRIGHTNESS_PIN = 26
 
 # Frequency at which we update the display
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"strobe_frequency",
-             u"Int",
+registerCvar("wurthless.clock.drivers.display.esp32maskdisplay",
+             "strobe_frequency",
+             "Int",
              int((4*100)*4))
 
 # If True, write directly to GPIO register without preserving other I/O settings. Default is False (off).
-registerCvar(u"wurthless.clock.drivers.display.esp32maskdisplay",
-             u"strobe_fast",
-             u"Boolean",
+registerCvar("wurthless.clock.drivers.display.esp32maskdisplay",
+             "strobe_fast",
+             "Boolean",
              False)
 
 # If True, use half-brightness mode. Default is False (off).
@@ -82,11 +82,11 @@ class Esp32MaskDisplay(SevenSegmentDisplay):
                 andmask |= (1 << self.seg_pins[segment])
         self.andmask = ~andmask
 
-        self.strobe_frequency = cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_frequency")
+        self.strobe_frequency = cvars.get("wurthless.clock.drivers.display.esp32maskdisplay", "strobe_frequency")
         self.sm_state = 0
         self.sm_ptr = 0
         
-        if cvars.get(u"wurthless.clock.drivers.display.esp32maskdisplay", u"strobe_fast") is True:
+        if cvars.get("wurthless.clock.drivers.display.esp32maskdisplay", "strobe_fast") is True:
             cb = self._strobe_fast
         else:
             cb = self._strobe

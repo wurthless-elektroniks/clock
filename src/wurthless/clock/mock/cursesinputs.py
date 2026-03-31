@@ -32,7 +32,7 @@ class CursesInputs(Inputs):
         self._pollThreadInst.start()
 
     def _pollThread(self):
-        print(u"pollthread started.")
+        print("pollthread started.")
         # keep polling for inputs and make a note of any keypress events on UP/DOWN/SET/DST
         while True:
             with self.mutex:

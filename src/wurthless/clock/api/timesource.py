@@ -1,15 +1,17 @@
 
-TIMESOURCE_GENERIC_ERROR = 0
+from wurthless.clock.common.upy import make_const
+
+TIMESOURCE_GENERIC_ERROR = make_const(0)
 """
 Timesource couldn't return time for whatever reason. Try again later.
 """
 
-TIMESOURCE_MUST_FORGET   = -1
+TIMESOURCE_MUST_FORGET   = make_const(-1)
 """
 Timesource explicitly told us to not connect to it anymore.
 """
 
-TIMESOURCE_RATE_LIMIT    = -2
+TIMESOURCE_RATE_LIMIT    = make_const(-2)
 """
 Timesource has rate limited us. Caller must decrease polling interval and continue to
 decrease it upon receiving another rate limit error.
@@ -27,4 +29,4 @@ class TimeSource(object):
         Any value of 0 or less is to be treated as an error
         (see TIMESOURCE_GENERIC_ERROR, TIMESOURCE_MUST_FORGET, TIMESOURCE_RATE_LIMIT)
         '''
-        raise RuntimeError(u"TimeSource.getUtcTime() called directly")
+        raise RuntimeError("TimeSource.getUtcTime() called directly")

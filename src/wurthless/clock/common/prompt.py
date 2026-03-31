@@ -7,7 +7,8 @@ from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN
 from wurthless.clock.common.bcd import unpackBcd
 from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
 from wurthless.clock.common.timestamp import autoformatHourIn12HourTime
-from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, BRIGHTNESS_MINIMUM_VALUE
+from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, BRIGHTNESS_MINIMUM_VALUE, BRIGHTNESS_TOTAL_STEPS, decrement_brightness
+from wurthless.clock.common.messages import messagesDisplaySure, messagesDisplayYes, messagesDisplayNo
 
 import time
 
@@ -176,6 +177,7 @@ def promptDst(tot,inputs,dst):
 
     display_type = tot.display().getDisplayType()
 
+    tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
     while True:
         if display_delay_ticks == 0:
             display_delay_ticks = DELAY_TICKS
@@ -210,3 +212,79 @@ def promptDst(tot,inputs,dst):
         else:
             pass
         snooze()
+
+def promptConfirm(direct_inputs, display) -> bool:
+    brightness = BRIGHTNESS_MAXIMUM_VALUE
+    display.setBrightness(brightness)
+    messagesDisplaySure(display)
+    try:
+        sleep_step = 3.0 / BRIGHTNESS_TOTAL_STEPS
+        for _ in range(BRIGHTNESS_TOTAL_STEPS):
+            # if user releases SET, cancel
+            direct_inputs.strobe()
+            if direct_inputs.set() is False:
+                return False
+            
+            brightness = decrement_brightness(brightness)
+            display.setBrightness(brightness)
+
+            time.sleep(sleep_step)
+        return True
+    finally:
+        # max out brightness on the way out
+        display.setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
+
+
+def promptMenu(display,
+               inputs,
+               items,
+               default_selection=None) -> int:
+    '''
+    Builds a simple menu and displays it.
+
+    items is a list of callbacks accepting a Display as the parameter, intended to point at
+    one of the many functions in messages.py. The function will return the index of the selection;
+    it's up to the caller to act on it. If None is encountered, the item will be skipped over.
+    '''
+
+    max_selection = len(items) - 1
+    selection = 0 if default_selection is None else clamp(default_selection, 0, max_selection)
+
+    flasher = DisplayFlasher(display)
+
+    while True:
+        display.setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
+        print(f"display idx: {selection}")
+        items[selection](display)
+        flasher.reset()
+
+        while True:
+            if inputs.strobe() is False:
+                flasher.tick()
+                snooze()
+            elif inputs.up():
+                while True:
+                    selection = clamp(selection + 1, 0, max_selection)
+                    if items[selection] is not None:
+                        break
+                break
+            elif inputs.down():
+                while True:
+                    selection = clamp(selection - 1, 0, max_selection)
+                    if items[selection] is not None:
+                        break
+                break
+            elif inputs.set():
+                return selection
+
+
+def promptBoolean(display,
+                  inputs,
+                  message_false = messagesDisplayNo,
+                  message_true = messagesDisplayYes,
+                  default_selection = False) -> bool:
+    items = [
+        message_false,
+        message_true
+    ]
+    return promptMenu(display, inputs, items, default_selection=1 if default_selection else 0) == 1

@@ -23,13 +23,14 @@
 
 import wurthless.clock.common.time64 as time64
 from wurthless.clock.api.timesource import TIMESOURCE_MUST_FORGET, TIMESOURCE_RATE_LIMIT, TIMESOURCE_GENERIC_ERROR
+from wurthless.clock.common.upy import make_const
 
 try:
     import ustruct as struct
 except:
     import struct
 
-TMUCITW_NTP_EPOCH = 3849984000 # = 0xE57A1800, 2022 Jan 1st 00:00.00
+_TMUCITW_NTP_EPOCH = make_const(3849984000) # = 0xE57A1800, 2022 Jan 1st 00:00.00
 
 def ntpv4_filter_error(refid) -> int:
     # Kiss o' Death fatal errors - DENY / RSTR
@@ -56,7 +57,7 @@ def ntpv4_transact(netcb) -> int:
     # detect valid server response first (server MUST support v4)
     header = struct.unpack("!bbbb",response[0x00:0x04])
     if (header[0] & 0b00111000) != 0b00100000:
-        print(u"NTPv4: unexpected response, wanted version 4 and server responded differently")
+        print("NTPv4: unexpected response, wanted version 4 and server responded differently")
         return TIMESOURCE_GENERIC_ERROR
     
     # stratum field of 0 means error happened
@@ -67,7 +68,7 @@ def ntpv4_transact(netcb) -> int:
     timestamp = struct.unpack("!I", response[0x28:0x2C])[0]
 
     # catch timestamp underflow (all dates before 2022-01-01 00:00.00 UTC are considered "future")
-    if timestamp < TMUCITW_NTP_EPOCH:
+    if timestamp < _TMUCITW_NTP_EPOCH:
         timestamp += 0x0000000100000000
     
     epoch_year = time64.gmtime(0)[0]

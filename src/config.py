@@ -9,27 +9,27 @@ from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE
 
 # Brightness of display.
-registerCvar(u"config.display",
-             u"brightness",
-             u"Int",
+registerCvar("config.display",
+             "brightness",
+             "Int",
              BRIGHTNESS_MAXIMUM_VALUE)
 
 # UTC offset in seconds. Default is 0 (plain ol' UTC).
-registerCvar(u"config.clock",
-             u"utc_offset_seconds",
-             u"Int",
+registerCvar("config.clock",
+             "utc_offset_seconds",
+             "Int",
              0)
 
 # DST active flag. Default is False (off).
-registerCvar(u"config.clock",
-             u"dst_active",
-             u"Boolean",
+registerCvar("config.clock",
+             "dst_active",
+             "Boolean",
              False)
 
 # If true, disable DST entirely (needed in territories where there is no DST). Default is False (off).
-registerCvar(u"config.clock",
-             u"dst_disable",
-             u"Boolean",
+registerCvar("config.clock",
+             "dst_disable",
+             "Boolean",
              False)
 
 # Display 12 hour time in main loop. Default is False (prefer 24 hour time).
@@ -38,20 +38,26 @@ registerCvar("config.clock",
              "Boolean",
              False)
 
+# Force manual mode; ignore all timesources.
+registerCvar("config.clock",
+             "force_manual",
+             "Boolean",
+             False)
+
 # Enable network interface if present. Default is True.
-registerCvar(u"config.nic",
-             u"enable",
-             u"Boolean",
+registerCvar("config.nic",
+             "enable",
+             "Boolean",
              True)
 
 # Name of Wifi access point (if connecting over Wi-Fi).
-registerCvar(u"config.nic",
-             u"wifi_ap_name",
-             u"String",
-             u"")
+registerCvar("config.nic",
+             "wifi_ap_name",
+             "String",
+             "")
 
 # Wifi password (if connecting over Wi-Fi)
-registerCvar(u"config.nic",
-             u"wifi_ap_password",
-             u"String",
-             u"")
+registerCvar("config.nic",
+             "wifi_ap_password",
+             "String",
+             "")

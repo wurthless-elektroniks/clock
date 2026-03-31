@@ -12,10 +12,10 @@ def runEsp32C3Wroom02():
     writer = TokenedCvarWriter()
 
     # "factory" is the factory defaults
-    writer.addPreflight(u"secrets/factory.ini")
+    writer.addPreflight("secrets/factory.ini")
     
     # "guid" is device-specific stuff (serial number, device name, etc.)
-    writer.addPreflight(u"secrets/guid.ini")
+    writer.addPreflight("secrets/guid.ini")
 
     cvars.setWriter(writer)
 
@@ -26,7 +26,7 @@ def runEsp32C3Wroom02():
     # we don't have enough I/Os to allow the user to re-enter config mode!
     bootpin = Pin(0, Pin.IN, Pin.PULL_UP)
     if bootpin.value() == 0:
-        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+        tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
     tot.setDisplay( Esp32MaskDisplay(tot) )
     tot.setInputs( NullInputs() )
@@ -40,8 +40,8 @@ def runEsp32C3Wroom02():
     tot.setTimeSources( [ NtpTimeSource(tot) ] )
 
     # force server mode if user hasn't configured wifi yet
-    if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
-        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+    if tot.cvars().get("config.nic","wifi_ap_name") == "":
+        tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
     tot.finalize()
     clockMain(tot)

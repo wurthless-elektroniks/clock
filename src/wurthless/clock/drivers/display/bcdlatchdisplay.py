@@ -8,70 +8,70 @@ from machine import Pin, PWM
 from wurthless.clock.api.display import Display,DISPLAY_TYPE_NUMERIC
 from wurthless.clock.cvars.cvars import registerCvar
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"latchenable_dig01_pin",
-             u"Int",
-             u"Latch enable for digits 0/1",
+# Latch enable for digits 0/1
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "latchenable_dig01_pin",
+             "Int",
              13)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"latchenable_dig23_pin",
-             u"Int",
-             u"Latch enable for digits 2/3",
+# Latch enable for digits 2/3
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "latchenable_dig23_pin",
+             "Int",
              14)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig02_bit_0_pin",
-             u"Int",
-             u"Output for digit 0/2 BCD bit 0",
+# Output for digit 0/2 BCD bit 0
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig02_bit_0_pin",
+             "Int",
              15)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig02_bit_1_pin",
-             u"Int",
-             u"Output for digit 0/2 BCD bit 1",
+# Output for digit 0/2 BCD bit 1
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig02_bit_1_pin",
+             "Int",
              16)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig02_bit_2_pin",
-             u"Int",
-             u"Output for digit 0/2 BCD bit 2",
+# Output for digit 0/2 BCD bit 2
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig02_bit_2_pin",
+             "Int",
              17)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig02_bit_3_pin",
-             u"Int",
-             u"Output for digit 0/2 BCD bit 3",
+# Output for digit 0/2 BCD bit 3
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig02_bit_3_pin",
+             "Int",
              18)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig13_bit_0_pin",
-             u"Int",
-             u"Output for digit 1/3 BCD bit 0",
+# Output for digit 1/3 BCD bit 0
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig13_bit_0_pin",
+             "Int",
              19)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig13_bit_1_pin",
-             u"Int",
-             u"Output for digit 1/3 BCD bit 1",
+# Output for digit 1/3 BCD bit 1
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig13_bit_1_pin",
+             "Int",
              20)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig13_bit_2_pin",
-             u"Int",
-             u"Output for digit 1/3 BCD bit 2",
+# Output for digit 1/3 BCD bit 2
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig13_bit_2_pin",
+             "Int",
              21)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"dig13_bit_3_pin",
-             u"Int",
-             u"Output for digit 1/3 BCD bit 3",
+# Output for digit 1/3 BCD bit 3
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "dig13_bit_3_pin",
+             "Int",
              22)
 
-registerCvar(u"wurthless.clock.drivers.display.bcdlatchdisplay",
-             u"brightness_pwm_pin",
-             u"Int",
-             u"PWM pin for controlling brightness.",
+# PWM pin for controlling brightness.
+registerCvar("wurthless.clock.drivers.display.bcdlatchdisplay",
+             "brightness_pwm_pin",
+             "Int",
              10)
 
 DEFAULT_BRIGHTNESS_TABLE = [

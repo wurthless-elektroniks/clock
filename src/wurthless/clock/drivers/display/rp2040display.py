@@ -18,35 +18,37 @@ from machine import Pin, PWM, mem32
 import rp2
 from rp2 import PIO
 
-################################################################################################################
+################################################################################
 #
 # Cvars
 #
-################################################################################################################
+################################################################################
 
-# pins are reconfigurable in case of PCB layout changess
-registerCvar(u"wurthless.clock.drivers.display.rp2040display",
-             u"segment_drive_base_pin",
-             u"Int",
-             u"LED matrix segment drive base pin. Default is GPIO 16 (17,18,19,20,21,22 will also be used here)",
+# pins are reconfigurable in case of PCB layout changes
+
+
+# LED matrix segment drive base pin. Default is GPIO 16 (17,18,19,20,21,22 will also be used here)
+registerCvar("wurthless.clock.drivers.display.rp2040display",
+             "segment_drive_base_pin",
+             "Int",
              16)
 
-registerCvar(u"wurthless.clock.drivers.display.rp2040display",
-             u"digit_drive_base_pin",
-             u"Int",
-             u"LED matrix digit drive base pin. Default is GPIO 12 (13,14,15 will also be used here)",
+# LED matrix digit drive base pin. Default is GPIO 12 (13,14,15 will also be used here)
+registerCvar("wurthless.clock.drivers.display.rp2040display",
+             "digit_drive_base_pin",
+             "Int",
              12)
 
-registerCvar(u"wurthless.clock.drivers.display.rp2040display",
-             u"brightness_pwm_pin",
-             u"Int",
-             u"PWM pin for controlling brightness. Default is GPIO 10.",
+# PWM pin for controlling brightness. Default is GPIO 10.
+registerCvar("wurthless.clock.drivers.display.rp2040display",
+             "brightness_pwm_pin",
+             "Int",
              10)
 
-registerCvar(u"wurthless.clock.drivers.display.rp2040display",
-             u"low_power_drives",
-             u"Boolean",
-             u"If true, reduces current drive power on the segment and digit control GPIOs. Default is True.",
+# If true, reduces current drive power on the segment and digit control GPIOs. Default is True.
+registerCvar("wurthless.clock.drivers.display.rp2040display",
+             "low_power_drives",
+             "Boolean",
              True)
 
 ################################################################################################################
@@ -72,13 +74,13 @@ def sevseg():
 
 class Rp2040Display(SevenSegmentDisplay):
     def __init__(self, tot):
-        segment_drive_base_pin = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"segment_drive_base_pin")
-        digit_drive_base_pin   = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"digit_drive_base_pin")
-        brightness_pwm_pin     = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"brightness_pwm_pin")
+        segment_drive_base_pin = tot.cvars().get("wurthless.clock.drivers.display.rp2040display", "segment_drive_base_pin")
+        digit_drive_base_pin   = tot.cvars().get("wurthless.clock.drivers.display.rp2040display", "digit_drive_base_pin")
+        brightness_pwm_pin     = tot.cvars().get("wurthless.clock.drivers.display.rp2040display", "brightness_pwm_pin")
 
         # attempt to grab I/Os here by setting them all as outputs
         # it is better to have them setup in a known state than to assume the statemachine will do everything for us
-        low_power_drives     = tot.cvars().get(u"wurthless.clock.drivers.display.rp2040display", u"low_power_drives")   
+        low_power_drives     = tot.cvars().get("wurthless.clock.drivers.display.rp2040display", "low_power_drives")   
         for i in range(segment_drive_base_pin, segment_drive_base_pin+7):
             Pin(i, Pin.OUT)
             if low_power_drives is True:

@@ -29,9 +29,9 @@ def runEsp32Wroom32E(invert_bits=False):
     cvars.load()
     tot.setCvars( cvars )
 
-    cvars.configure(u"wurthless.clock.drivers.display.esp32maskdisplay",
-                    { 
-                       u"strobe_fast": True
+    cvars.configure("wurthless.clock.drivers.display.esp32maskdisplay",
+                    {
+                       "strobe_fast": True
                     })
 
     # not enough CPU time in config mode to run the display
@@ -54,8 +54,8 @@ def runEsp32Wroom32E(invert_bits=False):
     tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
 
     # force server mode if user hasn't configured wifi yet
-    if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
-        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+    if tot.cvars().get("config.nic", "enable") and tot.cvars().get("config.nic","wifi_ap_name") == "":
+        tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
     tot.finalize()
     clockMain(tot)

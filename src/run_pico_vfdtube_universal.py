@@ -6,6 +6,8 @@ from wurthless.clock.burnin import burnin
 from wurthless.clock.common.ntp4timesource import Ntp4TimeSource
 from wurthless.clock.common.messages import messagesDisplayInit
 
+
+from wurthless.clock.drivers.display.pwmbrightnessdisplay import PwmU16BrightnessDisplay
 from wurthless.clock.drivers.display.shiftydisplay import ShiftyDisplay
 from wurthless.clock.drivers.display.scrambledbitsdisplay import ScrambledBitsDisplay
 
@@ -32,7 +34,11 @@ def picoVfdCommonInit(tot, is_iv22: bool = False, is_dst_toggle_momentary: bool 
     cvars.load()
     tot.setCvars( cvars )
     
+
     display = ShiftyDisplay(tot)
+
+    # put display brightness PWM control on pin 10
+    display = PwmU16BrightnessDisplay(display, 10)
 
     # the iv22 display board segments are wired according to how they are
     # in a datasheet. this is a mistake on my end but it turns out it's easier
@@ -94,8 +100,8 @@ def runPicoW(is_iv22: bool = False, is_dst_toggle_momentary: bool = False):
     tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
 
     # force server mode if user hasn't configured wifi yet
-    if tot.cvars().get(u"config.nic",u"wifi_ap_name") == u"":
-        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+    if tot.cvars().get("config.nic", "enable") and tot.cvars().get("config.nic","wifi_ap_name") == "":
+        tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
     tot.finalize()
     clockMain(tot)

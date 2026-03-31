@@ -10,78 +10,77 @@ from wurthless.clock.api.display import Display
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.display.sevensegdisplay import SevenSegmentDisplay
 
+# LED segment A drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "seg_a_pin",
              "Int",
-             "LED segment A drive pin",
              16)
 
+# LED segment B drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "seg_b_pin",
              "Int",
-             "LED segment B drive pin",
              17)
 
+# LED segment C drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "seg_c_pin",
              "Int",
-             "LED segment C drive pin",
              18)
 
+# LED segment D drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "seg_d_pin",
              "Int",
-             "LED segment D drive pin",
              19)
 
+# LED segment E drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "seg_e_pin",
              "Int",
-             "LED segment E drive pin",
              20)
 
+# LED segment F drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "seg_f_pin",
              "Int",
-             "LED segment F drive pin",
              21)
 
+# LED segment G drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "seg_g_pin",
              "Int",
-             "LED segment G drive pin",
              22)
 
+# LED digit 0 drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "digit_0_pin",
              "Int",
-             "LED digit 0 drive pin",
              12)
 
+# LED digit 1 drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "digit_1_pin",
              "Int",
-             "LED digit 1 drive pin",
              13)
 
+# LED digit 2 drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "digit_2_pin",
              "Int",
-             "LED digit 2 drive pin",
              14)
 
+# LED digit 3 drive pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "digit_3_pin",
              "Int",
-             "LED digit 3 drive pin",
              15)
 
+# LED brightness PWM pin
 registerCvar("wurthless.clock.drivers.display.latchdisplay",
              "brightness_pwm_pin",
              "Int",
-             "LED brightness PWM pin",
              10)
-
 
 class LatchDisplay(SevenSegmentDisplay):
     def __init__(self, tot):

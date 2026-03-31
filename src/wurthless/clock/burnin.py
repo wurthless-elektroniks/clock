@@ -48,7 +48,16 @@ def burninMessageTest(tot: ToT):
         messagesDisplayInit,
         messagesDisplayOops,
         messagesDisplaySync,
-        messagesDisplayTest
+        messagesDisplayTest,
+
+        messagesDisplaySure,
+        messagesDisplayNet,
+        messagesDisplayFact,
+        messagesDisplayYes,
+        messagesDisplayNo,
+        messagesDisplayOn,
+        messagesDisplayOff,
+        messagesDisplay12Hr,
     ]
 
     for f in functions:

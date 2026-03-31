@@ -25,7 +25,7 @@ from wurthless.clock.drivers.rtc.softrtc import SoftRtc
 import config
 
 def args():
-    print(u"""
+    print("""
 the most useless clock in the world emulator/mockup
 
 i demand arguments be passed because real hardware configurations can be messy
@@ -70,10 +70,10 @@ def cursesMain(stdscr):
     cvars.load()
     tot.setCvars( cvars )
 
-    tot.cvars().set(u"wurthless.clock.clockmain", u"set_and_dst_no_debounce", True)
+    tot.cvars().set("wurthless.clock.clockmain", "set_and_dst_no_debounce", True)
 
     # settings writeback delay would ideally be 0 seconds, but we make it 60 so it's easier to tell that there is a delay.
-    tot.cvars().set(u"wurthless.clock.clockmain", u"settings_write_delay", 60)
+    tot.cvars().set("wurthless.clock.clockmain", "settings_write_delay", 60)
 
     display = CursesDisplay(stdscr)
     if "-numeric" in sys.argv:
@@ -82,23 +82,23 @@ def cursesMain(stdscr):
     tot.setDisplay( display )
     tot.setInputs( CursesInputs(stdscr) )
 
-    if u"-ntp" in sys.argv or u"-server" in sys.argv:
+    if "-ntp" in sys.argv or "-server" in sys.argv:
         tot.setNic( StubNic() )
         tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
     else:
         tot.setTimeSources( [] )
 
-    if u"-softrtc" in sys.argv or u"-ntp" in sys.argv:
+    if "-softrtc" in sys.argv or "-ntp" in sys.argv:
         softrtc = SoftRtc()
         tot.setRtc( softrtc )
     else:
         tot.setRtc( Python3Rtc() )
 
-    if u"-server" in sys.argv:
-        tot.cvars().set(u"wurthless.clock.clockmain", u"force_server", True)
+    if "-server" in sys.argv:
+        tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
-    if u"-burnin" in sys.argv:
-        tot.cvars().set(u"wurthless.clock.clockmain", u"force_burnin", True)
+    if "-burnin" in sys.argv:
+        tot.cvars().set("wurthless.clock.clockmain", "force_burnin", True)
 
     tot.finalize()
 
@@ -113,7 +113,7 @@ def main():
     # scan for -go as that's the only thing that we need to start the thing
     go = False
     for i in sys.argv:
-        if i == u"-go":
+        if i == "-go":
             go = True
 
     if go is False:

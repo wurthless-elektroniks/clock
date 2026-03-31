@@ -1,14 +1,13 @@
-
-
+from wurthless.clock.common.upy import make_const
 
 # micropython does NOT support enum!!
-DISPLAY_TYPE_SEVEN_SEGMENT = 0
-DISPLAY_TYPE_NUMERIC       = 1
+DISPLAY_TYPE_SEVEN_SEGMENT = make_const(0)
+DISPLAY_TYPE_NUMERIC       = make_const(1)
 
 
-COLON_STATE_OFF   = 0
-COLON_STATE_ON    = 1
-COLON_STATE_BLINK = 2
+COLON_STATE_OFF   = make_const(0)
+COLON_STATE_ON    = make_const(1)
+COLON_STATE_BLINK = make_const(2)
 
 class Display(object):
     '''
