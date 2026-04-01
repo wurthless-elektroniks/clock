@@ -14,19 +14,19 @@ except:
 
 from wurthless.clock.api.display import COLON_STATE_BLINK, COLON_STATE_OFF, COLON_STATE_ON
 from wurthless.clock.api.tot import ToT
-from wurthless.clock.burnin import burnin,inputTest
 from wurthless.clock.common.messages import messagesDisplaySync,messagesDisplayErr,messagesDisplayOops,messagesDisplayCfg
-from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp,autoformatHourIn12HourTime,getTimestampForNextMinute
+from wurthless.clock.common.timestamp import timestampToTimeTuple,timeTupleToTimestamp
 from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
 from wurthless.clock.drivers.input.delayedinputs import DelayedInputs
 from wurthless.clock.common.prompt import promptYear, promptMonthOrDay, promptTime, promptDst
 from wurthless.clock.common.bcd import unpackBcd
 from wurthless.clock.scheduler.scheduler import Scheduler, EVENT_FIRES_EVERY_MINUTE, EVENT_FIRES_IMMEDIATELY, EventFiresAfter
-
 from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, decrement_brightness, increment_brightness, clamp_brightness
 
-from wurthless.clock.webserver.webserver import serverMain
+# init webserver cvars, but don't load the webserver until necessary
+import wurthless.clock.webserver.webservercvars
+
 
 ################################################################################################################
 #
@@ -90,7 +90,7 @@ registerCvar("wurthless.clock.clockmain",
              "Boolean",
              False)
 
-def configMode(tot: ToT):
+def manualMode(tot: ToT):
     utc_offset = tot.cvars().get("config.clock","utc_offset_seconds")
     dst_active = tot.cvars().get("config.clock", "dst_active")
 
@@ -269,10 +269,12 @@ def init(tot: ToT):
         return
     
     # if NIC present, bring it up
-    if tot.cvars().get("config.nic", "enable") is True and tot.nic() is not None and tot.nic().isUp() is False:
+    # (skip bringing it up if in manual mode, because there's no reason to connect to the network)
+    if tot.cvars().get("config.clock", "force_manual") is False and \
+        tot.cvars().get("config.nic", "enable") is True and \
+        tot.nic() is not None and \
+        tot.nic().isUp() is False:
         tot.nic().initAsClient()
-
-    
     
     if tot.rtc().readOnly() is False:
         # Synchronize time to timesource, if one is available.
@@ -281,7 +283,7 @@ def init(tot: ToT):
 
         # If RTC is not setup by this point, prompt for time.
         if tot.rtc().isUp() is False:
-            configMode(tot)
+            manualMode(tot)
 
     elif tot.rtc().isUp() is False:
         print("Read-only RTC is not started. Make your code less shitty please.")
@@ -432,8 +434,13 @@ def loop(tot: ToT):
         # if we are allowed to configure the RTC at all.
         # If any timesources are present, attempt synchronization before running config mode.
         elif rtc_read_only is False and inputs.set() is True:
-            if (force_manual or timesource_present is False or syncTime(tot, suppressError=False) is False):
-                configMode(tot)
+            # Synchronize time to timesource, if one is available.
+            if tot.cvars().get("config.clock", "force_manual") is False and tot.timesources() is not None and tot.timesources() != []:
+                syncTime(tot)
+            
+            # If RTC is not setup by this point, prompt for time.
+            if tot.rtc().isUp() is False:
+                manualMode(tot)
 
             # previously scheduled events are assigned to times that are no longer valid,
             # and debounce logic needs to be reset anyway
@@ -457,11 +464,13 @@ def clockMain(tot: ToT):
     tot.inputs().strobe()
 
     if tot.inputs().is_dst_dipswitch() is False and tot.inputs().dst():
+        from wurthless.clock.burnin import inputTest
         inputTest(tot)
 
     # if DOWN held on reset, go to burnin / demo mode
     force_burnin = tot.cvars().get("wurthless.clock.clockmain", "force_burnin")
     if force_burnin or tot.inputs().down():
+        from wurthless.clock.burnin import burnin
         burnin(tot)
 
     force_server = tot.cvars().get("wurthless.clock.clockmain", "force_server")
@@ -484,12 +493,11 @@ def clockMain(tot: ToT):
         if tot.cvars().get("config.nic", "enable") is True and tot.nic() is not None:
             # wait two seconds - if SET is still pressed, run configmode.py,
             # else start WiFi as normal
+            from wurthless.clock.webserver.webserver import serverMain
             serverMain(tot)
         else:
             # go directly to config mode
             go_config_mode(tot)
-
-
 
     # the ghost of Arduino past refuses to go away
     init(tot)

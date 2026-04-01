@@ -4,9 +4,7 @@
 #
 
 from microdot import Microdot,send_file
-from wurthless.clock.cvars.cvars import registerCvar
 from wurthless.clock.common.upy import RUNNING_UNDER_UPY, reboot as _reboot
-
 
 GIT = "undefined"
 try:
@@ -21,17 +19,6 @@ if RUNNING_UNDER_UPY:
 
 server = Microdot()
 
-# If True, shutdown display driver while running server. Default is False.
-registerCvar("wurthless.clock.webserver",
-             "disable_display_when_serving",
-             "Boolean",
-             False)
-
-# I/O pin that will be pulled high when server mode is active. Default is -1 (disable).
-registerCvar("wurthless.clock.webserver",
-             "server_active_pin",
-             "Int",
-             -1)
 
 # unfortunately, we have to store the ToT as a global...
 global g_tot

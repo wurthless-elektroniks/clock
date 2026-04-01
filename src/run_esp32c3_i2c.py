@@ -25,12 +25,6 @@ def runEsp32C3_I2C():
     cvars = Cvars()
     writer = TokenedCvarWriter()
 
-    # "factory" is the factory defaults
-    writer.addPreflight("secrets/factory.ini")
-    
-    # "guid" is device-specific stuff (serial number, device name, etc.)
-    writer.addPreflight("secrets/guid.ini")
-
     cvars.setWriter(writer)
 
     cvars.load()
