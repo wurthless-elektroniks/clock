@@ -30,12 +30,15 @@ $(OBJDIR)/secrets/factory.ini: defaults/factory.ini
 
 $(OBJDIR)/$(WWWDIR)/%.html: $(WWWDIR)/%.html $(OBJDIR)/$(WWWDIR)
 	cp $< $@
+	python3 deflate.py $< $@.gz
 
 $(OBJDIR)/$(WWWDIR)/%.css: $(WWWDIR)/%.css $(OBJDIR)/$(WWWDIR)
 	cp $< $@
+	python3 deflate.py $< $@.gz
 
 $(OBJDIR)/$(WWWDIR)/%.js: $(WWWDIR)/%.js $(OBJDIR)/$(WWWDIR)
 	cp $< $@
+	python3 deflate.py $< $@.gz
 
 $(OBJDIR)/$(WWWDIR): $
 	mkdir -p $@
@@ -70,12 +73,15 @@ $(MOCKDIR)/secrets/factory.ini: defaults/factory.ini
 
 $(MOCKDIR)/$(WWWDIR)/%.html: $(WWWDIR)/%.html $(MOCKDIR)/$(WWWDIR)
 	cp $< $@
+	python3 deflate.py $< $@.gz
 
 $(MOCKDIR)/$(WWWDIR)/%.css: $(WWWDIR)/%.css $(MOCKDIR)/$(WWWDIR)
 	cp $< $@
+	python3 deflate.py $< $@.gz
 
 $(MOCKDIR)/$(WWWDIR)/%.js: $(WWWDIR)/%.js $(MOCKDIR)/$(WWWDIR)
 	cp $< $@
+	python3 deflate.py $< $@.gz
 
 $(MOCKDIR)/$(WWWDIR): $
 	mkdir -p $@

@@ -80,45 +80,6 @@ MUTED_SOCKET_ERRORS = [
     128,  # Operation on closed socket
 ]
 
-
-def urldecode_str(s):
-    s = s.replace('+', ' ')
-    parts = s.split('%')
-    if len(parts) == 1:
-        return s
-    result = [parts[0]]
-    for item in parts[1:]:
-        if item == '':
-            result.append('%')
-        else:
-            code = item[:2]
-            result.append(chr(int(code, 16)))
-            result.append(item[2:])
-    return ''.join(result)
-
-
-def urldecode_bytes(s):
-    s = s.replace(b'+', b' ')
-    parts = s.split(b'%')
-    if len(parts) == 1:
-        return s.decode()
-    result = [parts[0]]
-    for item in parts[1:]:
-        if item == b'':
-            result.append(b'%')
-        else:
-            code = item[:2]
-            result.append(bytes([int(code, 16)]))
-            result.append(item[2:])
-    return b''.join(result).decode()
-
-
-def urlencode(s):
-    return s.replace('+', '%2B').replace(' ', '+').replace(
-        '%', '%25').replace('?', '%3F').replace('#', '%23').replace(
-            '&', '%26').replace('=', '%3D')
-
-
 class NoCaseDict(dict):
     """A subclass of dictionary that holds case-insensitive keys.
 
@@ -365,8 +326,6 @@ class Request:
         self.url = url
         #: The path portion of the URL.
         self.path = url
-        #: The query string portion of the URL.
-        self.query_string = None
         #: The parsed query string, as a
         #: :class:`MultiDict <microdot.MultiDict>` object.
         self.args = {}
@@ -382,8 +341,7 @@ class Request:
 
         self.http_version = http_version
         if '?' in self.path:
-            self.path, self.query_string = self.path.split('?', 1)
-            self.args = self._parse_urlencoded(self.query_string)
+            self.path, _ = self.path.split('?', 1)
 
         if 'Content-Length' in self.headers:
             self.content_length = int(self.headers['Content-Length'])
@@ -446,21 +404,6 @@ class Request:
                        body=body, stream=stream,
                        sock=(client_reader, client_writer))
 
-    def _parse_urlencoded(self, urlencoded):
-        data = MultiDict()
-        if len(urlencoded) > 0:  # pragma: no branch
-            if isinstance(urlencoded, str):
-                for kv in [pair.split('=', 1)
-                           for pair in urlencoded.split('&') if pair]:
-                    data[urldecode_str(kv[0])] = urldecode_str(kv[1]) \
-                        if len(kv) > 1 else ''
-            elif isinstance(urlencoded, bytes):  # pragma: no branch
-                for kv in [pair.split(b'=', 1)
-                           for pair in urlencoded.split(b'&') if pair]:
-                    data[urldecode_bytes(kv[0])] = urldecode_bytes(kv[1]) \
-                        if len(kv) > 1 else b''
-        return data
-
     @property
     def body(self):
         """The body of the request, as bytes."""
@@ -497,7 +440,7 @@ class Request:
             mime_type = self.content_type.split(';')[0]
             if mime_type != 'application/x-www-form-urlencoded':
                 return None
-            self._form = self._parse_urlencoded(self.body)
+            return None
         return self._form
 
     def after_request(self, f):
@@ -692,8 +635,14 @@ class Response:
         return iter()
 
     @classmethod
-    def send_file(cls, filename, status_code=200, content_type=None,
-                  stream=None, max_age=None, file_extension=''):
+    def send_file(cls,
+                  filename,
+                  status_code=200,
+                  content_type=None,
+                  content_encoding=None,
+                  stream=None,
+                  max_age=None,
+                  file_extension=''):
         """Send file contents in a response.
 
         :param filename: The filename of the file.
@@ -703,6 +652,7 @@ class Response:
                              response. If omitted, it is generated
                              automatically from the file extension of the
                              ``filename`` parameter.
+        :param content_encoding `Content-Encoding` response (TMUCITW feature)
         :param stream: A file-like object to read the file contents from. If
                        a stream is given, the ``filename`` parameter is only
                        used when generating the ``Content-Type`` header.
@@ -732,9 +682,12 @@ class Response:
         if max_age is not None:
             headers['Cache-Control'] = 'max-age={}'.format(max_age)
 
+        # tmucitw-specific change: all files are gzip compressed
+        if content_encoding is not None:
+            headers['Content-Encoding'] = content_encoding
+
         f = stream or open(filename + file_extension, 'rb')
         return cls(body=f, status_code=status_code, headers=headers)
-
 
 class URLPattern():
     def __init__(self, url_pattern):
@@ -1177,7 +1130,7 @@ class Microdot:
                     elif f in self.error_handlers:
                         res = await invoke_handler(self.error_handlers[f], req)
                     else:
-                        res = 'Not found', f
+                        res = '404', f
                 except HTTPException as exc:
                     if exc.status_code in self.error_handlers:
                         res = self.error_handlers[exc.status_code](req)

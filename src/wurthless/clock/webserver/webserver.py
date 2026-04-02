@@ -55,20 +55,34 @@ def validateWifiAccessPointName(string):
     
     return True
 
+def _client_supports_gzip(request):
+    headers = request.headers
+    if "Accept-Encoding" not in headers:
+        return False
+    return "gzip" in headers["Accept-Encoding"]
+
 @server.get('/index.html')
 async def indexhtml(request):
+    if _client_supports_gzip(request):
+        return send_file("www/index.html.gz", content_type="text/html", content_encoding="gzip")
     return send_file("www/index.html")
 
 @server.get('/')
 async def index(request):
+    if _client_supports_gzip(request):
+        return send_file("www/index.html.gz", content_type="text/html", content_encoding="gzip")
     return send_file("www/index.html")
 
 @server.get('/cfg.js')
 async def cfgjs(request):
+    if _client_supports_gzip(request):
+        return send_file("www/cfg.js.gz", content_type="application/javascript", content_encoding="gzip")
     return send_file("www/cfg.js")
 
 @server.get('/cfg.css')
 async def cfgcss(request):
+    if _client_supports_gzip(request):
+        return send_file("www/cfg.css.gz", content_type="text/css", content_encoding="gzip")
     return send_file("www/cfg.css")
 
 @server.get('/rest/settings')
@@ -86,8 +100,8 @@ async def settingsGet(request):
 
 @server.get('/rest/reboot')
 async def reboot(request):
-    _reboot()
-    return {},200
+    request.app.shutdown()
+    return ''
 
 @server.post('/rest/settings')
 async def settingsPost(request):
@@ -170,3 +184,4 @@ def serverMain(tot):
         print(f"{gc.mem_alloc()} bytes wired, {gc.mem_free()} bytes free")
 
     server.run(port=80)
+    _reboot()

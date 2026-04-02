@@ -11,7 +11,7 @@ from wurthless.clock.api.display import Display
 from wurthless.clock.api.inputs import Inputs
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
 from wurthless.clock.common.prompt import promptMenu, promptConfirm, promptBoolean
-from wurthless.clock.common.messages import messagesDisplaySync, \
+from wurthless.clock.common.messages import messagesDisplaySyncMenuItem, \
                                             messagesDisplayNet, \
                                             messagesDisplayFact, \
                                             messagesDisplay12Hr, \
@@ -123,7 +123,7 @@ def config_mode(tot: ToT):
     has_nic = tot.nic() is not None
 
     items = [
-        messagesDisplaySync,
+        messagesDisplaySyncMenuItem,
         messagesDisplayNet if has_nic else None,
         messagesDisplay12Hr,
         messagesDisplayFact,

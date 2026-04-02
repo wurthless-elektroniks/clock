@@ -479,13 +479,15 @@ def clockMain(tot: ToT):
         messagesDisplayCfg(tot.display())
 
         set_still_held = True
-        num_ticks = 3 * 1000
+        num_seconds = 3
+        num_ticks = num_seconds * 1000
 
         for _ in range(num_ticks):
-            sleep_ms( int((1/(num_ticks)) * 1000) )
+            sleep_ms(1)
             tot.inputs().strobe()
             if tot.inputs().set() is False:
                 set_still_held = False
+                break
         
         if set_still_held:
             go_config_mode(tot)

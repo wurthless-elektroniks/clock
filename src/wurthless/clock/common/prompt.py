@@ -254,7 +254,6 @@ def promptMenu(display,
 
     while True:
         display.setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
-        print(f"display idx: {selection}")
         items[selection](display)
         flasher.reset()
 
