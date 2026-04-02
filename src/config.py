@@ -44,6 +44,20 @@ registerCvar("config.clock",
              "Boolean",
              False)
 
+# Enables Nixie clock-style digit rotation.
+# If you're using a Nixie clock, you MUST set wurthless.clock.clockmain:nixieroto_override to True
+# to force this on all the time, as you will poison the tubes otherwise.
+registerCvar("config.clock",
+             "nixieroto",
+             "Boolean",
+             False)
+
+# Nixieroto interval in minutes.
+registerCvar("config.clock",
+             "nixieroto_interval",
+             "Int",
+             1)
+
 # Enable network interface if present. Default is True.
 registerCvar("config.nic",
              "enable",

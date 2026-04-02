@@ -10,14 +10,15 @@ from wurthless.clock.api.tot import ToT
 from wurthless.clock.api.display import Display
 from wurthless.clock.api.inputs import Inputs
 from wurthless.clock.drivers.input.debouncedinputs import DebouncedInputs
-from wurthless.clock.common.prompt import promptMenu, promptConfirm, promptBoolean
+from wurthless.clock.common.prompt import promptMenu, promptConfirm, promptBoolean, promptTwoDigit
 from wurthless.clock.common.messages import messagesDisplaySyncMenuItem, \
                                             messagesDisplayNet, \
                                             messagesDisplayFact, \
                                             messagesDisplay12Hr, \
                                             messagesDisplayOn, \
                                             messagesDisplayOff, \
-                                            messagesDisplayDone
+                                            messagesDisplayDone, \
+                                            messagesDisplayRoto
 from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, BRIGHTNESS_TOTAL_STEPS, decrement_brightness
 
 from wurthless.clock.common.upy import reboot       
@@ -111,6 +112,28 @@ def handle_12hr(tot):
         while direct_inputs.strobe():
             pass
 
+def handle_roto(tot):
+    direct_inputs = tot.inputs()
+    display = tot.display()
+
+    while direct_inputs.strobe():
+        pass
+
+    inputs = DebouncedInputs(direct_inputs)
+
+    nixieroto          = tot.cvars().get("config.clock", "nixieroto")
+    nixieroto_interval = 0 if nixieroto is False else tot.cvars().get("config.clock", "nixieroto_interval")
+
+    value = promptTwoDigit(tot, inputs, nixieroto_interval, minval=0, maxval=60)
+    if promptConfirm(direct_inputs, display):
+        tot.cvars().set("config.clock", "nixieroto", value != 0)
+        tot.cvars().set("config.clock", "nixieroto_interval", value if value != 0 else 1)
+        tot.cvars().save()
+
+        # display "DONE"
+        messagesDisplayDone(display)
+        while direct_inputs.strobe():
+            pass
 
 def nop(tot):
     pass
@@ -126,6 +149,7 @@ def config_mode(tot: ToT):
         messagesDisplaySyncMenuItem,
         messagesDisplayNet if has_nic else None,
         messagesDisplay12Hr,
+        messagesDisplayRoto,
         messagesDisplayFact,
     ]
 
@@ -133,6 +157,8 @@ def config_mode(tot: ToT):
         handle_sync,
         handle_net,
         handle_12hr,
+        handle_roto,
+
         handle_factory_reset
     ]
 

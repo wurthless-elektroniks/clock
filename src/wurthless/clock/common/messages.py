@@ -149,3 +149,9 @@ def messagesDisplay12Hr(display: Display):
         [0b00000110, 0b01011011, 0b01110100, 0b01010000],
         [5, None, 0, 3],
         COLON_STATE_OFF)
+
+def messagesDisplayRoto(display: Display):
+    _message_display_common(display,
+        [0b01010000, 0b01011100, 0b01111000, 0b01011100],
+        [5, None, 0, 4],
+        COLON_STATE_OFF)

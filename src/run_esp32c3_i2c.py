@@ -42,7 +42,9 @@ def runEsp32C3_I2C():
     tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
 
     # force server mode if user hasn't configured wifi yet
-    if tot.cvars().get("config.nic", "enable") and tot.cvars().get("config.nic","wifi_ap_name") == "":
+    if tot.cvars().get("config.clock","force_manual") is False and \
+       tot.cvars().get("config.nic", "enable") and \
+        tot.cvars().get("config.nic","wifi_ap_name") == "":
         tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
     tot.finalize()

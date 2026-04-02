@@ -80,6 +80,13 @@ def _brightness_test(tot: ToT):
 
 # numeric displays require different burn-in test
 def burninNumeric(tot: ToT):
+    tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
+
+    # "tESt"
+    messagesDisplayTest(tot.display())
+
+    time.sleep(5)
+
     while True:
         tot.display().setDigitsNumeric(8,8,8,8)
         time.sleep(0.5 * 8)

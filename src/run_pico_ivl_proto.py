@@ -26,6 +26,7 @@ from wurthless.clock.drivers.nmea.nmeatimesource import NmeaTimeSource
 
 from wurthless.clock.common.rp2040hbridgedriver import hbridge_init
 from wurthless.clock.drivers.input.dstdipswitchinputs import DstDipswitchInputs
+from wurthless.clock.drivers.input.resetkeycomboinputs import ResetKeycomboInputs
 
 def picoIvlCommonInit(tot):
     cvars = Cvars()
@@ -34,6 +35,10 @@ def picoIvlCommonInit(tot):
 
     cvars.load()
     tot.setCvars( cvars )
+
+    tot.cvars().set("wurthless.clock.drivers.display.rp2040displayivl", "segment_drive_base_pin", 16)
+    tot.cvars().set("wurthless.clock.drivers.display.rp2040displayivl", "digit_drive_base_pin",   11)
+    tot.cvars().set("wurthless.clock.drivers.display.rp2040displayivl", "brightness_pwm_pin",     10)
 
     display = Rp2040IvlDisplay(tot)
     display = ColonGpioDisplay(display, 4)
@@ -46,11 +51,8 @@ def picoIvlCommonInit(tot):
     tot.cvars().set("wurthless.clock.drivers.input.gpioinputs", "dst_pin_id", 9)
     
     inputs = GpioInputs(tot)
-    
-    inputs = DstDipswitchInputs(inputs)
-    
+    inputs = ResetKeycomboInputs(tot)
     tot.setInputs( inputs )
-
     tot.setRtc( MicropythonRTC() )
 
     hbridge_init(2)
@@ -66,9 +68,6 @@ def runPicoW():
     # tot.setNic( MicropythonWifiNic(tot) )
     # tot.setTimeSources( [ Ntp4TimeSource(tot) ] )
 
-    # force server mode if user hasn't configured wifi yet
-    if tot.cvars().get("config.nic", "enable") and tot.cvars().get("config.nic","wifi_ap_name") == "":
-        tot.cvars().set("wurthless.clock.clockmain", "force_server", True)
 
     tot.finalize()
     clockMain(tot)

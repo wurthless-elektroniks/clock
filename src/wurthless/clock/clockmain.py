@@ -86,7 +86,7 @@ registerCvar("wurthless.clock.clockmain",
 
 # If True, rotate all digits at the minute mark (avoids Nixie cathode poisoning). Default is False.
 registerCvar("wurthless.clock.clockmain",
-             "nixieroto",
+             "nixieroto_override",
              "Boolean",
              False)
 
@@ -211,18 +211,26 @@ def renderDisplay(tot: ToT, mode: int):
 
 def syncTime(tot: ToT, suppressError:bool=False) -> bool:
     '''
-    Return True if the clock was successfully able to synchronize to a timezone.
+    Return True if the clock was successfully able to synchronize to a time source.
     Return False otherwise.
     '''
+
+    # some code paths might land in this function, so preemptively cut them off
+    if (tot.cvars().get("config.clock", "force_manual") is False and \
+               tot.timesources() is not None and \
+               tot.timesources() != []) is False:
+        return False
+
     # display "SYNC"
     messagesDisplaySync(tot.display())
-    
+
     # enumerate over all time sources until something answers
     t = 0
     for timesource in tot.timesources():
         t = timesource.getUtcTime()
-        if t > 0: break
-    
+        if t > 0:
+            break
+
     # TODO: this does NOT handle rate limit/"forget us" error codes yet.
     if t > 0:
         tot.rtc().setUtcTime(t)
@@ -309,7 +317,13 @@ def loop(tot: ToT):
 
     force_manual = tot.cvars().get("config.clock", "force_manual") is False
 
-    nixieroto = tot.cvars().get("wurthless.clock.clockmain","nixieroto")
+    # nixieroto can be manually enabled, but it has to be forced on in the factory defaults
+    # for nixie clocks to prevent cathode poisoning
+    nixieroto = tot.cvars().get("wurthless.clock.clockmain","nixieroto_override") or \
+                tot.cvars().get("config.clock", "nixieroto")
+
+    nixieroto_interval = tot.cvars().get("config.clock", "nixieroto_interval")
+    nixieroto_interval = max(1, min(nixieroto_interval, 60))
 
     global displaymode
     displaymode = 0
@@ -332,7 +346,7 @@ def loop(tot: ToT):
         inputs = DebouncedInputs(delayedinputs)
 
     def _rerenderDisplay():
-        if nixieroto and displaymode == 0 and (tot.rtc().getUtcTime() % 60) < 3:
+        if nixieroto and displaymode == 0 and (tot.rtc().getUtcTime() % (nixieroto_interval * 60)) < 3:
             for i in range(0,10):
                 tot.display().setDigitsNumeric(i,i,i,i)
                 sleep_ms(200)
@@ -435,11 +449,11 @@ def loop(tot: ToT):
         # If any timesources are present, attempt synchronization before running config mode.
         elif rtc_read_only is False and inputs.set() is True:
             # Synchronize time to timesource, if one is available.
-            if tot.cvars().get("config.clock", "force_manual") is False and tot.timesources() is not None and tot.timesources() != []:
-                syncTime(tot)
-            
-            # If RTC is not setup by this point, prompt for time.
-            if tot.rtc().isUp() is False:
+            # If no timesources, or unable to sync time, send the user to manual time entry.
+            if (force_manual is False and \
+               tot.timesources() is not None and \
+               tot.timesources() != [] and \
+               syncTime(tot)) is False:
                 manualMode(tot)
 
             # previously scheduled events are assigned to times that are no longer valid,
@@ -478,10 +492,10 @@ def clockMain(tot: ToT):
         tot.display().setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
         messagesDisplayCfg(tot.display())
 
-        set_still_held = True
         num_seconds = 3
         num_ticks = num_seconds * 1000
 
+        set_still_held = True
         for _ in range(num_ticks):
             sleep_ms(1)
             tot.inputs().strobe()
