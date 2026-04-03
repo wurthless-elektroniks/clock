@@ -17,7 +17,7 @@ endif
 
 SOURCES := $(shell find $(SRCDIR) -name '*.py')
 OBJS    := $(subst $(SRCDIR),$(OBJDIR),$(SOURCES:%.py=%.mpy))
-WEBOBJS := $(OBJDIR)/$(WWWDIR)/index.html $(OBJDIR)/$(WWWDIR)/cfg.css $(OBJDIR)/$(WWWDIR)/cfg.js
+WEBOBJS := $(OBJDIR)/$(WWWDIR)/index.html
 
 all: mpy mock
 
@@ -28,19 +28,10 @@ $(OBJDIR)/secrets/factory.ini: defaults/factory.ini
 	@mkdir -p $(@D)
 	cp $< $@
 
-$(OBJDIR)/$(WWWDIR)/%.html: $(WWWDIR)/%.html $(OBJDIR)/$(WWWDIR)
-	cp $< $@
-	python3 deflate.py $< $@.gz
+$(OBJDIR)/$(WWWDIR)/index.html: $(OBJDIR)/$(WWWDIR) $(WWWDIR)/index.html $(WWWDIR)/cfg.js $(WWWDIR)/cfg.css
+	python3 webbundle.py $(OBJDIR)/$(WWWDIR)/index.html
 
-$(OBJDIR)/$(WWWDIR)/%.css: $(WWWDIR)/%.css $(OBJDIR)/$(WWWDIR)
-	cp $< $@
-	python3 deflate.py $< $@.gz
-
-$(OBJDIR)/$(WWWDIR)/%.js: $(WWWDIR)/%.js $(OBJDIR)/$(WWWDIR)
-	cp $< $@
-	python3 deflate.py $< $@.gz
-
-$(OBJDIR)/$(WWWDIR): $
+$(OBJDIR)/$(WWWDIR):
 	mkdir -p $@
 
 $(OBJDIR):
@@ -56,7 +47,7 @@ $(OBJDIR)/%.mpy: $(addprefix $(SRCDIR)/,%.py) $(PRIVATEDIR)/mpy-cross
 MOCKDIR = $(PRIVATEDIR)/test
 
 TESTPYS    := $(subst $(SRCDIR),$(MOCKDIR),$(SOURCES:%.py=%.py))
-TESTWEBOBJS := $(MOCKDIR)/$(WWWDIR)/index.html $(MOCKDIR)/$(WWWDIR)/cfg.css $(MOCKDIR)/$(WWWDIR)/cfg.js
+TESTWEBOBJS := $(MOCKDIR)/$(WWWDIR)/index.html
 
 mock: $(TESTPYS) $(TESTWEBOBJS) $(MOCKDIR)/secrets/factory.ini
 	git log -1 --pretty=format:"GIT = \"%H\"" > $(MOCKDIR)/git.py
@@ -71,19 +62,10 @@ $(MOCKDIR)/secrets/factory.ini: defaults/factory.ini
 	@mkdir -p $(@D)
 	cp $< $@
 
-$(MOCKDIR)/$(WWWDIR)/%.html: $(WWWDIR)/%.html $(MOCKDIR)/$(WWWDIR)
-	cp $< $@
-	python3 deflate.py $< $@.gz
+$(MOCKDIR)/$(WWWDIR)/index.html: $(MOCKDIR)/$(WWWDIR) $(WWWDIR)/index.html $(WWWDIR)/cfg.js $(WWWDIR)/cfg.css
+	python3 webbundle.py $(MOCKDIR)/$(WWWDIR)/index.html
 
-$(MOCKDIR)/$(WWWDIR)/%.css: $(WWWDIR)/%.css $(MOCKDIR)/$(WWWDIR)
-	cp $< $@
-	python3 deflate.py $< $@.gz
-
-$(MOCKDIR)/$(WWWDIR)/%.js: $(WWWDIR)/%.js $(MOCKDIR)/$(WWWDIR)
-	cp $< $@
-	python3 deflate.py $< $@.gz
-
-$(MOCKDIR)/$(WWWDIR): $
+$(MOCKDIR)/$(WWWDIR):
 	mkdir -p $@
 
 $(MOCKDIR)/%.py: $(addprefix $(SRCDIR)/,%.py)

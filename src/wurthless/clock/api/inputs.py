@@ -10,6 +10,13 @@ class Inputs(object):
         '''
         pass
 
+    def wait_unpressed(self):
+        '''
+        Wait until all buttons are released.
+        '''
+        while self.strobe():
+            continue
+
     def strobe(self) -> bool:
         '''
         Read inputs. Button states are only updated when this function is called. At all other times,

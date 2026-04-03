@@ -315,7 +315,7 @@ def loop(tot: ToT):
     dst_disable = tot.cvars().get("config.clock","dst_disable")
     cfg_writeback_delay = tot.cvars().get("wurthless.clock.clockmain","settings_write_delay")
 
-    force_manual = tot.cvars().get("config.clock", "force_manual") is False
+    force_manual = tot.cvars().get("config.clock", "force_manual")
 
     # nixieroto can be manually enabled, but it has to be forced on in the factory defaults
     # for nixie clocks to prevent cathode poisoning

@@ -309,7 +309,7 @@ class Request:
     #: Example::
     #:
     #:    Request.max_readline = 16 * 1024  # 16KB lines allowed
-    max_readline = 2 * 1024
+    max_readline = 512
 
     class G:
         pass
@@ -593,6 +593,9 @@ class Response:
             ITER_FILE_OBJ = 2
             ITER_NO_BODY = -1
 
+            def __init__(self):
+                self._buffer = bytearray(response.send_file_buffer_size)
+
             def __aiter__(self):
                 if response.body:
                     self.i = self.ITER_UNKNOWN  # need to determine type
@@ -619,12 +622,16 @@ class Response:
                     except StopIteration:
                         await self.aclose()
                         raise StopAsyncIteration
-                buf = response.body.read(response.send_file_buffer_size)
-                if iscoroutine(buf):  # pragma: no cover
-                    buf = await buf
-                if len(buf) < response.send_file_buffer_size:
+                
+                
+                bytes_read = response.body.readinto(self._buffer)
+                if iscoroutine(bytes_read):  # pragma: no cover
+                    bytes_read = await bytes_read
+                if bytes_read < response.send_file_buffer_size:
                     self.i = self.ITER_NO_BODY
-                return buf
+                    return memoryview(self._buffer)[:bytes_read]
+                
+                return memoryview(self._buffer)
 
             async def aclose(self):
                 if hasattr(response.body, 'close'):
@@ -641,8 +648,7 @@ class Response:
                   content_type=None,
                   content_encoding=None,
                   stream=None,
-                  max_age=None,
-                  file_extension=''):
+                  max_age=None):
         """Send file contents in a response.
 
         :param filename: The filename of the file.
@@ -660,10 +666,6 @@ class Response:
                         seconds. If omitted, the value of the
                         :attr:`Response.default_send_file_max_age` attribute is
                         used.
-        :param file_extension: A file extension to append to the ``filename``
-                               parameter when opening the file, including the
-                               dot. The extension given here is not considered
-                               when generating the ``Content-Type`` header.
 
         Security note: The filename is assumed to be trusted. Never pass
         filenames provided by the user without validating and sanitizing them
@@ -686,7 +688,7 @@ class Response:
         if content_encoding is not None:
             headers['Content-Encoding'] = content_encoding
 
-        f = stream or open(filename + file_extension, 'rb')
+        f = stream or open(filename, 'rb')
         return cls(body=f, status_code=status_code, headers=headers)
 
 class URLPattern():

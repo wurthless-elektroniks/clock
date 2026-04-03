@@ -34,12 +34,14 @@ _TMUCITW_NTP_EPOCH = make_const(3849984000) # = 0xE57A1800, 2022 Jan 1st 00:00.0
 
 def ntpv4_filter_error(refid) -> int:
     # Kiss o' Death fatal errors - DENY / RSTR
-    if refid == "DENY" or refid == "RSTR":
+    if refid in [ "DENY", "RSTR" ]:
+        print("ntp4prot: server gave us 'do not retry' message")
         return TIMESOURCE_MUST_FORGET
-    
+
     if refid == "RATE":
+        print("ntp4prot: rate limited")
         return TIMESOURCE_RATE_LIMIT
-    
+
     return TIMESOURCE_GENERIC_ERROR
 
 def ntpv4_transact(netcb) -> int:

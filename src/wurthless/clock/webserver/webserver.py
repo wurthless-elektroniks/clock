@@ -73,18 +73,6 @@ async def index(request):
         return send_file("www/index.html.gz", content_type="text/html", content_encoding="gzip")
     return send_file("www/index.html")
 
-@server.get('/cfg.js')
-async def cfgjs(request):
-    if _client_supports_gzip(request):
-        return send_file("www/cfg.js.gz", content_type="application/javascript", content_encoding="gzip")
-    return send_file("www/cfg.js")
-
-@server.get('/cfg.css')
-async def cfgcss(request):
-    if _client_supports_gzip(request):
-        return send_file("www/cfg.css.gz", content_type="text/css", content_encoding="gzip")
-    return send_file("www/cfg.css")
-
 @server.get('/rest/settings')
 async def settingsGet(request):
     # do NOT send password back to the client, ever. EVER.

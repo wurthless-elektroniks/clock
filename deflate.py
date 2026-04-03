@@ -1,14 +1,16 @@
 import sys
 import gzip
 
-def main():
-
+def gzippit(input, output):
     out = None
-    with open(sys.argv[1],"rb") as f:
+    with open(input,"rb") as f:
         out = gzip.compress(f.read())
     
-    with open(sys.argv[2],"wb") as f:
+    with open(output,"wb") as f:
         f.write(out)
+
+def main():
+    gzippit(sys.argv[1],sys.argv[2])
 
 if __name__ == '__main__':
     main()

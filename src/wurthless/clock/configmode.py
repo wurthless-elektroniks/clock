@@ -42,8 +42,7 @@ def handle_sync(tot):
     display = tot.display()
     inputs = DebouncedInputs(direct_inputs)
 
-    while direct_inputs.strobe():
-        pass
+    direct_inputs.wait_unpressed()
 
     # inputs are inverted because we're prompting the user to turn
     # sync on and off, but sync on disables force_manual and sync off enables it
@@ -59,8 +58,7 @@ def handle_sync(tot):
 
         # display "DONE"
         messagesDisplayDone(display)
-        while direct_inputs.strobe():
-            pass
+        direct_inputs.wait_unpressed()
 
 def handle_net(tot):
     net_enabled = tot.cvars().get("config.nic", "enable")
@@ -69,8 +67,7 @@ def handle_net(tot):
     display = tot.display()
     inputs = DebouncedInputs(direct_inputs)
 
-    while direct_inputs.strobe():
-        pass
+    direct_inputs.wait_unpressed()
 
     response = promptBoolean(display,
                              inputs,
@@ -84,8 +81,7 @@ def handle_net(tot):
 
         # display "DONE"
         messagesDisplayDone(display)
-        while direct_inputs.strobe():
-            pass
+        direct_inputs.wait_unpressed()
 
 def handle_12hr(tot):
     is_12hr = tot.cvars().get("config.clock", "display_12hr_time")
@@ -94,8 +90,7 @@ def handle_12hr(tot):
     display = tot.display()
     inputs = DebouncedInputs(direct_inputs)
 
-    while direct_inputs.strobe():
-        pass
+    direct_inputs.wait_unpressed()
     
     response = promptBoolean(display,
                              inputs,
@@ -109,22 +104,26 @@ def handle_12hr(tot):
 
         # display "DONE"
         messagesDisplayDone(display)
-        while direct_inputs.strobe():
-            pass
+        direct_inputs.wait_unpressed()
 
 def handle_roto(tot):
     direct_inputs = tot.inputs()
     display = tot.display()
 
-    while direct_inputs.strobe():
-        pass
+    direct_inputs.wait_unpressed()
 
     inputs = DebouncedInputs(direct_inputs)
+
+    override_active = tot.cvars().get("wurthless.clock.clockmain", "nixieroto_override")
 
     nixieroto          = tot.cvars().get("config.clock", "nixieroto")
     nixieroto_interval = 0 if nixieroto is False else tot.cvars().get("config.clock", "nixieroto_interval")
 
-    value = promptTwoDigit(tot, inputs, nixieroto_interval, minval=0, maxval=60)
+    value = promptTwoDigit(tot,
+                           inputs,
+                           nixieroto_interval,
+                           minval=1 if override_active else 0,
+                           maxval=60)
     if promptConfirm(direct_inputs, display):
         tot.cvars().set("config.clock", "nixieroto", value != 0)
         tot.cvars().set("config.clock", "nixieroto_interval", value if value != 0 else 1)
@@ -132,8 +131,7 @@ def handle_roto(tot):
 
         # display "DONE"
         messagesDisplayDone(display)
-        while direct_inputs.strobe():
-            pass
+        direct_inputs.wait_unpressed()
 
 def nop(tot):
     pass
@@ -150,6 +148,7 @@ def config_mode(tot: ToT):
         messagesDisplayNet if has_nic else None,
         messagesDisplay12Hr,
         messagesDisplayRoto,
+
         messagesDisplayFact,
     ]
 
@@ -162,12 +161,10 @@ def config_mode(tot: ToT):
         handle_factory_reset
     ]
 
-
     last_selection = 0
     while True:
         display.blank()
-        while direct_inputs.strobe():
-            pass
+        direct_inputs.wait_unpressed()
 
         last_selection = promptMenu(display, inputs, items, last_selection)
         handlers[last_selection](tot)
