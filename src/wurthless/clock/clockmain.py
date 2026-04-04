@@ -325,6 +325,8 @@ def loop(tot: ToT):
     nixieroto_interval = tot.cvars().get("config.clock", "nixieroto_interval")
     nixieroto_interval = max(1, min(nixieroto_interval, 60))
 
+    utc_offset = tot.cvars().get("config.clock","utc_offset_seconds")
+
     global displaymode
     displaymode = 0
     timesource_present = tot.timesources() is not None and tot.timesources() != []
@@ -346,10 +348,14 @@ def loop(tot: ToT):
         inputs = DebouncedInputs(delayedinputs)
 
     def _rerenderDisplay():
-        if nixieroto and displaymode == 0 and (tot.rtc().getUtcTime() % (nixieroto_interval * 60)) < 3:
-            for i in range(0,10):
-                tot.display().setDigitsNumeric(i,i,i,i)
-                sleep_ms(200)
+        if nixieroto and displaymode == 0:
+            # nixieroto has to take into account any timezone/DST offsets
+            # so it triggers reliably on the hour, for example
+            cur_time = (tot.rtc().getUtcTime() + utc_offset + (3600 if tot.cvars().get("config.clock","dst_active") else 0))
+            if cur_time % (nixieroto_interval * 60) < 3:
+                for i in range(0,10):
+                    tot.display().setDigitsNumeric(i,i,i,i)
+                    sleep_ms(200)
 
         renderDisplay(tot, displaymode)
 

@@ -27,11 +27,8 @@ from wurthless.clock.drivers.nmea.nmeatimesource import NmeaTimeSource
 from wurthless.clock.common.upy import make_const
 
 
-DISPLAY_DRIVER_SEVEN_SEGMENT_LED = make_const(0)
-DISPLAY_DRIVER_NIXIE             = make_const(1)
-
 # Pico/Pico W share common hardware configuration for the LED matrix, switches, etc.
-def picoCommonInit(tot, invert_bits, display_driver):
+def picoCommonInit(tot, invert_bits):
     cvars = Cvars()
     writer = TokenedCvarWriter()
     cvars.setWriter(TokenedCvarWriter())
@@ -39,13 +36,9 @@ def picoCommonInit(tot, invert_bits, display_driver):
     cvars.load()
     tot.setCvars( cvars )
 
-    if display_driver == DISPLAY_DRIVER_SEVEN_SEGMENT_LED:
-        display = Rp2040Display(tot)
-        if invert_bits is True:
-            display = InvertedBitDisplay(display)
-    elif display_driver == DISPLAY_DRIVER_NIXIE:
-        # TODO: doesn't belong here, should be moved out at some point.
-        display = BcdLatchDisplay(tot)
+    display = Rp2040Display(tot)
+    if invert_bits is True:
+        display = InvertedBitDisplay(display)
 
     tot.setDisplay(display)
     tot.setInputs( GpioInputs(tot) )
@@ -56,9 +49,9 @@ def picoCommonInit(tot, invert_bits, display_driver):
 # runPicoW(): init base RPi Pico W hardware; Wifi enabled, NTP timesource
 #
 #############################################################################
-def runPicoW(invert_bits=False, display_driver = DISPLAY_DRIVER_SEVEN_SEGMENT_LED):
+def runPicoW(invert_bits=False):
     tot = ToT()
-    picoCommonInit(tot, invert_bits, display_driver)
+    picoCommonInit(tot, invert_bits)
 
     # display INIT
     messagesDisplayInit(tot.display())
@@ -77,9 +70,9 @@ def runPicoW(invert_bits=False, display_driver = DISPLAY_DRIVER_SEVEN_SEGMENT_LE
     clockMain(tot)
 
 
-def runPicoGnss(invert_bits=False, display_driver = DISPLAY_DRIVER_SEVEN_SEGMENT_LED):
+def runPicoGnss(invert_bits=False):
     tot = ToT()
-    picoCommonInit(tot, invert_bits, display_driver)
+    picoCommonInit(tot, invert_bits)
 
     # display INIT
     messagesDisplayInit(tot.display())
@@ -101,15 +94,15 @@ def runPicoGnss(invert_bits=False, display_driver = DISPLAY_DRIVER_SEVEN_SEGMENT
 #
 ############################################################################
 # #
-def runPico(invert_bits=False, display_driver = DISPLAY_DRIVER_SEVEN_SEGMENT_LED):
+def runPico(invert_bits=False):
     tot = ToT()
-    picoCommonInit(tot, invert_bits, display_driver)
+    picoCommonInit(tot, invert_bits)
 
     tot.finalize()
     clockMain(tot)
 
-def burninPico(invert_bits=False, display_driver = DISPLAY_DRIVER_SEVEN_SEGMENT_LED):
+def burninPico(invert_bits=False):
     tot = ToT()
-    picoCommonInit(tot,invert_bits, display_driver)
+    picoCommonInit(tot,invert_bits)
 
     burnin(tot)

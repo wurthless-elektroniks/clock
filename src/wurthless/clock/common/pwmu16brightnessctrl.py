@@ -9,7 +9,10 @@ from machine import Pin,PWM
 from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, BRIGHTNESS_MINIMUM_VALUE, clamp_brightness
 
 class PwmU16BrightnessController():
-    def __init__(self, brightness_pin_id: int, strobe_frequency: int, half_brightness: bool = False):
+    def __init__(self,
+                 brightness_pin_id: int,
+                 strobe_frequency: int,
+                 half_brightness: bool = False):
         self._half_brightness = half_brightness
         self._brightness_pwm = PWM(Pin(brightness_pin_id))
         self._strobe_frequency = strobe_frequency
