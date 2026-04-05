@@ -5,8 +5,6 @@
 
 from wurthless.clock.api.display import DISPLAY_TYPE_NUMERIC, DISPLAY_TYPE_SEVEN_SEGMENT
 from wurthless.clock.common.bcd import unpackBcd
-from wurthless.clock.common.sevensegment import sevensegNumbersToDigits
-from wurthless.clock.common.timestamp import autoformatHourIn12HourTime
 from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, BRIGHTNESS_MINIMUM_VALUE, BRIGHTNESS_TOTAL_STEPS, decrement_brightness
 from wurthless.clock.common.messages import messagesDisplaySure, messagesDisplayYes, messagesDisplayNo
 
@@ -48,59 +46,49 @@ def clamp(val: int, minval: int, maxval: int) -> int:
         inp = minval
     return inp
 
-def promptFourDigit(tot, inputs, valin: int, minval: int=0, maxval: int=9999):
+def _prompt_digit_common(inputs,
+                         flasher,
+                         rerender_callback,
+                         valin,
+                         minval,
+                         maxval):
     inp = clamp(valin, minval, maxval)
+    rerender_callback(inp)
+    while True:
+        if inputs.strobe() is False:
+            flasher.tick()
+            snooze()
+        elif inputs.up():
+            inp = clamp(inp + 1, minval, maxval)
+            flasher.reset()
+            rerender_callback(inp)
+        elif inputs.down():
+            inp = clamp(inp - 1, minval, maxval)
+            flasher.reset()
+            rerender_callback(inp)
+        elif inputs.set():
+            return inp
+
+
+def promptFourDigit(tot, inputs, valin: int, minval: int=0, maxval: int=9999):
     display = tot.display()
     flasher = DisplayFlasher(display)
-    
-    def _rerender():
+
+    def _rerender(inp):
         bcd = unpackBcd(inp / 100, inp % 100)
         display.setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
 
-    _rerender()
-    while True:
-        if inputs.strobe() is False:
-            flasher.tick()
-            snooze()
-        elif inputs.up():
-            inp = clamp(inp + 1, minval, maxval)
-            flasher.reset()
-            _rerender()
-        elif inputs.down():
-            inp = clamp(inp - 1, minval, maxval)
-            flasher.reset()
-            _rerender()
-        elif inputs.set():
-            return inp
-        else:
-            pass
+    return _prompt_digit_common(inputs, flasher, _rerender, valin, minval, maxval)
 
 def promptTwoDigit(tot, inputs, valin, minval=0, maxval=99):
-    inp = clamp(valin, minval, maxval)
     display = tot.display()
     flasher = DisplayFlasher(display)
 
-    def _rerender():
+    def _rerender(inp):
         bcd = unpackBcd(0, inp)
         display.setDigitsNumeric( None, None, bcd[2], bcd[3]  )
 
-    _rerender()
-    while True:
-        if inputs.strobe() is False:
-            flasher.tick()
-            snooze()
-        elif inputs.up():
-            inp = clamp(inp + 1, minval, maxval)
-            flasher.reset()
-            _rerender()
-        elif inputs.down():
-            inp = clamp(inp - 1, minval, maxval)
-            flasher.reset()
-            _rerender()
-        elif inputs.set():
-            return inp
-        else:
-            pass
+    return _prompt_digit_common(inputs, flasher, _rerender, valin, minval, maxval)
 
 def promptYear(tot, inputs, year):
     return promptFourDigit(tot, inputs, year, minval=2022, maxval=2099)
@@ -108,7 +96,7 @@ def promptYear(tot, inputs, year):
 def promptMonthOrDay(tot, inputs, valin, maxval):
     return promptTwoDigit(tot, inputs, valin, minval=1, maxval=maxval)
 
-########################################################################################################################
+###############################################################################
 
 def promptTime(tot, inputs, hour, minute):
     display = tot.display()
@@ -116,59 +104,31 @@ def promptTime(tot, inputs, hour, minute):
 
     retval = [ 0, 0 ]
 
-    inp = hour
-
-    def _rerenderHour():
-        hour_visible = autoformatHourIn12HourTime(tot, inp)
+    def _rerenderHour(inp):
         bcd = unpackBcd(inp, 0)
         tot.display().setDigitsNumeric( bcd[0], bcd[1], None, None )
     
-    _rerenderHour()
-    
-    while True:
-        if inputs.strobe() is False:
-            flasher.tick()
-            snooze()
-        if inputs.up():
-            inp = clamp(inp + 1, minval=0, maxval=23)
-            flasher.reset()
-            _rerenderHour()
-        elif inputs.down():
-            inp = clamp(inp - 1, minval=0, maxval=23)
-            flasher.reset()
-            _rerenderHour()
-        elif inputs.set():
-            retval[0] = inp
-            break
-        else:
-            pass
+    retval[0] = _prompt_digit_common(inputs,
+                         flasher,
+                         _rerenderHour,
+                         hour,
+                         0,
+                         23)
 
     flasher.reset()
 
-    def _rerenderMinute():
-        hour_visible = autoformatHourIn12HourTime(tot, retval[0])
+    def _rerenderMinute(inp):
         bcd = unpackBcd(retval[0], inp)
         tot.display().setDigitsNumeric( bcd[0], bcd[1], bcd[2], bcd[3] )
 
-    inp = minute
-    _rerenderMinute()
-    while True:
-        if inputs.strobe() is False:
-            flasher.tick()
-            snooze()
-        if inputs.up():
-            inp = clamp(inp + 1, minval=0, maxval=59)
-            flasher.reset()
-            _rerenderMinute()
-        elif inputs.down():
-            inp = clamp(inp - 1, minval=0, maxval=59)
-            flasher.reset()
-            _rerenderMinute()
-        elif inputs.set():
-            retval[1] = inp
-            return retval
-        else:
-            pass
+    retval[1] = _prompt_digit_common(inputs,
+                                     flasher,
+                                     _rerenderMinute,
+                                     minute,
+                                     0,
+                                     59)
+
+    return retval
 
 def promptDst(tot,inputs,dst):
     flash_state = False
@@ -233,7 +193,6 @@ def promptConfirm(direct_inputs, display) -> bool:
     finally:
         # max out brightness on the way out
         display.setBrightness(BRIGHTNESS_MAXIMUM_VALUE)
-
 
 def promptMenu(display,
                inputs,

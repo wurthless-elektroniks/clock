@@ -6,8 +6,7 @@ from wurthless.clock.api.display import Display,DISPLAY_TYPE_NUMERIC,DISPLAY_TYP
 
 def _message_display_common(display: Display,
                             seven_segment_data: list,
-                            numeric_data: list,
-                            colon_state):
+                            numeric_data: list):
     if display.getDisplayType() == DISPLAY_TYPE_SEVEN_SEGMENT:
         display.setDigitsBinary(seven_segment_data[0],
                                 seven_segment_data[1],
@@ -18,7 +17,7 @@ def _message_display_common(display: Display,
                                  numeric_data[1],
                                  numeric_data[2],
                                  numeric_data[3])
-    display.setColonState(colon_state)
+    display.setColonState(COLON_STATE_OFF)
 
 def messagesDisplayInit(display: Display):
     '''
@@ -26,8 +25,7 @@ def messagesDisplayInit(display: Display):
     '''
     _message_display_common(display,
                             [0b00000110, 0b00110111, 0b00000110, 0b01111000],
-                            [8, 8, 8, 8],
-                            COLON_STATE_OFF)
+                            [8, 8, 8, 8])
 
 def messagesDisplaySync(display: Display):
     '''
@@ -35,8 +33,7 @@ def messagesDisplaySync(display: Display):
     '''
     _message_display_common(display,
                         [0b01101101, 0b01101110, 0b00110111, 0b00111001],
-                        [9, 9, 9, 9],
-                        COLON_STATE_OFF)
+                        [9, 9, 9, 9])
 
 def messagesDisplayErr(display: Display):
     '''
@@ -44,8 +41,7 @@ def messagesDisplayErr(display: Display):
     '''
     _message_display_common(display,
                     [0, 0b01111001, 0b01010000, 0b01010000],
-                    [6, None, 0, 0],
-                    COLON_STATE_OFF)
+                    [6, None, 0, 0])
 
 def messagesDisplayOops(display: Display):
     '''
@@ -53,8 +49,7 @@ def messagesDisplayOops(display: Display):
     '''
     _message_display_common(display,
                 [0b01011100,0b01011100,0b01110011,0b01101101],
-                [6, None, 9, 9],
-                COLON_STATE_OFF)
+                [6, None, 9, 9])
 
 def messagesDisplayTest(display: Display):
     '''
@@ -62,8 +57,7 @@ def messagesDisplayTest(display: Display):
     '''
     _message_display_common(display,
             [0b011111000, 0b01111001, 0b01101101, 0b011111000],
-            [4, None, 9, 9],
-            COLON_STATE_OFF)
+            [4, None, 9, 9])
 
 def messagesDisplayCfg(display: Display):
     '''
@@ -71,8 +65,7 @@ def messagesDisplayCfg(display: Display):
     '''
     _message_display_common(display,
             [0, 0b00111001, 0b01110001, 0b01111101],
-            [4, None, 1, 1],
-            COLON_STATE_OFF)
+            [4, None, 1, 1])
 
 # ------------------------------------------------------------------------------------
 #
@@ -86,8 +79,7 @@ def messagesDisplaySure(display: Display):
     '''
     _message_display_common(display,
         [0b01101101, 0b00111110, 0b01010000, 0b01111001],
-        [5, None, 8, 8],
-        COLON_STATE_OFF)
+        [5, None, 8, 8])
     
 
 def messagesDisplayFact(display: Display):
@@ -96,44 +88,37 @@ def messagesDisplayFact(display: Display):
     '''
     _message_display_common(display,
         [0b011110001, 0b01110111, 0b00111001, 0b01111000],
-        [5, None, 0, 0],
-        COLON_STATE_OFF)
+        [5, None, 0, 0])
 
 def messagesDisplayYes(display: Display):
     _message_display_common(display,
         [0b00000000, 0b01101110, 0b01111001, 0b01101101],
-        [None, None, 1, None],
-        COLON_STATE_OFF)
+        [None, None, 1, None])
 
 def messagesDisplayNo(display: Display):
     _message_display_common(display,
         [0b00000000, 0b01010100, 0b1011100, 0b00000000],
-        [None, None, 0, None],
-        COLON_STATE_OFF)
+        [None, None, 0, None])
 
 def messagesDisplayOn(display: Display):
     _message_display_common(display,
         [0b00000000, 0b1011100, 0b01010100, 0b00000000],
-        [None, None, 1, None],
-        COLON_STATE_OFF)
+        [None, None, 1, None])
 
 def messagesDisplayOff(display: Display):
     _message_display_common(display,
         [0b00000000, 0b1011100, 0b01110001, 0b01110001],
-        [None, None, 0, None],
-        COLON_STATE_OFF)
+        [None, None, 0, None])
 
 def messagesDisplayDone(display: Display):
     _message_display_common(display,
         [0b01011110, 0b1011100, 0b01010100, 0b01111001],
-        [5, None, 9, 9],
-        COLON_STATE_OFF)
+        [5, None, 9, 9])
 
 def messagesDisplaySyncMenuItem(display: Display):
     _message_display_common(display,
         [0b01101101, 0b01101110, 0b00110111, 0b00111001],
-        [5, None, 0, 1],
-        COLON_STATE_OFF)
+        [5, None, 0, 1])
 
 def messagesDisplayNet(display: Display):
     '''
@@ -141,17 +126,14 @@ def messagesDisplayNet(display: Display):
     '''
     _message_display_common(display,
         [0b00000000, 0b01010100, 0b01111001, 0b01111000],
-        [5, None, 0, 2],
-        COLON_STATE_OFF)
+        [5, None, 0, 2])
     
 def messagesDisplay12Hr(display: Display):
     _message_display_common(display,
         [0b00000110, 0b01011011, 0b01110100, 0b01010000],
-        [5, None, 0, 3],
-        COLON_STATE_OFF)
+        [5, None, 0, 3])
 
 def messagesDisplayRoto(display: Display):
     _message_display_common(display,
         [0b01010000, 0b01011100, 0b01111000, 0b01011100],
-        [5, None, 0, 4],
-        COLON_STATE_OFF)
+        [5, None, 0, 4])

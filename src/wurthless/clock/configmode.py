@@ -19,9 +19,8 @@ from wurthless.clock.common.messages import messagesDisplaySyncMenuItem, \
                                             messagesDisplayOff, \
                                             messagesDisplayDone, \
                                             messagesDisplayRoto
-from wurthless.clock.common.brightness import BRIGHTNESS_MAXIMUM_VALUE, BRIGHTNESS_TOTAL_STEPS, decrement_brightness
 
-from wurthless.clock.common.upy import reboot       
+from wurthless.clock.common.upy import reboot  
 
 def handle_nots(tot):
     tot.cvars().set("config.clock", "")
