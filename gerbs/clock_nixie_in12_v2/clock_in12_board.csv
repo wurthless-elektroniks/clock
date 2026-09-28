@@ -1,0 +1,8 @@
+"Item","Qty","Reference(s)","Value","LibPart","Footprint","Datasheet","DNP","LCSC"
+"1","4","H1, H2, H3, H4","MountingHole_Pad","Mechanical:MountingHole_Pad","MountingHole:MountingHole_4.3mm_M4_Pad","~","",""
+"2","1","J1","TO NIXIE DRIVES","Connector_Generic:Conn_02x20_Odd_Even","Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical","~","",""
+"3","1","J2","Conn_01x03_Pin","Connector:Conn_01x03_Pin","Connector_JST:JST_VH_B3P-VH-B_1x03_P3.96mm_Vertical","~","",""
+"4","40","Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q14, Q15, Q16, Q17, Q18, Q19, Q20, Q21, Q22, Q23, Q24, Q25, Q26, Q27, Q28, Q29, Q30, Q31, Q32, Q33, Q34, Q35, Q36, Q37, Q38, Q39, Q40","FMMT497TA","Device:Q_NPN_BEC","Package_TO_SOT_SMD:SOT-23-3","~","","C80781"
+"5","4","R1, R2, R3, R4","20k 1w","Device:R","Resistor_SMD:R_2512_6332Metric","~","","C5200562"
+"6","4","V1, V2, V3, V4","IN-12","Connector_Generic:Conn_01x12","Valve:IN-12B_1mm_pins","~","",""
+"7","4","ZD1, ZD2, ZD3, ZD4","180v","Device:D_Zener","Diode_SMD:D_SMB","~","",""

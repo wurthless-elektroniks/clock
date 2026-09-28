@@ -12,25 +12,25 @@ from wurthless.clock.api.display import Display,DISPLAY_TYPE_NUMERIC
 from wurthless.clock.cvars.cvars import registerCvar
 
 # Shift register(s) latch pin (latches shift register contents to outputs)
-registerCvar("wurthless.clock.drivers.display.shiftydisplay",
+registerCvar("wurthless.clock.drivers.display.shiftybcddisplay",
              "shiftreg_latch_pin",
              "Int",
              15)
 
 # Shift register reset pin (active low; clears shift register contents)
-registerCvar("wurthless.clock.drivers.display.shiftydisplay",
+registerCvar("wurthless.clock.drivers.display.shiftybcddisplay",
              "shiftreg_reset_pin",
              "Int",
              13)
 
 # Serial clock pin (data pin is shifted in on rising edge)
-registerCvar("wurthless.clock.drivers.display.shiftydisplay",
+registerCvar("wurthless.clock.drivers.display.shiftybcddisplay",
              "serial_clock_pin",
              "Int",
              14)
 
 # Serial data pin
-registerCvar("wurthless.clock.drivers.display.shiftydisplay",
+registerCvar("wurthless.clock.drivers.display.shiftybcddisplay",
              "serial_data_pin",
              "Int",
              12)
@@ -52,10 +52,10 @@ lut = [
 class ShiftyBcdDisplay(Display):
     def __init__(self, tot):
 
-        serial_data_pin_id     = tot.cvars().get("wurthless.clock.drivers.display.shiftydisplay", "serial_data_pin")
-        serial_clock_pin_id    = tot.cvars().get("wurthless.clock.drivers.display.shiftydisplay", "serial_clock_pin")
-        shiftreg_reset_pin_id  = tot.cvars().get("wurthless.clock.drivers.display.shiftydisplay", "shiftreg_reset_pin")
-        shiftreg_latch_pin_id  = tot.cvars().get("wurthless.clock.drivers.display.shiftydisplay", "shiftreg_latch_pin")
+        serial_data_pin_id     = tot.cvars().get("wurthless.clock.drivers.display.shiftybcddisplay", "serial_data_pin")
+        serial_clock_pin_id    = tot.cvars().get("wurthless.clock.drivers.display.shiftybcddisplay", "serial_clock_pin")
+        shiftreg_reset_pin_id  = tot.cvars().get("wurthless.clock.drivers.display.shiftybcddisplay", "shiftreg_reset_pin")
+        shiftreg_latch_pin_id  = tot.cvars().get("wurthless.clock.drivers.display.shiftybcddisplay", "shiftreg_latch_pin")
 
         self._serial_data_pin    = Pin(serial_data_pin_id, Pin.OUT)
         self._serial_clock_pin   = Pin(serial_clock_pin_id, Pin.OUT)
@@ -64,7 +64,6 @@ class ShiftyBcdDisplay(Display):
 
         # bring up display but in blank state.
         self.blank()
-
 
     def shift_bits_out_l_to_r(self, bits):
         for i in range(0,4):
