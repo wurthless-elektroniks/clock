@@ -62,7 +62,8 @@ This is a menu that allows you to set the following options:
 |-----------------------|-----------------|-------------------------------------------------------------------------
 | SYNC                  | 5 01            | Enable/disable time synchronization; if disabled, clock always runs in manual setting mode
 | NET                   | 5 02            | Enable/disable network interface
-| 12HR                  | 5 03            | Enable 12-hour time display
+| 12HR                  | 5 03            | Enable 12-hour time display (default = off, use 24-hour time display)
+| rOtO                  | 5 04            | Rotate all digits every nn minutes (00 = disabled; **must be on for Nixie clocks**)
 | FACt                  | 5 00            | Restore factory default settings and reboot
 
 Select the option using UP or DOWN, then confirm by holding SET. To confirm the setting, keep holding SET. "SURE" (or 5 88) will be displayed and
