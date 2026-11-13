@@ -15,6 +15,13 @@ class CvarWriter(object):
     def save(self, cvardict):
         pass
 
+def _file_exists(path):
+    try:
+        os.stat(path)
+        return True
+    except OSError:
+        return False
+
 class TokenedCvarWriter(CvarWriter):
     def __init__(self):
         self.preflights = [
@@ -27,10 +34,10 @@ class TokenedCvarWriter(CvarWriter):
         self.path = 'secrets/secrets.ini'
 
     def _load_optionals(self, cvardict, filenames):
-        for p in self.preflights:
+        for p in filenames:
             try:
                 self.loadFrom(cvardict, p)
-            except Exception as e:
+            except Exception:
                 # suppress - preflights aren't 100% necessary
                 pass
 
@@ -45,7 +52,7 @@ class TokenedCvarWriter(CvarWriter):
         self.preflights.append(path)
 
     def loadFrom(self, cvardict, path):
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 if line.startswith("#"):
                     continue
@@ -61,16 +68,38 @@ class TokenedCvarWriter(CvarWriter):
     def load(self, cvardict):
         self._load_optionals(cvardict, self.preflights)
         self._load_optionals(cvardict, self._scan_overrides())
-        
-        try:
-            self.loadFrom(cvardict, self.path)
-        except OSError as e:
-            self.save(cvardict)
+
+        for path in [ self.path, f"{self.path}.bak"]:
+            if _file_exists(path) is False:
+                continue
+
+            try:
+                self.loadFrom(cvardict, path)
+                return # load success
+            except Exception:
+                pass
+
+        # failed to load config, so try writing defaults
+        self.save(cvardict)
 
     def save(self, cvardict):
-        with open(self.path, "w") as f:
+        if _file_exists("cvars.tmp"):
+            os.remove("cvars.tmp")
+
+        with open("cvars.tmp", "w", encoding="utf-8") as f:
             f.write("# tmucitw config, do not modify this as values will get overwritten\n")
             for cvar in cvardict.values():
                 # any cvar that is not user-configurable does not get saved.
                 if cvar.registrant.startswith("config"):
                     f.write("%s:%s=%s"%(cvar.registrant,cvar.name, str( binascii.b2a_base64(bytearray(str(cvar.getValue()),'utf-8')), 'utf-8') ) )
+
+        if _file_exists(f"{self.path}.bak"):
+            os.remove(f"{self.path}.bak")
+
+        if _file_exists(f"{self.path}"):
+            os.rename(self.path, f"{self.path}.bak")
+
+        os.rename("cvars.tmp", self.path)
+
+        if _file_exists(f"{self.path}.bak"):
+            os.remove(f"{self.path}.bak")
